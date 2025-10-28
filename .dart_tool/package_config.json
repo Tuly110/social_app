@@ -392,6 +392,12 @@
       "languageVersion": "3.7"
     },
     {
+      "name": "font_awesome_flutter",
+      "rootUri": "file:///C:/Users/DELL/AppData/Local/Pub/Cache/hosted/pub.dev/font_awesome_flutter-10.9.1",
+      "packageUri": "lib/",
+      "languageVersion": "3.0"
+    },
+    {
       "name": "freezed",
       "rootUri": "file:///C:/Users/DELL/AppData/Local/Pub/Cache/hosted/pub.dev/freezed-2.5.7",
       "packageUri": "lib/",
@@ -1082,7 +1088,7 @@
       "languageVersion": "3.0"
     }
   ],
-  "generated": "2025-07-07T10:10:12.014726Z",
+  "generated": "2025-10-28T15:41:37.963408Z",
   "generator": "pub",
   "generatorVersion": "3.7.2",
   "flutterRoot": "file:///C:/flutter",

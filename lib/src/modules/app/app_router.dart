@@ -1,11 +1,10 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:flutter/widgets.dart';
 import 'package:injectable/injectable.dart';
 
+import '../auth/presentation/login/login_page.dart';
+import '../auth/presentation/signup/signup_page.dart';
 import '../home/presentation/home_page.dart';
-import '../notebook/presentation/notebook_page.dart';
-import 'splash_page.dart';
-
+import '../splash_screen/presentation/splash_screen_page.dart';
 
 part 'app_router.gr.dart';
 
@@ -14,8 +13,9 @@ part 'app_router.gr.dart';
 class AppRouter extends _$AppRouter {
   @override
   List<AutoRoute> get routes => [
-    AutoRoute(page: SplashRoute.page, path: '/'),
+    AutoRoute(page: SplashScreenRoute.page, path: '/'),
     AutoRoute(page: HomeRoute.page),
-    AutoRoute(page: NotebookRoute.page),
+    AutoRoute(page: LoginRoute.page),
+    AutoRoute(page: SignupRoute.page),
   ];
 }

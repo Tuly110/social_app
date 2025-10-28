@@ -12,7 +12,6 @@ class AppWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final router = getIt<AppRouter>();
-    // final talker = getIt<Talker>();
     return ScreenUtilInit(
       designSize: const Size(390, 844),
       minTextAdapt: true,
@@ -22,13 +21,18 @@ class AppWidget extends StatelessWidget {
           value: SystemUiOverlayStyle.light.copyWith(
             statusBarColor: Colors.transparent,
             statusBarIconBrightness: Brightness.light,
+            
           ),
           child: MaterialApp.router(
-                  builder: Asuka.builder,
-                  routerConfig: router.config(
-                    navigatorObservers: () => [],
-                  ),
-                )
+            debugShowCheckedModeBanner: false,
+            theme: ThemeData(
+              fontFamily: 'Poppins',
+            ),
+            builder: Asuka.builder,
+            routerConfig: router.config(
+              navigatorObservers: () => [],
+            ),
+          )
               
         ),
       ),
