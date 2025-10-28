@@ -9,23 +9,29 @@
 
 import 'package:flutter/widgets.dart';
 
-class $AssetsOtherImagesGen {
-  const $AssetsOtherImagesGen();
+class $AssetsAuthImagesGen {
+  const $AssetsAuthImagesGen();
 
-  /// File path: assets/other_images/logo.png
-  AssetGenImage get logo => const AssetGenImage('assets/other_images/logo.png');
+  /// File path: assets/auth_images/login.png
+  AssetGenImage get login =>
+      const AssetGenImage('assets/auth_images/login.png');
 
-  /// File path: assets/other_images/user.png
-  AssetGenImage get user => const AssetGenImage('assets/other_images/user.png');
+  /// File path: assets/auth_images/signup.png
+  AssetGenImage get signup =>
+      const AssetGenImage('assets/auth_images/signup.png');
+
+  /// File path: assets/auth_images/splash.png
+  AssetGenImage get splash =>
+      const AssetGenImage('assets/auth_images/splash.png');
 
   /// List of all assets
-  List<AssetGenImage> get values => [logo, user];
+  List<AssetGenImage> get values => [login, signup, splash];
 }
 
 class Assets {
   const Assets._();
 
-  static const $AssetsOtherImagesGen otherImages = $AssetsOtherImagesGen();
+  static const $AssetsAuthImagesGen authImages = $AssetsAuthImagesGen();
 }
 
 class AssetGenImage {
