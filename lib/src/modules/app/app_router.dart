@@ -18,11 +18,20 @@ class AppRouter extends _$AppRouter {
   @override
   List<AutoRoute> get routes => [
         AutoRoute(page: SplashScreenRoute.page, path: '/', initial: true),
-        AutoRoute(page: HomeRoute.page, path: '/home'),
+        AutoRoute(
+          page: HomeRoute.page,
+          path: '/home',
+        ),
         AutoRoute(page: LoginRoute.page, path: '/login'),
         AutoRoute(page: SignupRoute.page, path: '/signup'),
-        AutoRoute(page: ProfileRoute.page, path: '/profile'),
-        AutoRoute(page: UserProfileRoute.page, path: '/user/:username'),
+        AutoRoute(
+          page: ProfileRoute.page,
+          path: '/profile',
+        ),
+        AutoRoute(
+          page: UserProfileRoute.page,
+          path: '/user/:username',
+        ),
         AutoRoute(page: ChatRoute.page, path: '/chats'),
         AutoRoute(page: ChatDetailRoute.page, path: '/chats/:id'),
         AutoRoute(page: NotificationRoute.page, path: '/notifications'),

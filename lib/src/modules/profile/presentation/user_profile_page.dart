@@ -46,7 +46,6 @@ class UserProfilePage extends StatelessWidget {
   }
 }
 
-/// Cover ở dưới + Panel đè lên + Avatar chồng mép trên
 class _HeaderStack extends StatelessWidget {
   const _HeaderStack();
 
@@ -104,26 +103,22 @@ class _HeaderStack extends StatelessWidget {
           Positioned(
             right: 16,
             top: top + 12,
-            child: const _CircleIcon(icon: Icons.check_circle_outline),
+            child: const _CircleIcon(icon: Icons.mail_outline),
           ),
 
           // 3️⃣ PANEL TRẮNG (đè lên cover)
           Positioned(
-            left: 16,
-            right: 16,
+            left: 0,
+            right: 0,
             top: panelTop,
             child: Container(
               padding: const EdgeInsets.fromLTRB(16, avatarRadius + 18, 16, 16),
               decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(28),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(.12),
-                    blurRadius: 24,
-                    offset: const Offset(0, 12),
-                  ),
-                ],
+                color: UserProfilePage._bg,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(35),
+                  topRight: Radius.circular(35),
+                ),
               ),
               child: const _PanelContent(),
             ),
@@ -295,7 +290,6 @@ class _RoundedGallery extends StatelessWidget {
   }
 }
 
-/// ---------- Widgets phụ ----------
 class _CircleIcon extends StatelessWidget {
   final IconData icon;
   final VoidCallback? onTap;

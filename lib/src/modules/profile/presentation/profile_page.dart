@@ -10,13 +10,14 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  static const _mint = Color(0xFFA7C7B7); // màu mint cho nút & bottom bar
+  static const _mint = Color(0xFFA7C7B7);
   static const _softBg = Color(0xFFF5F6F8);
 
   static const double _avatarRadius = 38;
   static const double _horizontalMargin = 24;
   static const double _tabBarHeight = 48;
-  static const double _expandedHeight = 310 + _avatarRadius;
+
+  static final double _expandedHeight = 310 + _avatarRadius * 1.5;
 
   @override
   Widget build(BuildContext context) {
@@ -66,11 +67,14 @@ class _ProfilePageState extends State<ProfilePage> {
                     // KHỐI CARD PROFILE (Nổi)
                     Align(
                       alignment: Alignment.bottomCenter,
-                      child: Container(
-                        margin: const EdgeInsets.only(
-                            left: _horizontalMargin,
-                            right: _horizontalMargin,
-                            bottom: 0),
+                      child: Padding(
+                        // Dùng Padding để điều chỉnh vị trí Card
+                        padding: EdgeInsets.only(
+                          left: _horizontalMargin,
+                          right: _horizontalMargin,
+                          // !!! ĐIỀU CHỈNH: Kéo Card lên 1/2 bán kính Avatar + khoảng trống
+                          bottom: _avatarRadius - 6,
+                        ),
                         child: _ProfileCard(avatarRadius: _avatarRadius),
                       ),
                     ),
@@ -120,27 +124,18 @@ class _ProfilePageState extends State<ProfilePage> {
             highlightColor: Colors.transparent,
           ),
           child: BottomNavigationBar(
-            // Bắt buộc phải là fixed khi có > 3 mục. Giữ nguyên fixed là đúng.
             type: BottomNavigationBarType.fixed,
             backgroundColor: _mint,
             selectedItemColor: Colors.white,
             unselectedItemColor: Colors.white70,
             items: const [
-              // 1. Home
               BottomNavigationBarItem(icon: Icon(Icons.home_filled), label: ''),
-              // 2. Search
               BottomNavigationBarItem(icon: Icon(Icons.search), label: ''),
-              // 3. Create
               BottomNavigationBarItem(icon: Icon(Icons.create), label: ''),
-              // **********************************************
-              // THÊM: 4. Chat (Icon mới)
-              // **********************************************
               BottomNavigationBarItem(
                   icon: Icon(Icons.chat_bubble_outline), label: ''),
-              // 5. Notifications (Vị trí cũ là 4)
               BottomNavigationBarItem(
                   icon: Icon(Icons.notifications), label: ''),
-              // 6. Person/Profile (Vị trí cũ là 5)
               BottomNavigationBarItem(icon: Icon(Icons.person), label: ''),
             ],
           ),
@@ -149,8 +144,6 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 }
-
-///==================== KHỐI PROFILE CARD (Nổi) ====================
 
 class _ProfileCard extends StatelessWidget {
   final double avatarRadius;
@@ -161,11 +154,12 @@ class _ProfileCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const double nameBlockHeight = 100;
+    final double nameBlockTopPadding = 18;
+    final double nameBlockHeight =
+        (2 * avatarRadius) + nameBlockTopPadding + 10;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 0),
-      // Giữ nguyên padding dưới 24px để nút Edit không bị che bởi TabBar ghim
       padding: const EdgeInsets.only(bottom: 24),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -182,16 +176,15 @@ class _ProfileCard extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // KHỐI AVATAR, TÊN VÀ NÚT SETTING
           SizedBox(
             height: nameBlockHeight,
             child: Stack(
+              clipBehavior: Clip.none,
               children: [
-                // Tên và Handle
                 Positioned(
                   left: 0,
                   right: 0,
-                  top: avatarRadius + 5, // 38 + 5 = 43
+                  top: avatarRadius + 5,
                   child: Column(
                     children: [
                       const Text('SangHo',
@@ -211,6 +204,7 @@ class _ProfileCard extends StatelessWidget {
                   ),
                 ),
 
+                // AVATAR
                 Positioned(
                   left: 0,
                   right: 0,
@@ -228,8 +222,6 @@ class _ProfileCard extends StatelessWidget {
               ],
             ),
           ),
-
-          // KHỐI BIO VÀ NÚT EDIT/SEND (Giữ nguyên)
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
             child: Column(
@@ -305,15 +297,12 @@ class _ProfileCard extends StatelessWidget {
   }
 }
 
-///==================== TAB ALL (Body) ====================
-
 class _AllTab extends StatelessWidget {
   const _AllTab();
 
   @override
   Widget build(BuildContext context) {
     return ListView(
-      // Giữ padding trên 24 để tạo khoảng trống giữa TabBar ghim và nội dung
       padding: const EdgeInsets.fromLTRB(16, 24, 16, 100),
       children: [
         // Hàng Friends
@@ -358,7 +347,6 @@ class _AllTab extends StatelessWidget {
   }
 }
 
-// Giữ nguyên các widget phụ
 class _Avatar extends StatelessWidget {
   final double radius;
 
@@ -366,7 +354,8 @@ class _Avatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const _avatarUrl = 'https://i.ibb.co/6803h0K/messi-avatar-2.jpg';
+    const _avatarUrl =
+        'https://images.unsplash.com/photo-1660304755869-325c2ff6f02d?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1118';
     return Container(
       padding: const EdgeInsets.all(3),
       decoration: BoxDecoration(
