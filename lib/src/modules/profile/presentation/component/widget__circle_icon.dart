@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jupyternotebook/generated/colors.gen.dart'; 
 
 class WidgetCircleIcon extends StatelessWidget {
   final IconData icon;
@@ -8,7 +9,7 @@ class WidgetCircleIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.white,
+      color: ColorName.white,
       shape: const CircleBorder(),
       elevation: 6,
       shadowColor: Colors.black26,
@@ -17,7 +18,7 @@ class WidgetCircleIcon extends StatelessWidget {
         customBorder: const CircleBorder(),
         child: Padding(
           padding: const EdgeInsets.all(10),
-          child: Icon(icon, color: Colors.black87),
+          child: Icon(icon, color: ColorName.black87),
         ),
       ),
     );

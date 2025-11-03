@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jupyternotebook/generated/colors.gen.dart';
 
 class WidgetRoundedGallery extends StatelessWidget {
   final List<String> images;
@@ -11,11 +12,11 @@ class WidgetRoundedGallery extends StatelessWidget {
       children: [
         Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: ColorName.white,
             borderRadius: BorderRadius.circular(26),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(.08),
+                color: ColorName.black38.withOpacity(.08),
                 blurRadius: 18,
                 offset: const Offset(0, 10),
               ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jupyternotebook/generated/colors.gen.dart'; // đổi lại đúng package của bạn
 import 'widget__soft_button.dart';
 import 'widget__stat.dart';
 
@@ -7,8 +8,6 @@ class WidgetPanelContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const mint = Color(0xFFA7C7B7);
-
     return Column(
       children: [
         Row(
@@ -21,13 +20,19 @@ class WidgetPanelContent extends StatelessWidget {
         const SizedBox(height: 10),
         const Text(
           '@Sangho2049',
-          style: TextStyle(fontWeight: FontWeight.w700, color: Colors.black87),
+          style: TextStyle(
+            fontWeight: FontWeight.w700,
+            color: ColorName.black87,
+          ),
         ),
         const SizedBox(height: 8),
         Text(
           'My name is Sangho. I like Smoking and travelling\nall around the world.',
           textAlign: TextAlign.center,
-          style: TextStyle(color: Colors.grey.shade700, height: 1.25),
+          style: TextStyle(
+            color: ColorName.grey700,
+            height: 1.25,
+          ),
         ),
         const SizedBox(height: 14),
         Row(
@@ -35,14 +40,14 @@ class WidgetPanelContent extends StatelessWidget {
           children: const [
             WidgetSoftButton(
               text: 'Follow',
-              background: mint,
-              textColor: Colors.white,
+              background: ColorName.mintA7c7b7,
+              textColor: ColorName.white,
             ),
             SizedBox(width: 12),
             WidgetSoftButton(
               text: 'Message',
-              background: Colors.white,
-              textColor: Colors.black87,
+              background: ColorName.white,
+              textColor: ColorName.black87,
               hasBorder: true,
             ),
           ],

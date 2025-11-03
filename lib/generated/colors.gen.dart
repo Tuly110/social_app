@@ -16,8 +16,68 @@ class ColorName {
   /// Color: #BCF4DE
   static const Color background = Color(0xFFBCF4DE);
 
+  /// Color: #F4F7F7
+  static const Color bgF4f7f7 = Color(0xFFF4F7F7);
+
   /// Color: #000000
   static const Color black = Color(0xFF000000);
+
+  /// Color: #0D000000
+  static const Color black05 = Color(0x0D000000);
+
+  /// Color: #26000000
+  static const Color black15 = Color(0x26000000);
+
+  /// Color: #42000000
+  static const Color black26 = Color(0x42000000);
+
+  /// Color: #8A000000
+  static const Color black54 = Color(0x8A000000);
+
+  /// Color: #DE000000
+  static const Color black87 = Color(0xDE000000);
+
+  /// Color: #1A000000
+  static const Color black10 = Color(0x1A000000);
+
+  /// Color: #61000000
+  static const Color black38 = Color(0x61000000);
+
+  /// Color: #73000000
+  static const Color black45 = Color(0x73000000);
+
+  /// Color: #EFF6FF
+  static const Color blueEff6ff = Color(0xFFEFF6FF);
+
+  /// Color: #9E9E9E
+  static const Color grey = Color(0xFF9E9E9E);
+
+  /// Color: #F5F5F5
+  static const Color grey100 = Color(0xFFF5F5F5);
+
+  /// Color: #9E9E9E
+  static const Color grey500 = Color(0xFF9E9E9E);
+
+  /// Color: #757575
+  static const Color grey600 = Color(0xFF757575);
+
+  /// Color: #616161
+  static const Color grey700 = Color(0xFF616161);
+
+  /// Color: #424242
+  static const Color grey800 = Color(0xFF424242);
+
+  /// Color: #E5E7EB
+  static const Color greyE5e7eb = Color(0xFFE5E7EB);
+
+  /// Color: #E6EAEA
+  static const Color greyE6eaea = Color(0xFFE6EAEA);
+
+  /// Color: #EBEBEB
+  static const Color greyEb = Color(0xFFEBEBEB);
+
+  /// Color: #F0F0F0
+  static const Color greyF0 = Color(0xFFF0F0F0);
 
   /// MaterialColor:
   ///   50: #FFFFEBE4
@@ -46,8 +106,17 @@ class ColorName {
     },
   );
 
+  /// Color: #A7C7B7
+  static const Color mint = Color(0xFFA7C7B7);
+
+  /// Color: #A7C7B7
+  static const Color mintA7c7b7 = Color(0xFFA7C7B7);
+
   /// Color: #FF5722
   static const Color primary = Color(0xFFFF5722);
+
+  /// Color: #F5F6F8
+  static const Color softBg = Color(0xFFF5F6F8);
 
   /// Color: #A4C3B2
   static const Color textSplash = Color(0xFFA4C3B2);
@@ -57,4 +126,7 @@ class ColorName {
 
   /// Color: #FFFFFF
   static const Color white = Color(0xFFFFFFFF);
+
+  /// Color: #B3FFFFFF
+  static const Color white70 = Color(0xB3FFFFFF);
 }

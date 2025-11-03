@@ -1,21 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:auto_route/auto_route.dart';
-
 import 'component/widget__custom_app_bar.dart';
 import 'component/widget__search_bar.dart';
 import 'component/widget__chat_list_item.dart';
+import 'package:jupyternotebook/generated/colors.gen.dart';
 
 @RoutePage()
 class ChatPage extends StatelessWidget {
   const ChatPage({super.key});
 
-  static const _mint = Color(0xFFA7C7B7);
-  static const _softBg = Color(0xFFF5F6F8);
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _softBg,
+      backgroundColor: ColorName.softBg,
 
       body: Column(
         children: [
@@ -55,7 +52,6 @@ class ChatPage extends StatelessWidget {
                   time: '1/10/25',
                   isRead: false,
                 ),
-                // ... có thể thêm các mục khác
               ],
             ),
           ),
@@ -65,8 +61,8 @@ class ChatPage extends StatelessWidget {
       // FLOATING ACTION BUTTON (Nút +)
       floatingActionButton: FloatingActionButton(
         onPressed: () {},
-        backgroundColor: _mint,
-        foregroundColor: Colors.white,
+        backgroundColor: ColorName.mint,
+        foregroundColor: ColorName.white,
         shape: const CircleBorder(),
         child: const Icon(Icons.add),
       ),
@@ -79,9 +75,10 @@ class ChatPage extends StatelessWidget {
         ),
         child: BottomNavigationBar(
           type: BottomNavigationBarType.fixed,
-          backgroundColor: _mint,
-          selectedItemColor: Colors.white,
-          unselectedItemColor: Colors.white70,
+          backgroundColor: ColorName.mint,
+          selectedItemColor: ColorName.white,
+          // dùng opacity để khỏi phải thêm white70 vào XML
+          unselectedItemColor: ColorName.white.withOpacity(0.7),
           items: const [
             BottomNavigationBarItem(icon: Icon(Icons.home_filled), label: ''),
             BottomNavigationBarItem(icon: Icon(Icons.search), label: ''),

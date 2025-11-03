@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:auto_route/auto_route.dart';
+import 'package:jupyternotebook/generated/colors.gen.dart';
 
 // 🔹 Import các component tái sử dụng
 import 'component/widget__avatar.dart';
@@ -19,9 +20,6 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  static const _mint = Color(0xFFA7C7B7);
-  static const _softBg = Color(0xFFF5F6F8);
-
   static const double _avatarRadius = 38;
   static const double _horizontalMargin = 24;
   static const double _tabBarHeight = 48;
@@ -32,24 +30,28 @@ class _ProfilePageState extends State<ProfilePage> {
     return DefaultTabController(
       length: 5,
       child: Scaffold(
-        backgroundColor: _softBg,
+        backgroundColor: ColorName.softBg,
         body: NestedScrollView(
           headerSliverBuilder: (context, inner) => [
             SliverAppBar(
               pinned: true,
               expandedHeight: _expandedHeight,
-              backgroundColor: Colors.white,
-              surfaceTintColor: Colors.white,
+              backgroundColor: ColorName.white,
+              surfaceTintColor: ColorName.white,
               elevation: 0,
               leading: IconButton(
-                icon: Icon(Icons.arrow_back,
-                    color: inner ? Colors.black87 : Colors.white),
+                icon: Icon(
+                  Icons.arrow_back,
+                  color: inner ? ColorName.black87 : ColorName.white,
+                ),
                 onPressed: () => Navigator.of(context).maybePop(),
               ),
               actions: [
                 IconButton(
-                  icon: Icon(Icons.more_horiz,
-                      color: inner ? Colors.black87 : Colors.white),
+                  icon: Icon(
+                    Icons.more_horiz,
+                    color: inner ? ColorName.black87 : ColorName.white,
+                  ),
                   onPressed: () {},
                 ),
               ],
@@ -66,7 +68,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         gradient: LinearGradient(
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
-                          colors: [Colors.transparent, Colors.black26],
+                          colors: [Colors.transparent, ColorName.black26],
                         ),
                       ),
                     ),
@@ -88,12 +90,12 @@ class _ProfilePageState extends State<ProfilePage> {
                 preferredSize: const Size.fromHeight(_tabBarHeight),
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
-                  color: Colors.white,
+                  color: ColorName.white,
                   child: const TabBar(
                     isScrollable: true,
-                    labelColor: Colors.black,
-                    unselectedLabelColor: Colors.black54,
-                    indicatorColor: Colors.black,
+                    labelColor: ColorName.black,
+                    unselectedLabelColor: ColorName.black54,
+                    indicatorColor: ColorName.black,
                     indicatorWeight: 2,
                     indicatorSize: TabBarIndicatorSize.label,
                     labelPadding: EdgeInsets.symmetric(horizontal: 12),
@@ -126,9 +128,9 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
           child: BottomNavigationBar(
             type: BottomNavigationBarType.fixed,
-            backgroundColor: _mint,
-            selectedItemColor: Colors.white,
-            unselectedItemColor: Colors.white70,
+            backgroundColor: ColorName.mint,
+            selectedItemColor: ColorName.white,
+            unselectedItemColor: ColorName.white.withOpacity(0.7),
             items: const [
               BottomNavigationBarItem(icon: Icon(Icons.home_filled), label: ''),
               BottomNavigationBarItem(icon: Icon(Icons.search), label: ''),
@@ -148,8 +150,6 @@ class _ProfilePageState extends State<ProfilePage> {
 
 class _ProfileCard extends StatelessWidget {
   final double avatarRadius;
-  static const _mint = Color(0xFFA7C7B7);
-
   const _ProfileCard({required this.avatarRadius});
 
   @override
@@ -162,11 +162,11 @@ class _ProfileCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 0),
       padding: const EdgeInsets.only(bottom: 24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: ColorName.white,
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(.15),
+            color: ColorName.black15,
             blurRadius: 25,
             offset: const Offset(0, 10),
           )
@@ -187,16 +187,19 @@ class _ProfileCard extends StatelessWidget {
                   top: avatarRadius + 5,
                   child: Column(
                     children: [
-                      const Text('SangHo',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w800,
-                          )),
+                      const Text(
+                        'SangHo',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w800,
+                          color: ColorName.black87,
+                        ),
+                      ),
                       Text(
                         'sangho2049@mastodon',
                         style: TextStyle(
-                          color: Colors.grey.shade600,
+                          color: ColorName.grey600,
                           fontSize: 13,
                         ),
                       ),
@@ -230,7 +233,7 @@ class _ProfileCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: Colors.grey.shade800,
+                      color: ColorName.grey800,
                       height: 1.25,
                     ),
                   ),
@@ -248,14 +251,16 @@ class _ProfileCard extends StatelessWidget {
                             onPressed: () {},
                             style: ElevatedButton.styleFrom(
                               elevation: 0,
-                              backgroundColor: _mint,
-                              foregroundColor: Colors.white,
+                              backgroundColor: ColorName.mint,
+                              foregroundColor: ColorName.white,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
                             ),
-                            child: const Text('Edit',
-                                style: TextStyle(fontWeight: FontWeight.w600)),
+                            child: const Text(
+                              'Edit',
+                              style: TextStyle(fontWeight: FontWeight.w600),
+                            ),
                           ),
                         ),
                       ),
@@ -266,11 +271,14 @@ class _ProfileCard extends StatelessWidget {
                           width: 42,
                           height: 42,
                           decoration: BoxDecoration(
-                            color: _mint.withOpacity(0.2),
+                            color: ColorName.mint.withOpacity(0.2),
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child:
-                              Icon(Icons.send_rounded, color: _mint, size: 20),
+                          child: const Icon(
+                            Icons.send_rounded,
+                            color: ColorName.mint,
+                            size: 20,
+                          ),
                         ),
                       ),
                     ],
@@ -293,44 +301,59 @@ class _AllTab extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 24, 16, 100),
-      children: [
-        const WidgetSectionTitle('Friends'),
-        const SizedBox(height: 8),
-        const Row(
+      children: const [
+        WidgetSectionTitle('Friends'),
+        SizedBox(height: 8),
+        Row(
           children: [
             WidgetFriendAvatar(
-                'https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=200'),
+              'https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=200',
+            ),
             SizedBox(width: 10),
             WidgetFriendAvatar(
-                'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=200'),
+              'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=200',
+            ),
             SizedBox(width: 10),
             WidgetFriendAvatar(
-                'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=200'),
+              'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=200',
+            ),
             SizedBox(width: 10),
             WidgetFriendAvatar(
-                'https://images.unsplash.com/photo-1520813792240-56fc4a3765a7?w=200'),
+              'https://images.unsplash.com/photo-1520813792240-56fc4a3765a7?w=200',
+            ),
           ],
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: 16),
 
-        // 🔥 Phần này cần giữ nguyên Row + LayoutBuilder để hiển thị 2 bên
-        LayoutBuilder(
-          builder: (context, c) {
-            final isNarrow = c.maxWidth < 360;
-            return Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(
-                  width: isNarrow ? 96 : 110,
-                  child: const WidgetStatsCard(),
-                ),
-                const SizedBox(width: 16),
-                const Expanded(child: WidgetGalleryGrid()),
-              ],
-            );
-          },
-        ),
+        // 🔥 Giữ nguyên bố cục 2 cột: Stats bên trái + Gallery bên phải
+        // để không thay đổi giao diện bạn đã chụp trước đó
+        _TwoColumnStatsAndGallery(),
       ],
+    );
+  }
+}
+
+/// Tách khối layout 2 cột ra để gọn hơn phần trên
+class _TwoColumnStatsAndGallery extends StatelessWidget {
+  const _TwoColumnStatsAndGallery();
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, c) {
+        final isNarrow = c.maxWidth < 360;
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              width: isNarrow ? 96 : 110,
+              child: const WidgetStatsCard(),
+            ),
+            const SizedBox(width: 16),
+            const Expanded(child: WidgetGalleryGrid()),
+          ],
+        );
+      },
     );
   }
 }

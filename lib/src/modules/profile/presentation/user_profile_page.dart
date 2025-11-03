@@ -1,5 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:jupyternotebook/generated/colors.gen.dart';
 
 // Import các widget tách riêng
 import 'component/widget__avatar.dart';
@@ -11,15 +12,12 @@ import 'component/widget__tab_and_content.dart';
 class UserProfilePage extends StatelessWidget {
   const UserProfilePage({super.key});
 
-  static const _mint = Color(0xFFA7C7B7);
-  static const _bg = Color(0xFFF4F7F7);
-
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
       length: 3,
       child: Scaffold(
-        backgroundColor: _bg,
+        backgroundColor: ColorName.bgF4f7f7,
         body: ListView(
           padding: EdgeInsets.zero,
           children: const [
@@ -34,15 +32,17 @@ class UserProfilePage extends StatelessWidget {
           ),
           child: BottomNavigationBar(
             type: BottomNavigationBarType.fixed,
-            backgroundColor: _mint,
-            selectedItemColor: Colors.white,
-            unselectedItemColor: Colors.white70,
+            backgroundColor: ColorName.mint,
+            selectedItemColor: ColorName.white,
+            unselectedItemColor: ColorName.white70,
             items: const [
               BottomNavigationBarItem(icon: Icon(Icons.home_filled), label: ''),
               BottomNavigationBarItem(icon: Icon(Icons.search), label: ''),
               BottomNavigationBarItem(icon: Icon(Icons.edit_note), label: ''),
               BottomNavigationBarItem(
-                  icon: Icon(Icons.notifications), label: ''),
+                icon: Icon(Icons.notifications),
+                label: '',
+              ),
               BottomNavigationBarItem(icon: Icon(Icons.person), label: ''),
             ],
           ),
@@ -91,7 +91,7 @@ class _HeaderStack extends StatelessWidget {
                       gradient: LinearGradient(
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
-                        colors: [Colors.transparent, Colors.black26],
+                        colors: [Colors.transparent, ColorName.black26],
                       ),
                     ),
                   ),
@@ -120,7 +120,7 @@ class _HeaderStack extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.fromLTRB(16, avatarRadius + 18, 16, 16),
               decoration: const BoxDecoration(
-                color: UserProfilePage._bg,
+                color: ColorName.bgF4f7f7,
                 borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(35),
                   topRight: Radius.circular(35),

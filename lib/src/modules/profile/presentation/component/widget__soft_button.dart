@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jupyternotebook/generated/colors.gen.dart';
 
 class WidgetSoftButton extends StatelessWidget {
   final String text;
@@ -22,10 +23,12 @@ class WidgetSoftButton extends StatelessWidget {
       decoration: BoxDecoration(
         color: background,
         borderRadius: BorderRadius.circular(22),
-        border: hasBorder ? Border.all(color: const Color(0xFFE6EAEA)) : null,
+        border: hasBorder
+            ? Border.all(color: ColorName.greyE6eaea)
+            : null,
         boxShadow: const [
           BoxShadow(
-            color: Color(0x1A000000),
+            color: ColorName.black10,
             offset: Offset(0, 6),
             blurRadius: 12,
           ),

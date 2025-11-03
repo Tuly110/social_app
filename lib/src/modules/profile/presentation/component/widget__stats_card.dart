@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jupyternotebook/generated/colors.gen.dart';
 
 
 class WidgetStatsCard extends StatelessWidget {
@@ -15,14 +16,14 @@ class WidgetStatsCard extends StatelessWidget {
             const SizedBox(height: 2),
             Text(label,
                 textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
+                style: TextStyle(color: ColorName.grey600, fontSize: 12)),
           ],
         );
 
     return Card(
       elevation: 0,
       margin: EdgeInsets.zero,
-      color: Colors.white,
+      color: ColorName.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 18),
@@ -51,7 +52,7 @@ class WidgetDivider extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 14),
       child: Container(
         height: 1,
-        color: Colors.grey.shade200,
+        color: ColorName.greyE5e7eb,
         margin: const EdgeInsets.symmetric(horizontal: 14),
       ),
     );

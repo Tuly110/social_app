@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jupyternotebook/generated/colors.gen.dart';
 
 class WidgetCustomAppBar extends StatelessWidget {
   const WidgetCustomAppBar({super.key});
@@ -10,7 +11,7 @@ class WidgetCustomAppBar extends StatelessWidget {
         top: MediaQuery.of(context).padding.top,
         bottom: 8,
       ),
-      color: Colors.white,
+      color: ColorName.white,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -18,7 +19,9 @@ class WidgetCustomAppBar extends StatelessWidget {
             padding: EdgeInsets.only(left: 16.0),
             child: CircleAvatar(
               radius: 16,
-              backgroundImage: NetworkImage('https://i.ibb.co/bF0bS0v/black-avatar.png'),
+              backgroundImage: NetworkImage(
+                'https://i.ibb.co/bF0bS0v/black-avatar.png',
+              ),
             ),
           ),
           const Text(
@@ -26,11 +29,14 @@ class WidgetCustomAppBar extends StatelessWidget {
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: Colors.black87,
+              color: ColorName.black87,
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.settings_outlined, color: Colors.black54),
+            icon: const Icon(
+              Icons.settings_outlined,
+              color: ColorName.black54,
+            ),
             onPressed: () {},
           ),
         ],

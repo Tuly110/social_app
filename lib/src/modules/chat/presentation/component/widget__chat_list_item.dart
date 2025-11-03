@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jupyternotebook/generated/colors.gen.dart'; // đổi theo package thật
 
 class WidgetChatListItem extends StatelessWidget {
   final String imageUrl;
@@ -20,8 +21,8 @@ class WidgetChatListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final itemColor = isRead ? Colors.white : const Color(0xFFF0F0F0);
-    final messageColor = isRead ? Colors.grey.shade600 : Colors.black87;
+    final itemColor = isRead ? ColorName.white : ColorName.greyF0;
+    final messageColor = isRead ? ColorName.grey600 : ColorName.black87;
 
     return Container(
       color: itemColor,
@@ -39,13 +40,18 @@ class WidgetChatListItem extends StatelessWidget {
                     Text(
                       username,
                       style: const TextStyle(
-                          fontWeight: FontWeight.bold, fontSize: 16),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        color: ColorName.black87,
+                      ),
                     ),
                     const SizedBox(width: 4),
                     Text(
                       handle,
-                      style:
-                          TextStyle(color: Colors.grey.shade600, fontSize: 14),
+                      style: const TextStyle(
+                        color: ColorName.grey600,
+                        fontSize: 14,
+                      ),
                     ),
                   ],
                 ),
@@ -65,7 +71,10 @@ class WidgetChatListItem extends StatelessWidget {
           ),
           Text(
             time,
-            style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+            style: const TextStyle(
+              color: ColorName.grey600,
+              fontSize: 13,
+            ),
           ),
         ],
       ),

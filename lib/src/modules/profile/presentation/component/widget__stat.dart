@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jupyternotebook/generated/colors.gen.dart';
 
 class WidgetStat extends StatelessWidget {
   final String number;
@@ -18,7 +19,7 @@ class WidgetStat extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 2),
-        Text(label, style: TextStyle(color: Colors.grey.shade700)),
+        Text(label, style: TextStyle(color: ColorName.grey700)),
       ],
     );
   }

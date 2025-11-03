@@ -9,12 +9,10 @@ class WidgetNoticeList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.separated(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(16),
       itemCount: items.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 8),
-      itemBuilder: (_, i) => WidgetNoticeTile(item: items[i], onTap: () {
-        // TODO: điều hướng vào chi tiết nếu cần
-      }),
+      separatorBuilder: (_, __) => const SizedBox(height: 12),
+      itemBuilder: (context, i) => WidgetNoticeTile(item: items[i]),
     );
   }
 }

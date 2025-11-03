@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:jupyternotebook/generated/colors.gen.dart';
 
 class WidgetChatInput extends StatefulWidget {
-  final Color mintColor;
   final ValueChanged<String>? onSend;
 
   const WidgetChatInput({
     super.key,
-    required this.mintColor,
     this.onSend,
   });
 
@@ -30,7 +29,7 @@ class _WidgetChatInputState extends State<WidgetChatInput> {
 
     return Container(
       padding: EdgeInsets.fromLTRB(16, 12, 16, 12 + bottomPadding),
-      color: Colors.white,
+      color: ColorName.white,
       child: Row(
         children: [
           // Nút Add
@@ -38,19 +37,20 @@ class _WidgetChatInputState extends State<WidgetChatInput> {
             width: 38,
             height: 38,
             decoration: BoxDecoration(
-              color: widget.mintColor,
+              color: ColorName.mint,
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.add, color: Colors.white, size: 24),
+            child: const Icon(Icons.add, color: ColorName.white, size: 24),
           ),
           const SizedBox(width: 8),
+
           // Ô nhập
           Expanded(
             child: Container(
               height: 38,
               padding: const EdgeInsets.symmetric(horizontal: 16),
               decoration: BoxDecoration(
-                color: Colors.grey.shade100,
+                color: ColorName.grey100,
                 borderRadius: BorderRadius.circular(20),
               ),
               child: TextField(
@@ -68,6 +68,7 @@ class _WidgetChatInputState extends State<WidgetChatInput> {
             ),
           ),
           const SizedBox(width: 8),
+
           // Nút gửi
           GestureDetector(
             onTap: () => _handleSend(_controller.text),
@@ -75,10 +76,10 @@ class _WidgetChatInputState extends State<WidgetChatInput> {
               width: 38,
               height: 38,
               decoration: BoxDecoration(
-                color: widget.mintColor.withOpacity(0.2),
+                color: ColorName.mint.withOpacity(0.2),
                 shape: BoxShape.circle,
               ),
-              child: Icon(Icons.send, color: widget.mintColor, size: 20),
+              child: Icon(Icons.send, color: ColorName.mint, size: 20),
             ),
           ),
         ],

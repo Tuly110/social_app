@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:jupyternotebook/generated/colors.gen.dart'; // đổi theo tên package thật
 import '../model/message_model.dart';
 
 class WidgetMessageBubble extends StatelessWidget {
   final Message message;
-  static const _mint = Color(0xFFA7C7B7);
 
   const WidgetMessageBubble({super.key, required this.message});
 
   @override
   Widget build(BuildContext context) {
     final align = message.isMe ? Alignment.centerRight : Alignment.centerLeft;
-    final color = message.isMe ? _mint : Colors.white;
-    final textColor = message.isMe ? Colors.white : Colors.black87;
+
+    final color = message.isMe ? ColorName.mint : ColorName.white;
+    final textColor = message.isMe ? ColorName.white : ColorName.black87;
     final border = BorderRadius.circular(16);
 
     return Align(
@@ -20,6 +21,7 @@ class WidgetMessageBubble extends StatelessWidget {
         crossAxisAlignment:
             message.isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
         children: [
+          // Bong bóng tin nhắn
           Container(
             margin: const EdgeInsets.only(top: 8, bottom: 2),
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
@@ -37,7 +39,7 @@ class WidgetMessageBubble extends StatelessWidget {
                   ? []
                   : [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
+                        color: ColorName.black05, // thay vì Colors.black.withOpacity(0.05)
                         blurRadius: 5,
                         offset: const Offset(0, 2),
                       ),
@@ -48,12 +50,17 @@ class WidgetMessageBubble extends StatelessWidget {
               style: TextStyle(color: textColor, fontSize: 16),
             ),
           ),
+
+          // Trạng thái (Sent, Delivered, v.v.)
           if (message.isMe && message.status != null)
             Padding(
               padding: const EdgeInsets.only(right: 8.0, bottom: 8.0),
               child: Text(
                 message.status!,
-                style: TextStyle(color: Colors.grey.shade500, fontSize: 11),
+                style: TextStyle(
+                  color: ColorName.grey500,
+                  fontSize: 11,
+                ),
               ),
             ),
         ],

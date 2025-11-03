@@ -1,17 +1,25 @@
 import 'package:flutter/material.dart';
 import '../model/notice_model.dart';
+import 'package:jupyternotebook/generated/colors.gen.dart';
 
 class WidgetNoticeTile extends StatelessWidget {
   final NoticeItem item;
   final VoidCallback? onTap;
 
-  const WidgetNoticeTile({super.key, required this.item, this.onTap});
+  const WidgetNoticeTile({
+    super.key,
+    required this.item,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final radius = BorderRadius.circular(16);
-    final bgColor = item.unread ? const Color(0xFFEFF6FF) : theme.colorScheme.surface;
+
+    // Nền khác khi unread (giữ đúng như bản gốc)
+    final bgColor =
+        item.unread ? const Color(0xFFEFF6FF) : theme.colorScheme.surface;
 
     return Material(
       color: bgColor,
@@ -22,9 +30,12 @@ class WidgetNoticeTile extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(12),
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _LeadingAvatarOrIcon(item: item),
               const SizedBox(width: 12),
+
+              // Nội dung
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -37,7 +48,7 @@ class WidgetNoticeTile extends StatelessWidget {
                             item.title,
                             style: theme.textTheme.titleSmall?.copyWith(
                               fontWeight: FontWeight.w700,
-                              color: Colors.black87,
+                              color: ColorName.black87,
                             ),
                           ),
                         ),
@@ -45,7 +56,7 @@ class WidgetNoticeTile extends StatelessWidget {
                         Text(
                           item.time,
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: Colors.grey.shade600,
+                            color: ColorName.grey600,
                           ),
                         ),
                       ],
@@ -54,7 +65,7 @@ class WidgetNoticeTile extends StatelessWidget {
                     Text(
                       item.message,
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: Colors.black87,
+                        color: ColorName.black87,
                         fontWeight:
                             item.unread ? FontWeight.w600 : FontWeight.w400,
                       ),
@@ -62,6 +73,8 @@ class WidgetNoticeTile extends StatelessWidget {
                   ],
                 ),
               ),
+
+              // Dot xanh khi chưa đọc
               if (item.unread) ...[
                 const SizedBox(width: 8),
                 Container(
@@ -87,7 +100,7 @@ class _LeadingAvatarOrIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (item.avatarUrl != null && item.avatarUrl!.isNotEmpty) {
+    if ((item.avatarUrl ?? '').isNotEmpty) {
       return CircleAvatar(
         radius: 22,
         backgroundImage: NetworkImage(item.avatarUrl!),
@@ -101,5 +114,5 @@ class _LeadingAvatarOrIcon extends StatelessWidget {
         color: Colors.black54,
       ),
     );
-  }
+    }
 }

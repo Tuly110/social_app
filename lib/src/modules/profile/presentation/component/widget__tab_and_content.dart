@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'widget__rounded_gallery.dart';
+import 'package:jupyternotebook/generated/colors.gen.dart';
 
 const _demoImages = [
   'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200',
@@ -28,10 +29,10 @@ class WidgetTabAndContent extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
           ),
           child: const TabBar(
-            labelColor: Colors.black,
-            unselectedLabelColor: Colors.black45,
+            labelColor: ColorName.black,
+            unselectedLabelColor: ColorName.black45,
             indicator: UnderlineTabIndicator(
-              borderSide: BorderSide(width: 2, color: Colors.black),
+              borderSide: BorderSide(width: 2, color: ColorName.black),
               insets: EdgeInsets.symmetric(horizontal: 22),
             ),
             tabs: [

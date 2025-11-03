@@ -3,6 +3,7 @@ import 'package:auto_route/auto_route.dart';
 import 'model/message_model.dart';
 import 'component/widget__messages_list.dart';
 import 'component/widget__chat_input.dart';
+import 'package:jupyternotebook/generated/colors.gen.dart';
 
 @RoutePage()
 class ChatDetailPage extends StatelessWidget {
@@ -15,9 +16,6 @@ class ChatDetailPage extends StatelessWidget {
     this.userAvatarUrl =
         'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200',
   });
-
-  static const _mint = Color(0xFFA7C7B7);
-  static const _softBg = Color(0xFFF5F6F8);
 
   @override
   Widget build(BuildContext context) {
@@ -33,27 +31,28 @@ class ChatDetailPage extends StatelessWidget {
     ];
 
     return Scaffold(
-      backgroundColor: _softBg,
+      backgroundColor: ColorName.softBg,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        surfaceTintColor: Colors.white,
+        backgroundColor: ColorName.white,
+        surfaceTintColor: ColorName.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black87),
+          icon: const Icon(Icons.arrow_back, color: ColorName.black87),
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
           userName,
           style: const TextStyle(
-              fontWeight: FontWeight.bold, color: Colors.black87),
+            fontWeight: FontWeight.bold,
+            color: ColorName.black87,
+          ),
         ),
         centerTitle: true,
         actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 16.0),
+          const Padding(
+            padding: EdgeInsets.only(right: 16.0),
             child: CircleAvatar(
               radius: 16,
-              backgroundImage: NetworkImage(userAvatarUrl),
             ),
           ),
         ],
@@ -62,7 +61,6 @@ class ChatDetailPage extends StatelessWidget {
         children: [
           Expanded(child: WidgetMessagesList(messages: messages)),
           WidgetChatInput(
-            mintColor: _mint,
             onSend: (text) {
               // TODO: handle send logic
             },

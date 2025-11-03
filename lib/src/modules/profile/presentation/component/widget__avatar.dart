@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:jupyternotebook/generated/colors.gen.dart'; 
 class WidgetAvatar extends StatelessWidget {
   final double radius;
   const WidgetAvatar({super.key, required this.radius});
@@ -12,7 +12,7 @@ class WidgetAvatar extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(3),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: ColorName.white,
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(

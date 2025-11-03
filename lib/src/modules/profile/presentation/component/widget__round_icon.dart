@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:jupyternotebook/generated/colors.gen.dart';
 class WidgetRoundIcon extends StatelessWidget {
   final IconData icon;
   final VoidCallback? onTap;
@@ -8,16 +8,16 @@ class WidgetRoundIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.white,
+      color: ColorName.white,
       shape: const CircleBorder(),
       elevation: 4,
-      shadowColor: Colors.black38,
+      shadowColor: ColorName.black38,
       child: InkWell(
         customBorder: const CircleBorder(),
         onTap: onTap,
         child: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Icon(icon, color: Colors.black87),
+          child: Icon(icon, color: ColorName.black87),
         ),
       ),
     );
