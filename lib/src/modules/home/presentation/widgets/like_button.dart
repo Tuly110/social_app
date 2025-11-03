@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
+import '../../../../../generated/colors.gen.dart';
 
 class LikeButton extends StatefulWidget {
   final bool isLiked;
@@ -39,8 +40,8 @@ class _LikeButtonState extends State<LikeButton> with SingleTickerProviderStateM
     ));
 
     _colorAnimation = ColorTween(
-      begin: Colors.grey,
-      end: Colors.red, // Red color for heart
+      begin: ColorName.textLightGray,
+      end: ColorName.likeRed, // Using generated color
     ).animate(CurvedAnimation(
       parent: _animationController,
       curve: Curves.easeInOut,
@@ -102,7 +103,7 @@ class _LikeButtonState extends State<LikeButton> with SingleTickerProviderStateM
           AnimatedDefaultTextStyle(
             duration: const Duration(milliseconds: 200),
             style: TextStyle(
-              color: widget.isLiked ? Colors.red : Colors.grey,
+              color: widget.isLiked ? ColorName.likeRed : ColorName.textLightGray,
               fontSize: 13,
             ),
             child: Text(

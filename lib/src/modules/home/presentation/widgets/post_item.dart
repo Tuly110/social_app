@@ -5,6 +5,7 @@ import 'comment_button.dart';
 import 'repost_button.dart';
 import 'like_button.dart';
 import 'action_button.dart';
+import '../../../../../generated/colors.gen.dart'; 
 
 class PostItem extends StatelessWidget {
   final PostData postData;
@@ -24,22 +25,26 @@ class PostItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: const BoxDecoration(
-        color: Colors.white,
+      decoration: BoxDecoration(
+        color: ColorName.backgroundWhite,
         border: Border(
-          bottom: BorderSide(color: Color(0xFFE5E5E5), width: 0.5),
+          bottom: BorderSide(color: ColorName.borderLight, width: 0.5),
         ),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Avatar
+          // Avatar - using asset image
           Container(
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: const Color(0xFF1D9BF0),
+              color: ColorName.primaryBlue,
               borderRadius: BorderRadius.circular(20),
+              // image: const DecorationImage(
+              //   image: AssetImage(AssetImageName.defaultAvatar),
+              //   fit: BoxFit.cover,
+              // ),
             ),
             child: Center(
               child: Text(
@@ -62,8 +67,8 @@ class PostItem extends StatelessWidget {
                   children: [
                     Text(
                       postData.username,
-                      style: const TextStyle(
-                        color: Colors.black,
+                      style: TextStyle(
+                        color: ColorName.textBlack,
                         fontWeight: FontWeight.bold,
                         fontSize: 15,
                       ),
@@ -71,8 +76,8 @@ class PostItem extends StatelessWidget {
                     const SizedBox(width: 4),
                     Text(
                       '${postData.handle} · ${postData.time}',
-                      style: const TextStyle(
-                        color: Colors.grey,
+                      style: TextStyle(
+                        color: ColorName.textGray,
                         fontSize: 14,
                       ),
                     ),
@@ -82,8 +87,8 @@ class PostItem extends StatelessWidget {
                 // Content text
                 Text(
                   postData.content,
-                  style: const TextStyle(
-                    color: Colors.black,
+                  style: TextStyle(
+                    color: ColorName.textBlack,
                     fontSize: 15,
                     height: 1.4,
                   ),
@@ -93,10 +98,10 @@ class PostItem extends StatelessWidget {
                 if (postData.showThread)
                   Container(
                     margin: const EdgeInsets.only(bottom: 12),
-                    child: const Text(
+                    child: Text(
                       'Show this thread',
                       style: TextStyle(
-                        color: Color(0xFF1D9BF0),
+                        color: ColorName.primaryBlue,
                         fontSize: 14,
                       ),
                     ),

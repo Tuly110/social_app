@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
+import '../../../../../generated/colors.gen.dart';
 
 class RepostButton extends StatefulWidget {
   final bool isReposted;
@@ -39,8 +40,8 @@ class _RepostButtonState extends State<RepostButton> with SingleTickerProviderSt
     ));
 
     _colorAnimation = ColorTween(
-      begin: Colors.grey,
-      end: const Color(0xFF00FF00), // Green color for repost
+      begin: ColorName.textLightGray,
+      end: ColorName.repostGreen, // Using generated color
     ).animate(CurvedAnimation(
       parent: _animationController,
       curve: Curves.easeInOut,
@@ -102,7 +103,7 @@ class _RepostButtonState extends State<RepostButton> with SingleTickerProviderSt
           AnimatedDefaultTextStyle(
             duration: const Duration(milliseconds: 200),
             style: TextStyle(
-              color: widget.isReposted ? const Color(0xFF00FF00) : Colors.grey,
+              color: widget.isReposted ? ColorName.repostGreen : ColorName.textLightGray,
               fontSize: 13,
             ),
             child: Text(

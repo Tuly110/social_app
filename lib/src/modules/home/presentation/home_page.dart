@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'widgets/post_list.dart';
+import '../../../../../generated/colors.gen.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -29,7 +30,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: ColorName.backgroundWhite,
         elevation: 1,
         title: GestureDetector(
           onTap: () {
@@ -54,16 +55,22 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(48),
           child: Container(
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               border: Border(
-                bottom: BorderSide(color: Color(0xFFE5E5E5), width: 0.5),
+                bottom: BorderSide(color: ColorName.borderLight, width: 0.5),
               ),
             ),
             child: TabBar(
               controller: _tabController,
-              indicatorColor: const Color(0xFF1D9BF0),
-              labelColor: Colors.black,
-              unselectedLabelColor: Colors.grey,
+              indicatorColor: ColorName.primaryBlue,
+              labelColor: ColorName.textBlack,
+              unselectedLabelColor: ColorName.textGray,
+              labelStyle: TextStyle(
+                fontWeight: FontWeight.w600,
+              ),
+              unselectedLabelStyle: TextStyle(
+                fontWeight: FontWeight.w400,
+              ),
               tabs: const [
                 Tab(text: 'For You'),
                 Tab(text: 'Following'),
@@ -85,9 +92,9 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 
   Widget _buildBottomNavigationBar() {
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         border: Border(
-          top: BorderSide(color: Color(0xFFE5E5E5), width: 0.5),
+          top: BorderSide(color: ColorName.borderLight, width: 0.5),
         ),
       ),
       child: BottomNavigationBar(
@@ -97,18 +104,18 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             _currentIndex = index;
           });
         },
-        backgroundColor: const Color(0xFFA4C3B4),
-        selectedItemColor: Colors.grey,
+        backgroundColor: ColorName.navBackground,
+        selectedItemColor: ColorName.textGray,
         unselectedItemColor: Colors.white,
         type: BottomNavigationBarType.fixed,
         showSelectedLabels: true,
         showUnselectedLabels: true,
-        selectedLabelStyle: const TextStyle(
-          color: Colors.grey,
+        selectedLabelStyle: TextStyle(
+          color: ColorName.textGray,
           fontSize: 12,
           fontWeight: FontWeight.w500,
         ),
-        unselectedLabelStyle: const TextStyle(
+        unselectedLabelStyle: TextStyle(
           color: Colors.white,
           fontSize: 12,
           fontWeight: FontWeight.w400,
