@@ -1,24 +1,18 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:oktoast/oktoast.dart';
 import 'package:sizer/sizer.dart';
 
 import 'src/common/utils/getit_utils.dart';
-import 'src/modules/app/app_widget.dart';
+import 'src/modules/app/app_widget.dart'; // dùng router của bạn
 
 Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await GetItUtils.setup();
 
-    WidgetsFlutterBinding.ensureInitialized();
-
-    // await AppEnvironment.setup();
-    // await Storage.setup();
-    await GetItUtils.setup();
-
-    runApp(const AppWidget());
-    configLoading();
-  
+  runApp(const MyApp()); // chạy theo router (Splash/Login/Home)
+  configLoading();
 }
 
 class MyApp extends StatelessWidget {
@@ -26,13 +20,14 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Bọc AppWidget bằng OKToast + Sizer như trước
     return OKToast(
-      child: Sizer(builder: (context, orientation, deviceType) {
-        return MaterialApp(
-          debugShowCheckedModeBanner: false,
-          builder: EasyLoading.init(),
-        );
-      }),
+      child: Sizer(
+        builder: (context, orientation, deviceType) {
+          // AppWidget của bạn thường trả về MaterialApp.router
+          return const AppWidget();
+        },
+      ),
     );
   }
 }
