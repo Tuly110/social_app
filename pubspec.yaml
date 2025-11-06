@@ -1,5 +1,5 @@
-name: jupyternotebook
-description: "A base Flutter project."
+name: social_app
+description: "A multi-platform social media app."
 publish_to: "none"
 
 version: 1.0.0+1
@@ -10,7 +10,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
+  iconsax: 0.0.8
+  
   #Cupertino Icons
   cupertino_icons: ^1.0.8
 
@@ -72,7 +73,7 @@ dev_dependencies:
   mocktail: ^0.3.0
   bloc_test: ^9.1.4
   build_runner: ^2.4.9
-  freezed: ^2.5.3
+  freezed: 2.5.2
   json_serializable: ^6.7.1
   auto_route_generator: ^8.0.0
   flutter_gen_runner: ^5.4.0
