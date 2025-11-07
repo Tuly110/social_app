@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:iconsax/iconsax.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+
 
 class CommentButton extends StatelessWidget {
   final int commentCount;
@@ -17,8 +18,8 @@ class CommentButton extends StatelessWidget {
       onTap: onPressed,
       child: Row(
         children: [
-          const Icon(
-            Iconsax.message,
+          const FaIcon(
+            FontAwesomeIcons.comment,
             color: Colors.grey,
             size: 18,
           ),

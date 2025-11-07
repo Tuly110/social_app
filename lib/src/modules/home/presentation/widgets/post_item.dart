@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:iconsax/iconsax.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../models/post_data.dart';
 import 'comment_button.dart';
 import 'repost_button.dart';
 import 'like_button.dart';
 import 'action_button.dart';
-import '../../../../../generated/colors.gen.dart'; 
+
+import '../../../../../generated/colors.gen.dart';
 
 class PostItem extends StatelessWidget {
   final PostData postData;
@@ -34,17 +35,13 @@ class PostItem extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Avatar - using asset image
+          // Avatar
           Container(
             width: 40,
             height: 40,
             decoration: BoxDecoration(
               color: ColorName.primaryBlue,
               borderRadius: BorderRadius.circular(20),
-              // image: const DecorationImage(
-              //   image: AssetImage(AssetImageName.defaultAvatar),
-              //   fit: BoxFit.cover,
-              // ),
             ),
             child: Center(
               child: Text(
@@ -125,7 +122,7 @@ class PostItem extends StatelessWidget {
                       onPressed: onLikePressed,
                     ),
                     ActionButton(
-                      icon: Iconsax.share,
+                      icon: FontAwesomeIcons.share,
                       onPressed: () {},
                     ),
                   ],
