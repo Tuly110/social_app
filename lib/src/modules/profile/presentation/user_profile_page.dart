@@ -1,8 +1,8 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-import 'package:jupyternotebook/generated/colors.gen.dart';
 
 // Import các widget tách riêng
+import '../../../../generated/colors.gen.dart';
 import 'component/widget__avatar.dart';
 import 'component/widget__circle_icon.dart';
 import 'component/widget__panel_content.dart';

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:jupyternotebook/generated/colors.gen.dart'; 
+
+import '../../../../../generated/colors.gen.dart'; 
 class WidgetAvatar extends StatelessWidget {
   final double radius;
   const WidgetAvatar({super.key, required this.radius});

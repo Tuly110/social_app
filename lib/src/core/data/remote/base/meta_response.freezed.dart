@@ -25,12 +25,8 @@ mixin _$MetaResponse {
   int get limit => throw _privateConstructorUsedError;
   int get totalPages => throw _privateConstructorUsedError;
 
-  /// Serializes this MetaResponse to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-
-  /// Create a copy of MetaResponse
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   $MetaResponseCopyWith<MetaResponse> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -54,8 +50,6 @@ class _$MetaResponseCopyWithImpl<$Res, $Val extends MetaResponse>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of MetaResponse
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -104,8 +98,6 @@ class __$$MetaResponseImplCopyWithImpl<$Res>
       _$MetaResponseImpl _value, $Res Function(_$MetaResponseImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of MetaResponse
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -173,13 +165,11 @@ class _$MetaResponseImpl implements _MetaResponse {
                 other.totalPages == totalPages));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(runtimeType, total, page, limit, totalPages);
 
-  /// Create a copy of MetaResponse
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$MetaResponseImplCopyWith<_$MetaResponseImpl> get copyWith =>
@@ -211,11 +201,8 @@ abstract class _MetaResponse implements MetaResponse {
   int get limit;
   @override
   int get totalPages;
-
-  /// Create a copy of MetaResponse
-  /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$MetaResponseImplCopyWith<_$MetaResponseImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
