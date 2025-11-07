@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gap/gap.dart';
-import 'package:jupyternotebook/generated/colors.gen.dart';
+
+import '../../../../../generated/colors.gen.dart';
 
 
 class WidgetTextfield extends StatefulWidget {

@@ -91,8 +91,6 @@ mixin _$ApiError {
     required TResult orElse(),
   }) =>
       throw _privateConstructorUsedError;
-
-  /// Serializes this ApiError to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 }
 
@@ -111,9 +109,6 @@ class _$ApiErrorCopyWithImpl<$Res, $Val extends ApiError>
   final $Val _value;
   // ignore: unused_field
   final $Res Function($Val) _then;
-
-  /// Create a copy of ApiError
-  /// with the given fields replaced by the non-null parameter values.
 }
 
 /// @nodoc
@@ -133,8 +128,6 @@ class __$$ApiErrorImplCopyWithImpl<$Res>
       _$ApiErrorImpl _value, $Res Function(_$ApiErrorImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of ApiError
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -186,13 +179,11 @@ class _$ApiErrorImpl extends _ApiError {
             (identical(other.message, message) || other.message == message));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(runtimeType, code, message);
 
-  /// Create a copy of ApiError
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$ApiErrorImplCopyWith<_$ApiErrorImpl> get copyWith =>
@@ -295,10 +286,7 @@ abstract class _ApiError extends ApiError {
 
   int? get code;
   String get message;
-
-  /// Create a copy of ApiError
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$ApiErrorImplCopyWith<_$ApiErrorImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -320,8 +308,6 @@ class __$$ServerImplCopyWithImpl<$Res>
       _$ServerImpl _value, $Res Function(_$ServerImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of ApiError
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -373,13 +359,11 @@ class _$ServerImpl extends _Server {
             (identical(other.message, message) || other.message == message));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(runtimeType, code, message);
 
-  /// Create a copy of ApiError
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$ServerImplCopyWith<_$ServerImpl> get copyWith =>
@@ -482,10 +466,7 @@ abstract class _Server extends ApiError {
 
   int? get code;
   String get message;
-
-  /// Create a copy of ApiError
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$ServerImplCopyWith<_$ServerImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -507,8 +488,6 @@ class __$$NetworkImplCopyWithImpl<$Res>
       _$NetworkImpl _value, $Res Function(_$NetworkImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of ApiError
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -560,13 +539,11 @@ class _$NetworkImpl extends _Network {
             (identical(other.message, message) || other.message == message));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(runtimeType, code, message);
 
-  /// Create a copy of ApiError
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$NetworkImplCopyWith<_$NetworkImpl> get copyWith =>
@@ -669,10 +646,7 @@ abstract class _Network extends ApiError {
 
   int? get code;
   String get message;
-
-  /// Create a copy of ApiError
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$NetworkImplCopyWith<_$NetworkImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -691,9 +665,6 @@ class __$$UnexpectedImplCopyWithImpl<$Res>
   __$$UnexpectedImplCopyWithImpl(
       _$UnexpectedImpl _value, $Res Function(_$UnexpectedImpl) _then)
       : super(_value, _then);
-
-  /// Create a copy of ApiError
-  /// with the given fields replaced by the non-null parameter values.
 }
 
 /// @nodoc
@@ -720,7 +691,7 @@ class _$UnexpectedImpl extends _Unexpected {
         (other.runtimeType == runtimeType && other is _$UnexpectedImpl);
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   int get hashCode => runtimeType.hashCode;
 
@@ -837,8 +808,6 @@ class __$$UnauthorizedImplCopyWithImpl<$Res>
       _$UnauthorizedImpl _value, $Res Function(_$UnauthorizedImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of ApiError
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
@@ -882,13 +851,11 @@ class _$UnauthorizedImpl extends _Unauthorized {
             (identical(other.message, message) || other.message == message));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   int get hashCode => Object.hash(runtimeType, message);
 
-  /// Create a copy of ApiError
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$UnauthorizedImplCopyWith<_$UnauthorizedImpl> get copyWith =>
@@ -990,10 +957,7 @@ abstract class _Unauthorized extends ApiError {
       _$UnauthorizedImpl.fromJson;
 
   String get message;
-
-  /// Create a copy of ApiError
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$UnauthorizedImplCopyWith<_$UnauthorizedImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

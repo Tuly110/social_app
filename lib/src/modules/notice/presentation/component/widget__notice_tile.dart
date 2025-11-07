@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+
+import '../../../../../generated/colors.gen.dart';
 import '../model/notice_model.dart';
-import 'package:jupyternotebook/generated/colors.gen.dart';
+
 
 class WidgetNoticeTile extends StatelessWidget {
   final NoticeItem item;

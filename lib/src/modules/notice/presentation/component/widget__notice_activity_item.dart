@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:jupyternotebook/generated/colors.gen.dart';
 
-import 'widget__right_button.dart';
-import 'widget__right_image.dart';
-import 'widget__right_icon.dart';
+import '../../../../../generated/colors.gen.dart';
 import 'widget__notice_activity_tab.dart' show NoticeActivityItem, ActivityRightType;
+import 'widget__right_button.dart';
+import 'widget__right_icon.dart';
+import 'widget__right_image.dart';
 
 class WidgetNoticeActivityItem extends StatelessWidget {
   final NoticeActivityItem item;

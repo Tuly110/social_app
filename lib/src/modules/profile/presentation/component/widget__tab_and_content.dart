@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+
+import '../../../../../generated/colors.gen.dart';
 import 'widget__rounded_gallery.dart';
-import 'package:jupyternotebook/generated/colors.gen.dart';
+
 
 const _demoImages = [
   'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200',

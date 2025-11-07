@@ -1,9 +1,11 @@
-import 'package:flutter/material.dart';
 import 'package:auto_route/auto_route.dart';
+import 'package:flutter/material.dart';
+
+import '../../../../generated/colors.gen.dart';
+import 'component/widget__chat_list_item.dart';
 import 'component/widget__custom_app_bar.dart';
 import 'component/widget__search_bar.dart';
-import 'component/widget__chat_list_item.dart';
-import 'package:jupyternotebook/generated/colors.gen.dart';
+
 
 @RoutePage()
 class ChatPage extends StatelessWidget {

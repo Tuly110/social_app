@@ -1,11 +1,13 @@
-import 'package:flutter/material.dart';
 import 'package:auto_route/auto_route.dart';
+import 'package:flutter/material.dart';
+
 // đổi theo package thật:
-import 'model/notice_model.dart';
+import '../../../../generated/colors.gen.dart';
+import 'component/widget__notice_activity_tab.dart';
 import 'component/widget__notice_app_bar.dart';
 import 'component/widget__notice_list.dart';
-import 'component/widget__notice_activity_tab.dart';
-import 'package:jupyternotebook/generated/colors.gen.dart';
+import 'model/notice_model.dart';
+
 
 @RoutePage()
 class NoticePage extends StatelessWidget {

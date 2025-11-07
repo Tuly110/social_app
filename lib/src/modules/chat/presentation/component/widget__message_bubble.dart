@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:jupyternotebook/generated/colors.gen.dart'; // đổi theo tên package thật
+
+import '../../../../../generated/colors.gen.dart';
 import '../model/message_model.dart';
 
 class WidgetMessageBubble extends StatelessWidget {

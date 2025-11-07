@@ -16,6 +16,12 @@ class ColorName {
   /// Color: #BCF4DE
   static const Color background = Color(0xFFBCF4DE);
 
+  /// Color: #F5F5F5
+  static const Color backgroundLight = Color(0xFFF5F5F5);
+
+  /// Color: #FFFFFF
+  static const Color backgroundWhite = Color(0xFFFFFFFF);
+
   /// Color: #F4F7F7
   static const Color bgF4f7f7 = Color(0xFFF4F7F7);
 
@@ -49,6 +55,12 @@ class ColorName {
   /// Color: #EFF6FF
   static const Color blueEff6ff = Color(0xFFEFF6FF);
 
+  /// Color: #2F3336
+  static const Color borderDark = Color(0xFF2F3336);
+
+  /// Color: #E5E5E5
+  static const Color borderLight = Color(0xFFE5E5E5);
+
   /// Color: #9E9E9E
   static const Color grey = Color(0xFF9E9E9E);
 
@@ -78,6 +90,12 @@ class ColorName {
 
   /// Color: #F0F0F0
   static const Color greyF0 = Color(0xFFF0F0F0);
+
+  /// Color: #FF0000
+  static const Color heartRed = Color(0xFFFF0000);
+
+  /// Color: #FF0000
+  static const Color likeRed = Color(0xFFFF0000);
 
   /// MaterialColor:
   ///   50: #FFFFEBE4
@@ -112,11 +130,32 @@ class ColorName {
   /// Color: #A7C7B7
   static const Color mintA7c7b7 = Color(0xFFA7C7B7);
 
+  /// Color: #A4C3B4
+  static const Color navBackground = Color(0xFFA4C3B4);
+
   /// Color: #FF5722
   static const Color primary = Color(0xFFFF5722);
 
+  /// Color: #1D9BF0
+  static const Color primaryBlue = Color(0xFF1D9BF0);
+
+  /// Color: #00FF00
+  static const Color primaryGreen = Color(0xFF00FF00);
+
+  /// Color: #00FF00
+  static const Color repostGreen = Color(0xFF00FF00);
+
   /// Color: #F5F6F8
   static const Color softBg = Color(0xFFF5F6F8);
+
+  /// Color: #000000
+  static const Color textBlack = Color(0xFF000000);
+
+  /// Color: #666666
+  static const Color textGray = Color(0xFF666666);
+
+  /// Color: #999999
+  static const Color textLightGray = Color(0xFF999999);
 
   /// Color: #A4C3B2
   static const Color textSplash = Color(0xFFA4C3B2);

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:jupyternotebook/generated/colors.gen.dart'; // đổi lại đúng package của bạn
+
+import '../../../../../generated/colors.gen.dart';
 import 'widget__soft_button.dart';
 import 'widget__stat.dart';
 
