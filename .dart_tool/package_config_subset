@@ -267,9 +267,9 @@ font_awesome_flutter
 file:///C:/Users/DELL/AppData/Local/Pub/Cache/hosted/pub.dev/font_awesome_flutter-10.9.1/
 file:///C:/Users/DELL/AppData/Local/Pub/Cache/hosted/pub.dev/font_awesome_flutter-10.9.1/lib/
 freezed
-3.0
-file:///C:/Users/DELL/AppData/Local/Pub/Cache/hosted/pub.dev/freezed-2.5.7/
-file:///C:/Users/DELL/AppData/Local/Pub/Cache/hosted/pub.dev/freezed-2.5.7/lib/
+2.17
+file:///C:/Users/DELL/AppData/Local/Pub/Cache/hosted/pub.dev/freezed-2.5.2/
+file:///C:/Users/DELL/AppData/Local/Pub/Cache/hosted/pub.dev/freezed-2.5.2/lib/
 freezed_annotation
 3.0
 file:///C:/Users/DELL/AppData/Local/Pub/Cache/hosted/pub.dev/freezed_annotation-2.4.4/
@@ -322,6 +322,10 @@ http_parser
 2.12
 file:///C:/Users/DELL/AppData/Local/Pub/Cache/hosted/pub.dev/http_parser-4.0.2/
 file:///C:/Users/DELL/AppData/Local/Pub/Cache/hosted/pub.dev/http_parser-4.0.2/lib/
+iconsax
+2.12
+file:///C:/Users/DELL/AppData/Local/Pub/Cache/hosted/pub.dev/iconsax-0.0.8/
+file:///C:/Users/DELL/AppData/Local/Pub/Cache/hosted/pub.dev/iconsax-0.0.8/lib/
 image_size_getter
 2.12
 file:///C:/Users/DELL/AppData/Local/Pub/Cache/hosted/pub.dev/image_size_getter-2.4.0/

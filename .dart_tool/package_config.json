@@ -429,9 +429,9 @@
     },
     {
       "name": "freezed",
-      "rootUri": "file:///C:/Users/DELL/AppData/Local/Pub/Cache/hosted/pub.dev/freezed-2.5.7",
+      "rootUri": "file:///C:/Users/DELL/AppData/Local/Pub/Cache/hosted/pub.dev/freezed-2.5.2",
       "packageUri": "lib/",
-      "languageVersion": "3.0"
+      "languageVersion": "2.17"
     },
     {
       "name": "freezed_annotation",
@@ -508,6 +508,12 @@
     {
       "name": "http_parser",
       "rootUri": "file:///C:/Users/DELL/AppData/Local/Pub/Cache/hosted/pub.dev/http_parser-4.0.2",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "iconsax",
+      "rootUri": "file:///C:/Users/DELL/AppData/Local/Pub/Cache/hosted/pub.dev/iconsax-0.0.8",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },
@@ -1238,7 +1244,7 @@
       "languageVersion": "3.0"
     }
   ],
-  "generated": "2025-11-07T06:41:33.292575Z",
+  "generated": "2025-11-07T06:51:58.031271Z",
   "generator": "pub",
   "generatorVersion": "3.7.2",
   "flutterRoot": "file:///C:/flutter",
