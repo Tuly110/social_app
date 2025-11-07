@@ -4,19 +4,26 @@ import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:oktoast/oktoast.dart';
 import 'package:sizer/sizer.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'src/common/utils/getit_utils.dart';
 import 'src/modules/app/app_widget.dart';
 
+const SUPABASE_URL = "https://miagiyhyjpibwljojfbk.supabase.co" ;
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1pYWdpeWh5anBpYndsam9qZmJrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE1NzI2OTQsImV4cCI6MjA3NzE0ODY5NH0.QhfFq2EPuGjk730X7QJi2PR12HOKB42oA7XkC8FIIdo" ;
 Future<void> main() async {
 
     WidgetsFlutterBinding.ensureInitialized();
 
-    // await AppEnvironment.setup();
-    // await Storage.setup();
+    await Supabase.initialize(
+        url: SUPABASE_URL,
+        anonKey: SUPABASE_ANON_KEY,
+    );
     await GetItUtils.setup();
 
-    runApp(const AppWidget());
+    runApp(OKToast( 
+      child: const AppWidget(),
+    ));
     configLoading();
   
 }

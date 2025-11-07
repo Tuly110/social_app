@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:injectable/injectable.dart';
 
 import '../auth/presentation/login/login_page.dart';
+import '../auth/presentation/reset_password/update_password_page.dart';
 import '../auth/presentation/signup/signup_page.dart';
 import '../home/presentation/home_page.dart';
 import '../splash_screen/presentation/splash_screen_page.dart';
@@ -17,5 +18,8 @@ class AppRouter extends _$AppRouter {
     AutoRoute(page: HomeRoute.page),
     AutoRoute(page: LoginRoute.page),
     AutoRoute(page: SignupRoute.page),
+    AutoRoute(page: UpdatePasswordRoute.page)
+
+
   ];
 }

@@ -39,6 +39,12 @@ abstract class _$AppRouter extends RootStackRouter {
         child: const SplashScreenPage(),
       );
     },
+    UpdatePasswordRoute.name: (routeData) {
+      return AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: const UpdatePasswordPage(),
+      );
+    },
   };
 }
 
@@ -94,6 +100,20 @@ class SplashScreenRoute extends PageRouteInfo<void> {
         );
 
   static const String name = 'SplashScreenRoute';
+
+  static const PageInfo<void> page = PageInfo<void>(name);
+}
+
+/// generated route for
+/// [UpdatePasswordPage]
+class UpdatePasswordRoute extends PageRouteInfo<void> {
+  const UpdatePasswordRoute({List<PageRouteInfo>? children})
+      : super(
+          UpdatePasswordRoute.name,
+          initialChildren: children,
+        );
+
+  static const String name = 'UpdatePasswordRoute';
 
   static const PageInfo<void> page = PageInfo<void>(name);
 }
