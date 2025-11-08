@@ -1,6 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../../../generated/colors.gen.dart';
 import 'widgets/post_list.dart';
 
@@ -39,18 +39,18 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             print('Profile icon tapped - would navigate to profile');
           },
           child: const Icon(
-            Iconsax.profile_circle,
+            FontAwesomeIcons.userCircle,
             color: Colors.black,
             size: 32,
           ),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Iconsax.search_normal, color: Colors.black),
+            icon: const FaIcon(FontAwesomeIcons.magnifyingGlass, color: Colors.black),
             onPressed: () {},
           ),
           IconButton(
-            icon: const Icon(Iconsax.notification, color: Colors.black),
+            icon: const FaIcon(FontAwesomeIcons.bell, color: Colors.black),
             onPressed: () {},
           ),
         ],
@@ -124,33 +124,33 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
         ),
         items: const [
           BottomNavigationBarItem(
-            icon: Icon(Iconsax.home),
-            activeIcon: Icon(Iconsax.home_15),
+            icon: FaIcon(FontAwesomeIcons.house),
+            activeIcon: FaIcon(FontAwesomeIcons.house),
             label: 'Home',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Iconsax.search_normal),
-            activeIcon: Icon(Iconsax.search_normal_1),
+            icon: FaIcon(FontAwesomeIcons.magnifyingGlass),
+            activeIcon: FaIcon(FontAwesomeIcons.magnifyingGlass),
             label: 'Explore',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Iconsax.add_square),
-            activeIcon: Icon(Iconsax.add_square5),
+            icon: FaIcon(FontAwesomeIcons.squarePlus),
+            activeIcon: FaIcon(FontAwesomeIcons.squarePlus),
             label: 'New Post',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Iconsax.message),
-            activeIcon: Icon(Iconsax.message5),
+            icon: FaIcon(FontAwesomeIcons.envelope),
+            activeIcon: FaIcon(FontAwesomeIcons.envelope),
             label: 'Messages',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Iconsax.notification),
-            activeIcon: Icon(Iconsax.notification5),
+            icon: FaIcon(FontAwesomeIcons.bell),
+            activeIcon: FaIcon(FontAwesomeIcons.bell),
             label: 'Notifications',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Iconsax.profile_circle),
-            activeIcon: Icon(Iconsax.profile_circle5),
+            icon: FaIcon(FontAwesomeIcons.user),
+            activeIcon: FaIcon(FontAwesomeIcons.user),
             label: 'Profile',
           ),
         ],

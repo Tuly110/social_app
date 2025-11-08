@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class ActionButton extends StatelessWidget {
   final IconData icon;
@@ -18,7 +19,7 @@ class ActionButton extends StatelessWidget {
       onTap: onPressed,
       child: Row(
         children: [
-          Icon(
+          FaIcon(
             icon,
             color: Colors.grey,
             size: 18,
