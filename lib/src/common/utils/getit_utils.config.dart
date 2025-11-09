@@ -10,7 +10,7 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
-import 'package:jupyternotebook/src/modules/app/app_router.dart' as _i311;
+import 'package:social_app/src/modules/app/app_router.dart' as _i886;
 
 extension GetItInjectableX on _i174.GetIt {
 // initializes the registration of main-scope dependencies inside of GetIt
@@ -23,7 +23,7 @@ extension GetItInjectableX on _i174.GetIt {
       environment,
       environmentFilter,
     );
-    gh.singleton<_i311.AppRouter>(() => _i311.AppRouter());
+    gh.singleton<_i886.AppRouter>(() => _i886.AppRouter());
     return this;
   }
 }
