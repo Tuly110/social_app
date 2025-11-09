@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:jupyternotebook/generated/colors.gen.dart'; // đổi theo package thật
+
+import '../../../../../generated/colors.gen.dart'; // đổi theo package thật
 
 class WidgetChatListItem extends StatelessWidget {
   final String imageUrl;

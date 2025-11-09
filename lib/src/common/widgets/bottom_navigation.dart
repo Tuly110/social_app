@@ -21,13 +21,11 @@ class WidgetBottomNav extends StatelessWidget {
         r.replace(const HomeRoute());
         break;
       case 1:
-        // chưa có trang Explore
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Explore feature coming soon!')),
         );
         break;
       case 2:
-        // chưa có trang New Post
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('New Post feature coming soon!')),
         );
@@ -41,33 +39,83 @@ class WidgetBottomNav extends StatelessWidget {
       case 5:
         r.replace(const ProfileRoute());
         break;
+      case 6:
+        r.replace(const UserProfileRoute());
+        break;
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Theme(
-      data: Theme.of(context).copyWith(
-        splashColor: Colors.transparent,
-        highlightColor: Colors.transparent,
-      ),
-      child: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        backgroundColor: ColorName.mint,
-        selectedItemColor: ColorName.white,
-        unselectedItemColor: ColorName.white.withOpacity(0.7),
-        currentIndex: currentIndex,
-        onTap: (i) => _onTap(context, i),
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home_filled), label: ''),
-          BottomNavigationBarItem(icon: Icon(Icons.search), label: ''),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.add_box_outlined), label: ''),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.chat_bubble_outline), label: ''),
-          BottomNavigationBarItem(icon: Icon(Icons.notifications), label: ''),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: ''),
+    return Container(
+      decoration: BoxDecoration(
+        color: ColorName.mint,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.12),
+            blurRadius: 16,
+            offset: const Offset(0, -4),
+          ),
         ],
+      ),
+      child: SafeArea(
+        top: false,
+        child: NavigationBarTheme(
+          data: NavigationBarThemeData(
+            backgroundColor: Colors.transparent,
+            indicatorColor: Colors.white.withOpacity(0.20),
+            labelTextStyle: const WidgetStatePropertyAll(
+              TextStyle(fontSize: 11, color: Colors.white),
+            ),
+            iconTheme: WidgetStateProperty.resolveWith((states) {
+              final isSelected = states.contains(WidgetState.selected);
+              return IconThemeData(
+                color: isSelected ? Colors.white : Colors.white70,
+                size: isSelected ? 28 : 24,
+              );
+            }),
+            height: 68,
+          ),
+          child: NavigationBar(
+            selectedIndex: currentIndex,
+            onDestinationSelected: (i) => _onTap(context, i),
+            labelBehavior: NavigationDestinationLabelBehavior.alwaysHide,
+            surfaceTintColor: Colors.transparent,
+            destinations: const [
+              NavigationDestination(
+                icon: Icon(Icons.home_outlined),
+                selectedIcon: Icon(Icons.home_rounded),
+                label: 'Home',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.search),
+                selectedIcon: Icon(Icons.search_rounded),
+                label: 'Search',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.add_box_outlined),
+                selectedIcon: Icon(Icons.add_box_rounded),
+                label: 'Post',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.chat_bubble_outline),
+                selectedIcon: Icon(Icons.chat_bubble_rounded),
+                label: 'Chat',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.notifications_none_rounded),
+                selectedIcon: Icon(Icons.notifications_rounded),
+                label: 'Notice',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.person_outline),
+                selectedIcon: Icon(Icons.person_rounded),
+                label: 'Profile',
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

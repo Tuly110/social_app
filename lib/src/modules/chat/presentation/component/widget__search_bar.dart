@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:jupyternotebook/generated/colors.gen.dart'; // đổi theo package của bạn
+
+import '../../../../../generated/colors.gen.dart'; // đổi theo package của bạn
 
 class WidgetSearchBar extends StatelessWidget {
   const WidgetSearchBar({super.key});

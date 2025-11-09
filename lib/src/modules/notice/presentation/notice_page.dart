@@ -1,11 +1,14 @@
-import 'package:flutter/material.dart';
 import 'package:auto_route/auto_route.dart';
+import 'package:flutter/material.dart';
+
 // đổi theo package thật:
-import 'model/notice_model.dart';
+import '../../../../generated/colors.gen.dart';
+import '../../../common/widgets/bottom_navigation.dart';
+
+import 'component/widget__notice_activity_tab.dart';
 import 'component/widget__notice_app_bar.dart';
 import 'component/widget__notice_list.dart';
-import 'component/widget__notice_activity_tab.dart';
-import 'package:jupyternotebook/generated/colors.gen.dart';
+import 'model/notice_model.dart';
 
 @RoutePage()
 class NoticePage extends StatelessWidget {
@@ -13,7 +16,6 @@ class NoticePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Data mẫu cho tab All/Mention (dùng lại model NoticeItem bạn đang có)
     final noticesAll = <NoticeItem>[
       NoticeItem(
         title: 'User 1',
@@ -57,6 +59,7 @@ class NoticePage extends StatelessWidget {
             Expanded(child: _NoticeTabViews()),
           ],
         ),
+        bottomNavigationBar: const WidgetBottomNav(currentIndex: 4),
       ),
     );
   }
@@ -92,7 +95,6 @@ class _NoticeTabViews extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Có thể lấy data thực từ Provider/BLoC thay vì hard-code
     final noticesAll = <NoticeItem>[
       NoticeItem(
         title: 'User 1',
@@ -127,13 +129,8 @@ class _NoticeTabViews extends StatelessWidget {
 
     return TabBarView(
       children: [
-        // 1) Activity - khôi phục layout gốc: Today/This week + RightContent
         const WidgetNoticeActivityTab(),
-
-        // 2) All - dùng lại list tile đã tách
         SafeArea(child: WidgetNoticeList(items: noticesAll)),
-
-        // 3) Mention - dùng lại list tile đã tách
         SafeArea(child: WidgetNoticeList(items: noticesMention)),
       ],
     );

@@ -1,8 +1,9 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-import 'package:jupyternotebook/generated/colors.gen.dart';
 
 // Import các widget tách riêng
+import '../../../../generated/colors.gen.dart';
+import '../../../common/widgets/bottom_navigation.dart';
 import 'component/widget__avatar.dart';
 import 'component/widget__circle_icon.dart';
 import 'component/widget__panel_content.dart';
@@ -25,28 +26,7 @@ class UserProfilePage extends StatelessWidget {
             WidgetTabAndContent(),
           ],
         ),
-        bottomNavigationBar: Theme(
-          data: Theme.of(context).copyWith(
-            splashColor: Colors.transparent,
-            highlightColor: Colors.transparent,
-          ),
-          child: BottomNavigationBar(
-            type: BottomNavigationBarType.fixed,
-            backgroundColor: ColorName.mint,
-            selectedItemColor: ColorName.white,
-            unselectedItemColor: ColorName.white70,
-            items: const [
-              BottomNavigationBarItem(icon: Icon(Icons.home_filled), label: ''),
-              BottomNavigationBarItem(icon: Icon(Icons.search), label: ''),
-              BottomNavigationBarItem(icon: Icon(Icons.edit_note), label: ''),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.notifications),
-                label: '',
-              ),
-              BottomNavigationBarItem(icon: Icon(Icons.person), label: ''),
-            ],
-          ),
-        ),
+        bottomNavigationBar: const WidgetBottomNav(currentIndex: 6),
       ),
     );
   }

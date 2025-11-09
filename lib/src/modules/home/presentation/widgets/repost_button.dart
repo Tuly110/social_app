@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:iconsax/iconsax.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+
 import '../../../../../generated/colors.gen.dart';
 
 class RepostButton extends StatefulWidget {
@@ -41,7 +42,7 @@ class _RepostButtonState extends State<RepostButton> with SingleTickerProviderSt
 
     _colorAnimation = ColorTween(
       begin: ColorName.textLightGray,
-      end: ColorName.repostGreen, // Using generated color
+      end: ColorName.repostGreen,
     ).animate(CurvedAnimation(
       parent: _animationController,
       curve: Curves.easeInOut,
@@ -91,8 +92,8 @@ class _RepostButtonState extends State<RepostButton> with SingleTickerProviderSt
             child: AnimatedBuilder(
               animation: _colorAnimation,
               builder: (context, child) {
-                return Icon(
-                  widget.isReposted ? Iconsax.repeat5 : Iconsax.repeat,
+                return FaIcon(
+                  FontAwesomeIcons.retweet,
                   color: _colorAnimation.value,
                   size: 18,
                 );

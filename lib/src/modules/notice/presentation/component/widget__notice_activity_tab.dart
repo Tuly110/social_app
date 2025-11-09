@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:jupyternotebook/generated/colors.gen.dart';
-import 'widget__time_header.dart';
+
 import 'widget__notice_activity_item.dart';
+import 'widget__time_header.dart';
 
 /// Data mẫu cho Activity theo “đúng UI gốc”
 class WidgetNoticeActivityTab extends StatelessWidget {

@@ -33,6 +33,12 @@ abstract class _$AppRouter extends RootStackRouter {
         child: const ChatPage(),
       );
     },
+    HomeRoute.name: (routeData) {
+      return AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: const HomePage(),
+      );
+    },
     LoginRoute.name: (routeData) {
       return AutoRoutePage<dynamic>(
         routeData: routeData,
@@ -61,6 +67,12 @@ abstract class _$AppRouter extends RootStackRouter {
       return AutoRoutePage<dynamic>(
         routeData: routeData,
         child: const SplashScreenPage(),
+      );
+    },
+    UpdatePasswordRoute.name: (routeData) {
+      return AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: const UpdatePasswordPage(),
       );
     },
     UserProfileRoute.name: (routeData) {
@@ -132,6 +144,20 @@ class ChatRoute extends PageRouteInfo<void> {
 }
 
 /// generated route for
+/// [HomePage]
+class HomeRoute extends PageRouteInfo<void> {
+  const HomeRoute({List<PageRouteInfo>? children})
+      : super(
+          HomeRoute.name,
+          initialChildren: children,
+        );
+
+  static const String name = 'HomeRoute';
+
+  static const PageInfo<void> page = PageInfo<void>(name);
+}
+
+/// generated route for
 /// [LoginPage]
 class LoginRoute extends PageRouteInfo<void> {
   const LoginRoute({List<PageRouteInfo>? children})
@@ -197,6 +223,20 @@ class SplashScreenRoute extends PageRouteInfo<void> {
         );
 
   static const String name = 'SplashScreenRoute';
+
+  static const PageInfo<void> page = PageInfo<void>(name);
+}
+
+/// generated route for
+/// [UpdatePasswordPage]
+class UpdatePasswordRoute extends PageRouteInfo<void> {
+  const UpdatePasswordRoute({List<PageRouteInfo>? children})
+      : super(
+          UpdatePasswordRoute.name,
+          initialChildren: children,
+        );
+
+  static const String name = 'UpdatePasswordRoute';
 
   static const PageInfo<void> page = PageInfo<void>(name);
 }

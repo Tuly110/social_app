@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:iconsax/iconsax.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../models/post_data.dart';
 import '../models/comment_data.dart';
 import '../widgets/comment_button.dart';
@@ -7,6 +7,8 @@ import '../widgets/repost_button.dart';
 import '../widgets/like_button.dart';
 import '../widgets/action_button.dart';
 import '../widgets/comment_item.dart';
+
+import '../../../../../generated/colors.gen.dart';
 
 class CommentsPage extends StatefulWidget {
   final PostData post;
@@ -65,7 +67,7 @@ class _CommentsPageState extends State<CommentsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: ColorName.backgroundWhite,
         elevation: 1,
         title: const Text(
           'Comments',
@@ -76,7 +78,7 @@ class _CommentsPageState extends State<CommentsPage> {
           ),
         ),
         leading: IconButton(
-          icon: const Icon(Iconsax.arrow_left, color: Colors.black),
+          icon: const FaIcon(FontAwesomeIcons.arrowLeft, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -85,10 +87,10 @@ class _CommentsPageState extends State<CommentsPage> {
           // Original Post
           Container(
             padding: const EdgeInsets.all(16),
-            decoration: const BoxDecoration(
-              color: Colors.white,
+            decoration: BoxDecoration(
+              color: ColorName.backgroundWhite,
               border: Border(
-                bottom: BorderSide(color: Color(0xFFE5E5E5), width: 0.5),
+                bottom: BorderSide(color: ColorName.borderLight, width: 0.5),
               ),
             ),
             child: Row(
@@ -99,7 +101,7 @@ class _CommentsPageState extends State<CommentsPage> {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF1D9BF0),
+                    color: ColorName.primaryBlue,
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Center(
@@ -121,8 +123,8 @@ class _CommentsPageState extends State<CommentsPage> {
                         children: [
                           Text(
                             widget.post.username,
-                            style: const TextStyle(
-                              color: Colors.black,
+                            style: TextStyle(
+                              color: ColorName.textBlack,
                               fontWeight: FontWeight.bold,
                               fontSize: 15,
                             ),
@@ -130,8 +132,8 @@ class _CommentsPageState extends State<CommentsPage> {
                           const SizedBox(width: 4),
                           Text(
                             '${widget.post.handle} · ${widget.post.time}',
-                            style: const TextStyle(
-                              color: Colors.grey,
+                            style: TextStyle(
+                              color: ColorName.textGray,
                               fontSize: 14,
                             ),
                           ),
@@ -140,8 +142,8 @@ class _CommentsPageState extends State<CommentsPage> {
                       const SizedBox(height: 4),
                       Text(
                         widget.post.content,
-                        style: const TextStyle(
-                          color: Colors.black,
+                        style: TextStyle(
+                          color: ColorName.textBlack,
                           fontSize: 15,
                           height: 1.4,
                         ),
@@ -165,7 +167,7 @@ class _CommentsPageState extends State<CommentsPage> {
                             onPressed: widget.onLikePressed,
                           ),
                           ActionButton(
-                            icon: Iconsax.share,
+                            icon: FontAwesomeIcons.share,
                             onPressed: () {},
                           ),
                         ],
@@ -191,10 +193,10 @@ class _CommentsPageState extends State<CommentsPage> {
           // Add Comment Input
           Container(
             padding: const EdgeInsets.all(16),
-            decoration: const BoxDecoration(
-              color: Colors.white,
+            decoration: BoxDecoration(
+              color: ColorName.backgroundWhite,
               border: Border(
-                top: BorderSide(color: Color(0xFFE5E5E5), width: 0.5),
+                top: BorderSide(color: ColorName.borderLight, width: 0.5),
               ),
             ),
             child: Row(
@@ -224,7 +226,7 @@ class _CommentsPageState extends State<CommentsPage> {
                 ),
                 const SizedBox(width: 12),
                 IconButton(
-                  icon: const Icon(Iconsax.send1, color: Color(0xFF1D9BF0)),
+                  icon: const FaIcon(FontAwesomeIcons.paperPlane, color: Color(0xFF1D9BF0)),
                   onPressed: () {},
                 ),
               ],
