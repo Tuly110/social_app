@@ -1,5 +1,3 @@
-// forgot_password_bottom_sheet.dart
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -26,18 +24,16 @@ class _ForgotPasswordBottomSheetState extends State<ForgotPasswordBottomSheet> {
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
 
-
   @override
   void dispose() {
     emailController.dispose();
     super.dispose();
   }
 
-
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<AuthCubit, AuthState>(
-      listener: (context, state){
+    return BlocListener<AuthCubit, AuthState>(
+      listener: (context, state) {
         state.whenOrNull(
           passwordResetSent: (email) {
             // Đóng bottom sheet khi thành công
@@ -52,76 +48,76 @@ class _ForgotPasswordBottomSheetState extends State<ForgotPasswordBottomSheet> {
           },
         );
       },
-      builder: (context, state) {
-        final cubit = context.read<AuthCubit>();
-        
-        // Lấy email error từ state
-        final emailError = state.maybeWhen(
-          unauthenticated: (emailErr, passErr, msg, isEmailValid, isPasswordValid) => emailErr,
-          orElse: () => '',
-        );
-        
-        // Kiểm tra email có hợp lệ không
-        final isEmailValid = state.maybeWhen(
-          unauthenticated: (emailErr, passErr, msg, isEmailValid, isPasswordValid) => isEmailValid,
-          orElse: () => false,
-        );
+      child: _buildContent(), 
+    );
+  }
 
-        return Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom, 
+  Widget _buildContent() {
+    return Padding(
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom, 
+      ),
+      child: Container(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height * 0.7,
+        ),
+        padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 24.h),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(20.r),
+            topRight: Radius.circular(20.r),
           ),
-          child: Container(
-            constraints: BoxConstraints(
-              maxHeight: MediaQuery.of(context).size.height * 0.7, // limit max height
-            ),
-            padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 24.h),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(20.r),
-                topRight: Radius.circular(20.r),
-              ),
-            ),
-            child: SingleChildScrollView(
-              // QUAN TRỌNG: Thêm các property này
-              physics: const ClampingScrollPhysics(),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min, 
+        ),
+        child: SingleChildScrollView(
+          physics: const ClampingScrollPhysics(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min, 
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // Header
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Forgot Password?',
-                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      IconButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        icon: const FaIcon(FontAwesomeIcons.xmark),
-                      ),
-                    ],
-                  ),
-                  
-                  Gap(8.h),
                   Text(
-                    'Enter your email address and we\'ll send you a link to reset your password.',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Colors.grey.shade600,
+                    'Forgot Password?',
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
+                  IconButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    icon: const FaIcon(FontAwesomeIcons.xmark),
+                  ),
+                ],
+              ),
+              
+              Gap(8.h),
+              Text(
+                'Enter your email address and we\'ll send you a link to reset your password.',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Colors.grey.shade600,
+                ),
+              ),
+              
+              Gap(32.h),
+              BlocBuilder<AuthCubit, AuthState>(
+                builder: (context, state) {
+                  final cubit = context.read<AuthCubit>();
+
+                  final emailError = state.maybeWhen(
+                    unauthenticated: (emailErr, passErr, msg, isEmailValid, isPasswordValid) => emailErr,
+                    orElse: () => '',
+                  );
                   
-                  Gap(32.h),
-                  
-                  // Form
-                  Form(
+                  final isEmailValid = state.maybeWhen(
+                    unauthenticated: (emailErr, passErr, msg, isEmailValid, isPasswordValid) => isEmailValid,
+                    orElse: () => false,
+                  );
+
+                  return Form(
                     key: _formKey,
                     child: Column(
-                      mainAxisSize: MainAxisSize.min, // QUAN TRỌNG
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         Align(
                           alignment: Alignment.centerLeft,
@@ -136,17 +132,17 @@ class _ForgotPasswordBottomSheetState extends State<ForgotPasswordBottomSheet> {
                             color: ColorName.white,
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.1), // Giảm opacity
-                                blurRadius: 4.0, // Tăng blur radius
+                                color: Colors.black.withOpacity(0.1),
+                                blurRadius: 4.0,
                                 offset: const Offset(0, 2),
                               ),
                             ],
-                            borderRadius: BorderRadius.circular(8.r), // Thêm border radius
+                            borderRadius: BorderRadius.circular(8.r),
                           ),
                           child: TextField(
                             controller: emailController,
                             decoration: InputDecoration(
-                              errorText: widget.emailError?.isNotEmpty ==true? widget.emailError:null,
+                              errorText: emailError.isNotEmpty == true ? emailError : null,
                               filled: true,
                               fillColor: Colors.transparent, 
                               contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
@@ -155,7 +151,7 @@ class _ForgotPasswordBottomSheetState extends State<ForgotPasswordBottomSheet> {
                               focusedBorder: InputBorder.none,
                               errorBorder: InputBorder.none,
                               focusedErrorBorder: InputBorder.none,
-                              hintText: 'your@email.com', // Thêm hint text
+                              hintText: 'your@email.com',
                             ),
                             keyboardType: TextInputType.emailAddress,
                             onChanged: (value) {
@@ -165,8 +161,7 @@ class _ForgotPasswordBottomSheetState extends State<ForgotPasswordBottomSheet> {
                         ),
                         
                         Gap(24.h),
-                        
-                        // Buttons
+
                         Row(
                           children: [
                             // Cancel Button
@@ -193,8 +188,21 @@ class _ForgotPasswordBottomSheetState extends State<ForgotPasswordBottomSheet> {
                             // Reset Button
                             Expanded(
                               child: ElevatedButton(
-                                onPressed:_isLoading || !isEmailValid ? null : () {
-                                  cubit.resetPassword(email: emailController.text);
+                                onPressed:_isLoading || !isEmailValid ? null : () async {
+                                  setState(() {
+                                    _isLoading = true;
+                                  });
+                                  
+                                  try {
+                                    await cubit.resetPassword(email: emailController.text);
+                                  } catch (e) {
+                                  } finally {
+                                    if (mounted) {
+                                      setState(() {
+                                        _isLoading = false;
+                                      });
+                                    }
+                                  }
                                 },
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: ColorName.background,
@@ -222,14 +230,13 @@ class _ForgotPasswordBottomSheetState extends State<ForgotPasswordBottomSheet> {
                         ),
                       ],
                     ),
-                  ),
-                ],
+                  );
+                },
               ),
-            ),
+            ],
           ),
-        );
-      },
+        ),
+      ),
     );
-    
   }
 }

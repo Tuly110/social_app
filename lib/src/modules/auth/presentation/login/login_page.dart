@@ -130,8 +130,8 @@ class _LoginPageState extends State<LoginPage> {
                             onTap: (){
                               showModalBottomSheet(
                                 context: context,
-                                isScrollControlled: true, // Quan trọng: cho phép scroll
-                                backgroundColor: Colors.transparent, // Background trong suốt
+                                isScrollControlled: true,
+                                backgroundColor: Colors.transparent, 
                                 builder: (context) => ForgotPasswordBottomSheet(),
                               );
                             },

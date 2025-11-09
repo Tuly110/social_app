@@ -33,16 +33,46 @@ class AuthRepositoryImpl implements AuthRepository {
     return authRemoteDataSource.signInWithGoogle();
   }
 
+
   @override
-  Future<Either<Failure, UserEntity>> signUp({required String email, required String password}) async{
-    try{
-      final userEntity = await authRemoteDataSource.signUp(email: email, password: password);
-      return Right(userEntity);
-    }on Exception catch(e){
-      print('Repository Exception: ${e.toString()}');
-      return Left(ServerFailure(e.toString()));
+Future<Either<Failure, UserEntity>> signUp({required String email, required String password}) async {
+  try {
+    final emailExists = await _checkEmailExistence(email);
+    if (emailExists) {
+      return Left(AuthFailure('Email $email đã được đăng ký. Vui lòng đăng nhập.'));
     }
+
+    final userEntity = await authRemoteDataSource.signUp(email: email, password: password);
+    return Right(userEntity);
+  } on Exception catch(e) {
+    print('Repository Exception: ${e.toString()}');
+    
+    if (e.toString().contains('đã được đăng ký') ||
+        e.toString().contains('already registered') ||
+        e.toString().contains('user_exists')) {
+      return Left(AuthFailure(e.toString()));
+    }
+    
+    return Left(ServerFailure(e.toString()));
   }
+}
+
+Future<bool> _checkEmailExistence(String email) async {
+  try {
+    await supabaseClient.auth.signInWithOtp(
+      email: email,
+      shouldCreateUser: false,
+    );
+    //No exception -> email tồn tại
+    return true;
+  } on AuthException catch (e) {
+    if (e.message.toLowerCase().contains('not found') ||
+        e.message.toLowerCase().contains('invalid')) {
+      return false;
+    }
+    return true;
+  }
+}
 
   @override
   Future<Either<Failure, void>> signOut() async{

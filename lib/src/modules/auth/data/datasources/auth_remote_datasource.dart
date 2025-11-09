@@ -94,7 +94,7 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDataSource{
     try{
       await supabaseClient.auth.signInWithOAuth(
         OAuthProvider.google,
-        redirectTo: 'https://miagiyhyjpibwljojfbk.supabase.co/auth/v1/callback',
+        redirectTo: 'fau.socialapp://login-callback',
       );
       return UserEntity(
         id: 'pending-google-auth',
@@ -109,17 +109,42 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDataSource{
   }
 
   @override
-  Future<UserEntity> signUp(
-      {required String email, required String password}) async {
+  Future<UserEntity> signUp({required String email, required String password}) async {
     try {
+      try {
+        // Check email exist
+        final authResponse = await supabaseClient.auth.signInWithPassword(
+          email: email,
+          password: 'dummy_password', 
+        );
+        
+        // No exception, email exist
+        throw "Email already registered. Please sign in instead.";
+      } on AuthException catch (e) {
+        if (!e.message.toLowerCase().contains('invalid login credentials')) {
+          if (e.message.toLowerCase().contains('email') || 
+              e.message.toLowerCase().contains('user')) {
+            throw "Email already registered. Please sign in instead.";
+          }
+          rethrow;
+        }
+
+      }
+      
       final AuthResponse response = await supabaseClient.auth.signUp(
         password: password,
         email: email,
-        data: {
-          'email': email,
-          'username': email.split('@')[0],
-        },
+        data: {'email': email},
+        emailRedirectTo: 'fau.socialapp://login-callback',
       );
+
+      if (response.user?.identities != null && response.user!.identities!.isNotEmpty) {
+        final providers = response.user!.identities!.map((i) => i.provider).toList();
+        
+        if (providers.contains('google')) {
+          throw "Email already registered with Google. Please sign in with Google instead.";
+        }
+      }
 
       return UserEntity(
         id: response.user?.id ?? 'pending-verification',
@@ -129,9 +154,11 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDataSource{
         isEmailVerified: false,
       );
     } on AuthException catch (e) {
-      throw Exception("Sign up failed: ${e.message}");
-    } catch (e) {
-      throw Exception("Unexpected error during signup: $e");
+      if (e.message.contains('already registered') || e.message.contains('user_exists')) {
+        throw "Email already registered. Please sign in instead or use forgot password.";
+      }
+      rethrow;
+      
     }
   }
 

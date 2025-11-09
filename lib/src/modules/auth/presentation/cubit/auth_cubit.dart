@@ -270,7 +270,7 @@ class AuthCubit extends Cubit<AuthState> {
           (_) {
             // Success - emit success state
             emit(AuthState.passwordResetSent(email: email));
-            print('✅ Password reset email sent to: $email');
+            // print('✅ Password reset email sent to: $email');
           },
         );
 

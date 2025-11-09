@@ -62,9 +62,6 @@ class _UpdatePasswordPageState extends State<UpdatePasswordPage> {
       },
       builder: (context, state) {
         final cubit = context.read<AuthCubit>();
-          
-          
-          // Lấy thông tin lỗi password từ state
           final passwordError = state.maybeWhen(
             unauthenticated: (emailErr, passErr, msg, isEmailValid, isPasswordValid) => passErr,
             orElse: () => '',
@@ -81,7 +78,7 @@ class _UpdatePasswordPageState extends State<UpdatePasswordPage> {
           ),
           child: Container(
             constraints: BoxConstraints(
-              maxHeight: MediaQuery.of(context).size.height * 0.7, // limit max height
+              maxHeight: MediaQuery.of(context).size.height * 0.7, 
             ),
             padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 24.h),
             decoration: BoxDecoration(
@@ -121,7 +118,7 @@ class _UpdatePasswordPageState extends State<UpdatePasswordPage> {
                   Form(
                     key: formKey,
                     child: Column(
-                      mainAxisSize: MainAxisSize.min, // QUAN TRỌNG
+                      mainAxisSize: MainAxisSize.min, 
                       children: [
                         Align(
                           alignment: Alignment.centerLeft,
@@ -137,16 +134,16 @@ class _UpdatePasswordPageState extends State<UpdatePasswordPage> {
                             boxShadow: [
                               BoxShadow(
                                 color: Colors.black.withOpacity(0.1),
-                                blurRadius: 4.0, // Tăng blur radius
+                                blurRadius: 4.0, 
                                 offset: const Offset(0, 2),
                               ),
                             ],
-                            borderRadius: BorderRadius.circular(8.r), // Thêm border radius
+                            borderRadius: BorderRadius.circular(8.r), 
                           ),
                           child: TextField(
                             controller: passwordController,
                             decoration: InputDecoration(
-                              errorText: passwordError?.isNotEmpty ==true? passwordError:null,
+                              errorText: passwordError.isNotEmpty ==true? passwordError:null,
                               filled: true,
                               fillColor: Colors.transparent, 
                               contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
