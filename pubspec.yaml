@@ -45,6 +45,9 @@ dependencies:
   #navigation
   auto_route: ^8.0.3
 
+  #bottomNavigation 
+  motion_tab_bar: ^2.0.3
+
   #dependency injection
   get_it: ^7.6.8
   injectable: ^2.4.1

@@ -1,7 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 // 🔹 Import các component tái sử dụng
-import '../../../common/widgets/bottom_navigation.dart';
 import '../../../../generated/colors.gen.dart';
 import 'component/widget__avatar.dart';
 import 'component/widget__friend_avatar.dart';
@@ -121,8 +120,6 @@ class _ProfilePageState extends State<ProfilePage> {
             ],
           ),
         ),
-        // BOTTOM NAVIGATION BAR
-        bottomNavigationBar: const WidgetBottomNav(currentIndex: 5),
       ),
     );
   }
@@ -304,7 +301,6 @@ class _AllTab extends StatelessWidget {
           ],
         ),
         SizedBox(height: 16),
-
         _TwoColumnStatsAndGallery(),
       ],
     );

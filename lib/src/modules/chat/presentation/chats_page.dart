@@ -5,7 +5,6 @@ import '../../../../generated/colors.gen.dart';
 import 'component/widget__chat_list_item.dart';
 import 'component/widget__custom_app_bar.dart';
 import 'component/widget__search_bar.dart';
-import 'package:social_app/src/common/widgets/bottom_navigation.dart';
 
 @RoutePage()
 class ChatPage extends StatelessWidget {
@@ -71,9 +70,6 @@ class ChatPage extends StatelessWidget {
         shape: const CircleBorder(),
         child: const Icon(Icons.add),
       ),
-
-      // BOTTOM NAVIGATION BAR
-      bottomNavigationBar: const WidgetBottomNav(currentIndex: 3),
     );
   }
 }

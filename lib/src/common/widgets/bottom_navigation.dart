@@ -1,59 +1,34 @@
-import 'package:auto_route/auto_route.dart';
+// lib/src/modules/common/widgets/widget__bottom_nav.dart
 import 'package:flutter/material.dart';
 import '../../../generated/colors.gen.dart';
-import '../../modules/app/app_router.dart';
 
 class WidgetBottomNav extends StatelessWidget {
   final int currentIndex;
-
+  final ValueChanged<int> onTap; 
   const WidgetBottomNav({
     super.key,
     required this.currentIndex,
+    required this.onTap,
   });
-
-  void _onTap(BuildContext context, int index) {
-    if (index == currentIndex) return;
-
-    final r = context.router;
-
-    switch (index) {
-      case 0:
-        r.replace(const HomeRoute());
-        break;
-      case 1:
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Explore feature coming soon!')),
-        );
-        break;
-      case 2:
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('New Post feature coming soon!')),
-        );
-        break;
-      case 3:
-        r.replace(const ChatRoute());
-        break;
-      case 4:
-        r.replace(const NoticeRoute());
-        break;
-      case 5:
-        r.replace(const ProfileRoute());
-        break;
-      case 6:
-        r.replace(const UserProfileRoute());
-        break;
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
+    const icons = <IconData>[
+      Icons.home_rounded,
+      Icons.search_rounded,
+      Icons.add_box_rounded,
+      Icons.chat_bubble_rounded,
+      Icons.notifications_rounded,
+      Icons.person_rounded,
+    ];
+
     return Container(
       decoration: BoxDecoration(
         color: ColorName.mint,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.12),
+            color: Colors.black.withOpacity(.12),
             blurRadius: 16,
             offset: const Offset(0, -4),
           ),
@@ -61,59 +36,71 @@ class WidgetBottomNav extends StatelessWidget {
       ),
       child: SafeArea(
         top: false,
-        child: NavigationBarTheme(
-          data: NavigationBarThemeData(
-            backgroundColor: Colors.transparent,
-            indicatorColor: Colors.white.withOpacity(0.20),
-            labelTextStyle: const WidgetStatePropertyAll(
-              TextStyle(fontSize: 11, color: Colors.white),
-            ),
-            iconTheme: WidgetStateProperty.resolveWith((states) {
-              final isSelected = states.contains(WidgetState.selected);
-              return IconThemeData(
-                color: isSelected ? Colors.white : Colors.white70,
-                size: isSelected ? 28 : 24,
+        child: SizedBox(
+          height: 68,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final tabCount = icons.length;
+              final tabWidth = constraints.maxWidth / tabCount;
+
+              return Stack(
+                alignment: Alignment.centerLeft,
+                children: [
+                  // Bubble chạy theo tab đang chọn
+                  AnimatedPositioned(
+                    duration: const Duration(milliseconds: 250),
+                    curve: Curves.easeOutCubic,
+                    left: currentIndex * tabWidth + (tabWidth - 42) / 2,
+                    top: 8,
+                    child: Container(
+                      width: 42,
+                      height: 42,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(.10),
+                            blurRadius: 10,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Icon(
+                        icons[currentIndex],
+                        size: 24,
+                        color: ColorName.mint,
+                      ),
+                    ),
+                  ),
+
+                  // Hàng icon bấm được
+                  Row(
+                    children: List.generate(tabCount, (i) {
+                      final isSelected = i == currentIndex;
+                      return Expanded(
+                        child: InkWell(
+                          splashColor: Colors.transparent,
+                          highlightColor: Colors.transparent,
+                          onTap: () => onTap(i), 
+                          child: SizedBox(
+                            height: double.infinity,
+                            child: Center(
+                              child: Icon(
+                                icons[i],
+                                size:
+                                    isSelected ? 0 : 24, 
+                                color: Colors.white70,
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    }),
+                  ),
+                ],
               );
-            }),
-            height: 68,
-          ),
-          child: NavigationBar(
-            selectedIndex: currentIndex,
-            onDestinationSelected: (i) => _onTap(context, i),
-            labelBehavior: NavigationDestinationLabelBehavior.alwaysHide,
-            surfaceTintColor: Colors.transparent,
-            destinations: const [
-              NavigationDestination(
-                icon: Icon(Icons.home_outlined),
-                selectedIcon: Icon(Icons.home_rounded),
-                label: 'Home',
-              ),
-              NavigationDestination(
-                icon: Icon(Icons.search),
-                selectedIcon: Icon(Icons.search_rounded),
-                label: 'Search',
-              ),
-              NavigationDestination(
-                icon: Icon(Icons.add_box_outlined),
-                selectedIcon: Icon(Icons.add_box_rounded),
-                label: 'Post',
-              ),
-              NavigationDestination(
-                icon: Icon(Icons.chat_bubble_outline),
-                selectedIcon: Icon(Icons.chat_bubble_rounded),
-                label: 'Chat',
-              ),
-              NavigationDestination(
-                icon: Icon(Icons.notifications_none_rounded),
-                selectedIcon: Icon(Icons.notifications_rounded),
-                label: 'Notice',
-              ),
-              NavigationDestination(
-                icon: Icon(Icons.person_outline),
-                selectedIcon: Icon(Icons.person_rounded),
-                label: 'Profile',
-              ),
-            ],
+            },
           ),
         ),
       ),

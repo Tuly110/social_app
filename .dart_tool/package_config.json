@@ -650,6 +650,12 @@
       "languageVersion": "3.3"
     },
     {
+      "name": "motion_tab_bar",
+      "rootUri": "file:///C:/Users/NAM%20VIET%20COMPUTER/AppData/Local/Pub/Cache/hosted/pub.dev/motion_tab_bar-2.0.4",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
       "name": "nested",
       "rootUri": "file:///C:/Users/NAM%20VIET%20COMPUTER/AppData/Local/Pub/Cache/hosted/pub.dev/nested-1.0.0",
       "packageUri": "lib/",
@@ -1244,7 +1250,7 @@
       "languageVersion": "3.0"
     }
   ],
-  "generated": "2025-11-09T14:19:10.307436Z",
+  "generated": "2025-11-10T06:01:12.810704Z",
   "generator": "pub",
   "generatorVersion": "3.7.0",
   "flutterRoot": "file:///C:/flutter",

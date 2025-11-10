@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 
 // đổi theo package thật:
 import '../../../../generated/colors.gen.dart';
-import '../../../common/widgets/bottom_navigation.dart';
-
 import 'component/widget__notice_activity_tab.dart';
 import 'component/widget__notice_app_bar.dart';
 import 'component/widget__notice_list.dart';
@@ -59,7 +57,6 @@ class NoticePage extends StatelessWidget {
             Expanded(child: _NoticeTabViews()),
           ],
         ),
-        bottomNavigationBar: const WidgetBottomNav(currentIndex: 4),
       ),
     );
   }
