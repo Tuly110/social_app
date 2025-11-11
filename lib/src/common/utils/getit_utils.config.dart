@@ -18,6 +18,8 @@ import 'package:social_app/src/modules/auth/data/repositories/auth_repository_im
     as _i791;
 import 'package:social_app/src/modules/auth/domain/repositories/auth_repository.dart'
     as _i491;
+import 'package:social_app/src/modules/auth/domain/usecases/get_user_usecase.dart'
+    as _i606;
 import 'package:social_app/src/modules/auth/domain/usecases/reset_password_usecase.dart'
     as _i190;
 import 'package:social_app/src/modules/auth/domain/usecases/sign_in_withGG_usecase.dart'
@@ -66,6 +68,8 @@ extension GetItInjectableX on _i174.GetIt {
         () => _i279.SignInWithggUsecase(gh<_i491.AuthRepository>()));
     gh.lazySingleton<_i214.UpdatePasswordUsecase>(
         () => _i214.UpdatePasswordUsecase(gh<_i491.AuthRepository>()));
+    gh.lazySingleton<_i606.GetUserUsecase>(
+        () => _i606.GetUserUsecase(gh<_i491.AuthRepository>()));
     gh.factory<_i950.AuthCubit>(() => _i950.AuthCubit(
           signOutUsecase: gh<_i263.SignOutUsecase>(),
           signinUsecase: gh<_i118.SigninUsecase>(),
@@ -73,6 +77,7 @@ extension GetItInjectableX on _i174.GetIt {
           signupUsecase: gh<_i657.SignupUsecase>(),
           resetPasswordUsecase: gh<_i190.ResetPasswordUsecase>(),
           updatePasswordUsecase: gh<_i214.UpdatePasswordUsecase>(),
+          getUserUsecase: gh<_i606.GetUserUsecase>(),
           supabaseClient: gh<_i454.SupabaseClient>(),
         ));
     return this;

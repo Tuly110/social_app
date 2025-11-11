@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:social_app/src/modules/auth/domain/entities/user_entity.dart';
 
 part 'auth_state.freezed.dart';
 @freezed
@@ -16,6 +17,7 @@ class AuthState with _$AuthState {
   const factory AuthState.googleLoading() = _GoogleLoading; 
   const factory AuthState.pendingVerification({required String email}) = _PendingVerification;
   const factory AuthState.passwordRecovery() = _PasswordRecovery;
+  const factory AuthState.userInfoLoaded(UserEntity user) = _UserInfoLoaded;
   const factory AuthState.updatePasswordSuccess() = _UpdatePasswordSuccess;
   const factory AuthState.passwordResetSent({required String email}) = _PasswordResetSent;
 }
