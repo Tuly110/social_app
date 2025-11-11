@@ -123,5 +123,15 @@ Future<bool> _checkEmailExistence(String email) async {
     }
   }
   
+  @override
+  Future<Either<Failure, UserEntity>> getUserInfo() async {
+    try{
+      final user = await authRemoteDataSource.getUserInfo();
+      return Right(user);
+    }catch(e){
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+  
   
 }

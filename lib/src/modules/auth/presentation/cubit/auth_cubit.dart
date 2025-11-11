@@ -7,6 +7,7 @@ import 'package:social_app/src/modules/auth/domain/usecases/sign_in_withGG_useca
 import 'package:social_app/src/modules/auth/domain/usecases/update_password_usecase.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' hide AuthState;
 
+import '../../domain/usecases/get_user_usecase.dart';
 import '../../domain/usecases/signin_usecase.dart';
 import '../../domain/usecases/signout_usecase.dart';
 import '../../domain/usecases/signup_usecase.dart';
@@ -20,6 +21,7 @@ class AuthCubit extends Cubit<AuthState> {
   final SignupUsecase _signupUsecase;
   final ResetPasswordUsecase _resetPasswordUsecase;
   final UpdatePasswordUsecase _updatePasswordUsecase;
+  final GetUserUsecase _getUserUsecase;
   final SupabaseClient supabaseClient;
   StreamSubscription? _authSubscription;
   
@@ -31,6 +33,7 @@ class AuthCubit extends Cubit<AuthState> {
     required SignupUsecase signupUsecase,
     required ResetPasswordUsecase resetPasswordUsecase,
     required UpdatePasswordUsecase updatePasswordUsecase,
+    required GetUserUsecase getUserUsecase,
     required SupabaseClient supabaseClient,
   }) :  _signinUsecase = signinUsecase,
         _signInWithggUsecase = signInWithggUsecase,  
@@ -38,6 +41,7 @@ class AuthCubit extends Cubit<AuthState> {
         _signOutUsecase = signOutUsecase,
         _resetPasswordUsecase = resetPasswordUsecase,
         _updatePasswordUsecase =  updatePasswordUsecase,
+        _getUserUsecase = getUserUsecase,
         supabaseClient = supabaseClient,
         super(const AuthState.loading()) 
         {
@@ -54,6 +58,7 @@ class AuthCubit extends Cubit<AuthState> {
             
             if (user != null) {
                 emit(AuthState.authenticated(user.id)); 
+                getUserInfo();
             } else {
                 emit(const AuthState.unauthenticated());
             }
@@ -155,6 +160,7 @@ class AuthCubit extends Cubit<AuthState> {
         },
         (user) {
           emit(AuthState.authenticated(user.id));
+          getUserInfo();
         },
         );
     }
@@ -180,6 +186,7 @@ class AuthCubit extends Cubit<AuthState> {
             emit(const AuthState.unauthenticated(
               errorMessage:null,
             ));
+            getUserInfo();
           }
         );
 
@@ -270,7 +277,6 @@ class AuthCubit extends Cubit<AuthState> {
           (_) {
             // Success - emit success state
             emit(AuthState.passwordResetSent(email: email));
-            // print('✅ Password reset email sent to: $email');
           },
         );
 
@@ -313,6 +319,20 @@ class AuthCubit extends Cubit<AuthState> {
           emit(AuthState.failure(e.toString()));
         }
     }
+
+    Future<void> getUserInfo() async {
+      emit(AuthState.loading());
+      try {
+        final result = await _getUserUsecase.call();
+        result.fold(
+          (failure) => emit(AuthState.failure(failure.message)),
+          (user) => emit(AuthState.userInfoLoaded(user)),
+        );
+      } catch (e) {
+        emit(AuthState.failure(e.toString()));
+      }
+    }
+
       
 
     @override

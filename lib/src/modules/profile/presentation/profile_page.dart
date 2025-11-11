@@ -1,7 +1,13 @@
+
+
+// 🔹 Import các component tái sử dụng
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-// 🔹 Import các component tái sử dụng
+import 'package:flutter_bloc/flutter_bloc.dart';
+
 import '../../../../generated/colors.gen.dart';
+import '../../auth/presentation/cubit/auth_cubit.dart';
+import '../../auth/presentation/cubit/auth_state.dart';
 import 'component/widget__avatar.dart';
 import 'component/widget__friend_avatar.dart';
 import 'component/widget__gallery_grid.dart';
@@ -165,52 +171,69 @@ class _ProfileCard extends StatelessWidget {
     final double nameBlockHeight =
         (2 * avatarRadius) + nameBlockTopPadding + 10;
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 0),
-      padding: const EdgeInsets.only(bottom: 24),
-      decoration: BoxDecoration(
-        color: ColorName.white,
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: [
-          BoxShadow(
-            color: ColorName.black15,
-            blurRadius: 25,
-            offset: const Offset(0, 10),
-          )
-        ],
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          SizedBox(
-            height: nameBlockHeight,
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                Positioned(
-                  left: 0,
-                  right: 0,
-                  top: avatarRadius + 5,
-                  child: Column(
-                    children: [
-                      const Text(
-                        'SangHo',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w800,
-                          color: ColorName.black87,
+    return BlocBuilder<AuthCubit, AuthState>(builder: (context, state){
+      print('state current in profile page: $state');
+      final user = state.maybeWhen(
+        userInfoLoaded: (user) => user, orElse: () => null);
+      // if (user == null) {
+      //     final supabaseUser = Supabase.instance.client.auth.currentUser;
+      //     if (supabaseUser != null) {
+      //       user = UserEntity(
+      //         id: supabaseUser.id,
+      //         email: supabaseUser.email ?? '',
+      //         username: supabaseUser.userMetadata?['username'] ?? 
+      //                  supabaseUser.userMetadata?['name'] ?? 
+      //                  (supabaseUser.email?.split('@').first ?? 'User'),
+      //       );
+      //     }
+      //   }
+      return Container(
+        margin: const EdgeInsets.only(bottom: 0),
+        padding: const EdgeInsets.only(bottom: 24),
+        decoration: BoxDecoration(
+          color: ColorName.white,
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: [
+            BoxShadow(
+              color: ColorName.black15,
+              blurRadius: 25,
+              offset: const Offset(0, 10),
+            )
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            SizedBox(
+              height: nameBlockHeight,
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    top: avatarRadius + 5,
+                    child: Column(
+                      children: [
+                        Text(
+                          user?.username ?? 'User Name',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w800,
+                            color: ColorName.black87,
+                          ),
                         ),
-                      ),
-                      Text(
-                        'sangho2049@mastodon',
-                        style: TextStyle(
-                          color: ColorName.grey600,
-                          fontSize: 13,
+                        Text(
+                          user?.email ?? 'email@example.com',
+                          style: TextStyle(
+                            color: ColorName.grey600,
+                            fontSize: 13,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
                 Positioned(
@@ -221,47 +244,47 @@ class _ProfileCard extends StatelessWidget {
                 ),
               ],
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                  child: Text(
-                    'Trong bộ tộc Bodi Tribe (Ethiopia)...',
-                    maxLines: 3,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: ColorName.grey800,
-                      height: 1.25,
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                    child: Text(
+                      'Trong bộ tộc Bodi Tribe (Ethiopia)...',
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: ColorName.grey800,
+                        height: 1.25,
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 16),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Expanded(
-                        child: SizedBox(
-                          height: 42,
-                          child: ElevatedButton(
-                            onPressed: () {},
-                            style: ElevatedButton.styleFrom(
-                              elevation: 0,
-                              backgroundColor: ColorName.mint,
-                              foregroundColor: ColorName.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
+                  const SizedBox(height: 16),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Expanded(
+                          child: SizedBox(
+                            height: 42,
+                            child: ElevatedButton(
+                              onPressed: () {},
+                              style: ElevatedButton.styleFrom(
+                                elevation: 0,
+                                backgroundColor: ColorName.mint,
+                                foregroundColor: ColorName.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
                               ),
-                            ),
-                            child: const Text(
-                              'Edit',
-                              style: TextStyle(fontWeight: FontWeight.w600),
+                              child: const Text(
+                                'Edit',
+                                style: TextStyle(fontWeight: FontWeight.w600),
+                              ),
                             ),
                           ),
                         ),
@@ -284,17 +307,17 @@ class _ProfileCard extends StatelessWidget {
                             size: 22,
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-                const SizedBox(height: 16),
-              ],
+                  const SizedBox(height: 16),
+                ],
+              ),
             ),
-          ),
-        ],
-      ),
-    );
+          ],
+        ),
+      );
+    });
   }
 }
 

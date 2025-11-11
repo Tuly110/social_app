@@ -14,6 +14,7 @@ abstract class AuthRemoteDataSource{
   Future<void> signOut();
   Future<void> resetPassword({required String email});
   Future<void> updatePassword({required String newPassword});
+  Future<UserEntity> getUserInfo();
 }
 
 @LazySingleton(as: AuthRemoteDataSource)
@@ -26,38 +27,62 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDataSource{
     final userId = user.id;
 
     try {
+
+      // await Future.delayed(Duration(milliseconds: 100));
+
       final existingProfile = await supabaseClient
           .from('profiles')
           .select()
           .eq('id', userId)
           .maybeSingle();
 
+
       if (existingProfile == null) {
-        // create new if not have acc
-        await supabaseClient.from('profiles').insert({
-          'id': userId,
-          'username': defaultUsername,
-          'email': email,
-          'created_at': DateTime.now().toIso8601String(),
-          'updated_at': DateTime.now().toIso8601String(),
-        });
+        
+        try {
+
+          final insertResult = await supabaseClient.from('profiles').insert({
+            'id': userId,
+            'username': defaultUsername,
+            'email': email,
+            'created_at': DateTime.now().toIso8601String(),
+            'updated_at': DateTime.now().toIso8601String(),
+          }).select();
+          
+          if (insertResult.isEmpty) {
+            throw Exception('Profile creation failed - no data returned');
+          }
+          
+        } on PostgrestException catch (e) {
+          
+          if (e.code == '42501') {
+            await _createProfileAlternative(userId, defaultUsername, email);
+          } else {
+            rethrow;
+          }
+        }
+      }
+  // get profile again to ensure we have the latest data
+      final finalProfile = await supabaseClient
+          .from('profiles')
+          .select()
+          .eq('id', userId)
+          .maybeSingle();
+
+      if (finalProfile == null) {
+        throw Exception('Failed to create or retrieve profile');
       }
 
-    } on PostgrestException catch (e) {
-      if (e.code == '42501') {
-        print('RLS violation, trying alternative approach...');
-        await _createProfileAlternative(userId, defaultUsername, email);
-      } else {
-        rethrow;
-      }
+      return UserEntity(
+        id: userId, 
+        email: email,
+        username: finalProfile['username'] ?? defaultUsername,
+        avatarUrl: user.userMetadata?['avatar_url'] as String?,
+      );
+
+    } catch (e) {
+      rethrow;
     }
-
-    return UserEntity(
-      id: userId, 
-      email: email,
-      username: defaultUsername,
-      avatarUrl: user.userMetadata?['avatar_url'] as String?,
-    );
   }
 
   // Phương thức alternative để tạo profile
@@ -195,5 +220,44 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDataSource{
       throw Exception(e.toString());
     }
   }
+  
+  @override
+  Future<UserEntity> getUserInfo() async {
+    try {
+      final currentUser = supabaseClient.auth.currentUser;
+      if (currentUser == null) {
+        throw Exception('No user is currently signed in');
+      }
+
+      final profile = await supabaseClient
+        .from('profiles')
+        .select()
+        .eq('id', currentUser.id)
+        .maybeSingle();
+
+      if (profile == null) {
+        return await mapUserandCreateProfile(currentUser, currentUser.email ?? '');
+      }
+
+      return UserEntity(
+        id: currentUser.id,
+        email: currentUser.email ?? 'Unknown',
+        username: profile['username'] ?? currentUser.email?.split('@')[0] ?? 'Unknown',
+        avatarUrl: profile['avatar_url'],
+        isEmailVerified: currentUser.emailConfirmedAt != null,
+      );
+    } on PostgrestException catch(e) {
+
+      if (e.code == 'PGRST116') { // No data found
+        final currentUser = supabaseClient.auth.currentUser!;
+        return await mapUserandCreateProfile(currentUser, currentUser.email ?? '');
+      }
+
+      throw Exception('Failed to fetch user info: ${e.message}');
+    } catch (e) {
+
+      throw Exception('Failed to fetch user info: ${e.toString()}');
+    }
+  } 
 
 }

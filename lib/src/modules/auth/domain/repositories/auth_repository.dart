@@ -22,6 +22,8 @@ abstract class AuthRepository {
     required String newPassword
   });
 
+  Future<Either<Failure, UserEntity>> getUserInfo();
+
 
 
 }
