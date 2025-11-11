@@ -6,9 +6,9 @@ import 'component/widget__avatar.dart';
 import 'component/widget__friend_avatar.dart';
 import 'component/widget__gallery_grid.dart';
 import 'component/widget__placeholder.dart';
-import 'component/widget__round_icon.dart';
 import 'component/widget__section_title.dart';
 import 'component/widget__stats_card.dart';
+import 'component/select_friends_page.dart';
 
 @RoutePage()
 class ProfilePage extends StatefulWidget {
@@ -27,7 +27,7 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 5,
+      length: 4,
       child: Scaffold(
         backgroundColor: ColorName.softBg,
         body: NestedScrollView(
@@ -39,19 +39,47 @@ class _ProfilePageState extends State<ProfilePage> {
               surfaceTintColor: ColorName.white,
               elevation: 0,
               leading: IconButton(
-                icon: Icon(
-                  Icons.arrow_back,
-                  color: inner ? ColorName.black87 : ColorName.white,
-                ),
-                onPressed: () => Navigator.of(context).maybePop(),
+                icon: const Icon(Icons.arrow_back_ios_new_rounded,
+                    color: Color(0xFF9CA3AF), size: 22),
+                onPressed: () => AutoTabsRouter.of(context).setActiveIndex(0),
               ),
               actions: [
-                IconButton(
+                PopupMenuButton<String>(
                   icon: Icon(
                     Icons.more_horiz,
                     color: inner ? ColorName.black87 : ColorName.white,
                   ),
-                  onPressed: () {},
+                  onSelected: (value) async {
+                    if (value == 'logout') {
+                      final ok = await showDialog<bool>(
+                        context: context,
+                        builder: (ctx) => AlertDialog(
+                          title: const Text('Logout'),
+                          content: const Text('Are you sure logout?'),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.of(ctx).pop(false),
+                              child: const Text('Cancel'),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.of(ctx).pop(true),
+                              child: const Text('Logout'),
+                            ),
+                          ],
+                        ),
+                      );
+
+                      if (ok == true) {
+                        // TODO: Logic logout sau này
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Logged out')),
+                        );
+                      }
+                    }
+                  },
+                  itemBuilder: (ctx) => const [
+                    PopupMenuItem(value: 'logout', child: Text('Logout')),
+                  ],
                 ),
               ],
               flexibleSpace: FlexibleSpaceBar(
@@ -88,7 +116,7 @@ class _ProfilePageState extends State<ProfilePage> {
               bottom: PreferredSize(
                 preferredSize: const Size.fromHeight(_tabBarHeight),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  padding: const EdgeInsets.only(left: 8, right: 16),
                   color: ColorName.white,
                   child: const TabBar(
                     isScrollable: true,
@@ -97,13 +125,14 @@ class _ProfilePageState extends State<ProfilePage> {
                     indicatorColor: ColorName.black,
                     indicatorWeight: 2,
                     indicatorSize: TabBarIndicatorSize.label,
-                    labelPadding: EdgeInsets.symmetric(horizontal: 12),
+                    labelPadding: EdgeInsets.symmetric(horizontal: 20),
                     tabs: [
                       Tab(text: 'All'),
                       Tab(text: 'Post'),
                       Tab(text: 'Replies'),
                       Tab(text: 'Media'),
-                      Tab(text: 'About'),
+                      // Tab(text: 'About'),
+                      // Tab(text: 'Setting'),
                     ],
                   ),
                 ),
@@ -116,7 +145,8 @@ class _ProfilePageState extends State<ProfilePage> {
               WidgetPlaceholder(text: 'Post'),
               WidgetPlaceholder(text: 'Replies'),
               WidgetPlaceholder(text: 'Media'),
-              WidgetPlaceholder(text: 'About'),
+              // WidgetPlaceholder(text: 'About'),
+              // WidgetPlaceholder(text: 'Setting'),
             ],
           ),
         ),
@@ -189,11 +219,6 @@ class _ProfileCard extends StatelessWidget {
                   top: -avatarRadius,
                   child: Center(child: WidgetAvatar(radius: avatarRadius)),
                 ),
-                const Positioned(
-                  right: 16,
-                  top: 16,
-                  child: WidgetRoundIcon(icon: Icons.grid_view_rounded),
-                ),
               ],
             ),
           ),
@@ -243,7 +268,9 @@ class _ProfileCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 8),
                       InkWell(
-                        onTap: () {},
+                        onTap: () {
+                          // TODO: xử lý mở trang cài đặt sau
+                        },
                         child: Container(
                           width: 42,
                           height: 42,
@@ -252,9 +279,9 @@ class _ProfileCard extends StatelessWidget {
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: const Icon(
-                            Icons.send_rounded,
+                            Icons.settings_rounded,
                             color: ColorName.mint,
-                            size: 20,
+                            size: 22,
                           ),
                         ),
                       ),
@@ -278,36 +305,51 @@ class _AllTab extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 24, 16, 100),
-      children: const [
-        WidgetSectionTitle('Friends'),
-        SizedBox(height: 8),
+      children: [
+        const WidgetSectionTitle('Friends'),
+        const SizedBox(height: 8),
+
+        // Dãy avatar + nút 3 chấm
         Row(
           children: [
-            WidgetFriendAvatar(
+            const WidgetFriendAvatar(
               'https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=200',
             ),
-            SizedBox(width: 10),
-            WidgetFriendAvatar(
+            const SizedBox(width: 10),
+            const WidgetFriendAvatar(
               'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=200',
             ),
-            SizedBox(width: 10),
-            WidgetFriendAvatar(
+            const SizedBox(width: 10),
+            const WidgetFriendAvatar(
               'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=200',
             ),
-            SizedBox(width: 10),
-            WidgetFriendAvatar(
+            const SizedBox(width: 10),
+            const WidgetFriendAvatar(
               'https://images.unsplash.com/photo-1520813792240-56fc4a3765a7?w=200',
+            ),
+
+            const Spacer(),
+
+            // Nút 3 chấm → mở trang chọn bạn bè
+            IconButton(
+              icon: const Icon(Icons.more_horiz),
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const SelectFriendsPage()),
+                );
+              },
+              tooltip: 'All friends',
             ),
           ],
         ),
-        SizedBox(height: 16),
-        _TwoColumnStatsAndGallery(),
+
+        const SizedBox(height: 16),
+        const _TwoColumnStatsAndGallery(),
       ],
     );
   }
 }
 
-/// Tách khối layout 2 cột ra để gọn hơn phần trên
 class _TwoColumnStatsAndGallery extends StatelessWidget {
   const _TwoColumnStatsAndGallery();
 
