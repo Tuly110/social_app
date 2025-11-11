@@ -6,7 +6,6 @@ import 'component/widget__avatar.dart';
 import 'component/widget__friend_avatar.dart';
 import 'component/widget__gallery_grid.dart';
 import 'component/widget__placeholder.dart';
-import 'component/widget__round_icon.dart';
 import 'component/widget__section_title.dart';
 import 'component/widget__stats_card.dart';
 import 'component/select_friends_page.dart';
@@ -28,7 +27,7 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 6,
+      length: 4,
       child: Scaffold(
         backgroundColor: ColorName.softBg,
         body: NestedScrollView(
@@ -40,19 +39,47 @@ class _ProfilePageState extends State<ProfilePage> {
               surfaceTintColor: ColorName.white,
               elevation: 0,
               leading: IconButton(
-                icon: Icon(
-                  Icons.arrow_back,
-                  color: inner ? ColorName.black87 : ColorName.white,
-                ),
-                onPressed: () => Navigator.of(context).maybePop(),
+                icon: const Icon(Icons.arrow_back_ios_new_rounded,
+                    color: Color(0xFF9CA3AF), size: 22),
+                onPressed: () => AutoTabsRouter.of(context).setActiveIndex(0),
               ),
               actions: [
-                IconButton(
+                PopupMenuButton<String>(
                   icon: Icon(
                     Icons.more_horiz,
                     color: inner ? ColorName.black87 : ColorName.white,
                   ),
-                  onPressed: () {},
+                  onSelected: (value) async {
+                    if (value == 'logout') {
+                      final ok = await showDialog<bool>(
+                        context: context,
+                        builder: (ctx) => AlertDialog(
+                          title: const Text('Logout'),
+                          content: const Text('Are you sure logout?'),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.of(ctx).pop(false),
+                              child: const Text('Cancel'),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.of(ctx).pop(true),
+                              child: const Text('Logout'),
+                            ),
+                          ],
+                        ),
+                      );
+
+                      if (ok == true) {
+                        // TODO: Logic logout sau này
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Logged out')),
+                        );
+                      }
+                    }
+                  },
+                  itemBuilder: (ctx) => const [
+                    PopupMenuItem(value: 'logout', child: Text('Logout')),
+                  ],
                 ),
               ],
               flexibleSpace: FlexibleSpaceBar(
@@ -89,7 +116,7 @@ class _ProfilePageState extends State<ProfilePage> {
               bottom: PreferredSize(
                 preferredSize: const Size.fromHeight(_tabBarHeight),
                 child: Container(
-                  padding: const EdgeInsets.only(left: 0, right: 16),
+                  padding: const EdgeInsets.only(left: 8, right: 16),
                   color: ColorName.white,
                   child: const TabBar(
                     isScrollable: true,
@@ -98,14 +125,14 @@ class _ProfilePageState extends State<ProfilePage> {
                     indicatorColor: ColorName.black,
                     indicatorWeight: 2,
                     indicatorSize: TabBarIndicatorSize.label,
-                    labelPadding: EdgeInsets.symmetric(horizontal: 12),
+                    labelPadding: EdgeInsets.symmetric(horizontal: 20),
                     tabs: [
                       Tab(text: 'All'),
                       Tab(text: 'Post'),
                       Tab(text: 'Replies'),
                       Tab(text: 'Media'),
-                      Tab(text: 'About'),
-                      Tab(text: 'Setting'),
+                      // Tab(text: 'About'),
+                      // Tab(text: 'Setting'),
                     ],
                   ),
                 ),
@@ -118,8 +145,8 @@ class _ProfilePageState extends State<ProfilePage> {
               WidgetPlaceholder(text: 'Post'),
               WidgetPlaceholder(text: 'Replies'),
               WidgetPlaceholder(text: 'Media'),
-              WidgetPlaceholder(text: 'About'),
-              WidgetPlaceholder(text: 'Setting'),
+              // WidgetPlaceholder(text: 'About'),
+              // WidgetPlaceholder(text: 'Setting'),
             ],
           ),
         ),
@@ -192,11 +219,6 @@ class _ProfileCard extends StatelessWidget {
                   top: -avatarRadius,
                   child: Center(child: WidgetAvatar(radius: avatarRadius)),
                 ),
-                const Positioned(
-                  right: 16,
-                  top: 16,
-                  child: WidgetRoundIcon(icon: Icons.grid_view_rounded),
-                ),
               ],
             ),
           ),
@@ -246,7 +268,9 @@ class _ProfileCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 8),
                       InkWell(
-                        onTap: () {},
+                        onTap: () {
+                          // TODO: xử lý mở trang cài đặt sau
+                        },
                         child: Container(
                           width: 42,
                           height: 42,
@@ -255,9 +279,9 @@ class _ProfileCard extends StatelessWidget {
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: const Icon(
-                            Icons.send_rounded,
+                            Icons.settings_rounded,
                             color: ColorName.mint,
-                            size: 20,
+                            size: 22,
                           ),
                         ),
                       ),

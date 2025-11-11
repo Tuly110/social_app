@@ -39,16 +39,31 @@ class _SelectFriendsPageState extends State<SelectFriendsPage> {
       appBar: AppBar(
         backgroundColor: ColorName.white,
         surfaceTintColor: ColorName.white,
-        title: const Text('Select friends',
-            style: TextStyle(fontWeight: FontWeight.w700)),
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: ColorName.black87,
+          ),
+          onPressed: () => Navigator.of(context).maybePop(),
+          tooltip: 'Back',
+        ),
+        title: const Text(
+          'Select friends',
+          style: TextStyle(fontWeight: FontWeight.w700),
+        ),
         centerTitle: true,
         actions: [
           TextButton.icon(
             onPressed: _toggleAll,
-            icon: Icon(_allSelected
-                ? Icons.check_circle
-                : Icons.radio_button_unchecked),
-            label: Text(_allSelected ? 'Deselect all' : 'Select all'),
+            icon: Icon(
+              _allSelected ? Icons.check_circle : Icons.radio_button_unchecked,
+              color: ColorName.mint,
+            ),
+            label: Text(
+              _allSelected ? 'Deselect all' : 'Select all',
+              style: const TextStyle(color: ColorName.mint),
+            ),
           ),
         ],
       ),
@@ -71,7 +86,6 @@ class _SelectFriendsPageState extends State<SelectFriendsPage> {
               ),
             ),
           ),
-
           Expanded(
             child: ListView.separated(
               itemCount: _friends.length,
@@ -81,9 +95,13 @@ class _SelectFriendsPageState extends State<SelectFriendsPage> {
                 final selected = _selected.contains(index);
                 return ListTile(
                   leading: CircleAvatar(
-                      backgroundImage: NetworkImage(f.avatar), radius: 24),
-                  title: Text(f.name,
-                      style: const TextStyle(fontWeight: FontWeight.w600)),
+                    backgroundImage: NetworkImage(f.avatar),
+                    radius: 24,
+                  ),
+                  title: Text(
+                    f.name,
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
                   subtitle: Text('${f.friendsCount} friends'),
                   trailing: Checkbox(
                     value: selected,
@@ -114,7 +132,8 @@ class _SelectFriendsPageState extends State<SelectFriendsPage> {
                 backgroundColor: ColorName.mint,
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14)),
+                  borderRadius: BorderRadius.circular(14),
+                ),
               ),
               onPressed: () => Navigator.of(context).pop(), // demo UI
               child: Text('Done (${_selected.length})'),
@@ -130,6 +149,9 @@ class _Friend {
   final String name;
   final String avatar;
   final int friendsCount;
-  _Friend(
-      {required this.name, required this.avatar, required this.friendsCount});
+  _Friend({
+    required this.name,
+    required this.avatar,
+    required this.friendsCount,
+  });
 }
