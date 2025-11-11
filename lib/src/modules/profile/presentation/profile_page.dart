@@ -1,6 +1,5 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-
 // 🔹 Import các component tái sử dụng
 import '../../../../generated/colors.gen.dart';
 import 'component/widget__avatar.dart';
@@ -118,28 +117,6 @@ class _ProfilePageState extends State<ProfilePage> {
               WidgetPlaceholder(text: 'Replies'),
               WidgetPlaceholder(text: 'Media'),
               WidgetPlaceholder(text: 'About'),
-            ],
-          ),
-        ),
-        bottomNavigationBar: Theme(
-          data: Theme.of(context).copyWith(
-            splashColor: Colors.transparent,
-            highlightColor: Colors.transparent,
-          ),
-          child: BottomNavigationBar(
-            type: BottomNavigationBarType.fixed,
-            backgroundColor: ColorName.mint,
-            selectedItemColor: ColorName.white,
-            unselectedItemColor: ColorName.white.withOpacity(0.7),
-            items: const [
-              BottomNavigationBarItem(icon: Icon(Icons.home_filled), label: ''),
-              BottomNavigationBarItem(icon: Icon(Icons.search), label: ''),
-              BottomNavigationBarItem(icon: Icon(Icons.create), label: ''),
-              BottomNavigationBarItem(
-                  icon: Icon(Icons.chat_bubble_outline), label: ''),
-              BottomNavigationBarItem(
-                  icon: Icon(Icons.notifications), label: ''),
-              BottomNavigationBarItem(icon: Icon(Icons.person), label: ''),
             ],
           ),
         ),
@@ -324,9 +301,6 @@ class _AllTab extends StatelessWidget {
           ],
         ),
         SizedBox(height: 16),
-
-        // 🔥 Giữ nguyên bố cục 2 cột: Stats bên trái + Gallery bên phải
-        // để không thay đổi giao diện bạn đã chụp trước đó
         _TwoColumnStatsAndGallery(),
       ],
     );

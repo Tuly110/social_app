@@ -1,7 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-
 import '../../../../../generated/colors.gen.dart';
 import 'widgets/post_list.dart';
 
@@ -13,7 +12,8 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin {
+class _HomePageState extends State<HomePage>
+    with SingleTickerProviderStateMixin {
   int _currentIndex = 0;
   late TabController _tabController;
 
@@ -47,14 +47,14 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
         ),
         actions: [
           IconButton(
-            icon: const FaIcon(FontAwesomeIcons.magnifyingGlass, color: Colors.black),
+            icon: const FaIcon(FontAwesomeIcons.magnifyingGlass,
+                color: Colors.black),
             onPressed: () {},
           ),
           IconButton(
             icon: const FaIcon(FontAwesomeIcons.bell, color: Colors.black),
             onPressed: () {},
           ),
-
         ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(48),
@@ -90,74 +90,6 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
           PostList(),
         ],
       ),
-      bottomNavigationBar: _buildBottomNavigationBar(),
     );
-  }
-
-  Widget _buildBottomNavigationBar() {
-    return Container(
-      decoration: BoxDecoration(
-        border: Border(
-          top: BorderSide(color: ColorName.borderLight, width: 0.5),
-        ),
-      ),
-      child: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-        backgroundColor: ColorName.navBackground,
-        selectedItemColor: ColorName.textGray,
-        unselectedItemColor: Colors.white,
-        type: BottomNavigationBarType.fixed,
-        showSelectedLabels: true,
-        showUnselectedLabels: true,
-        selectedLabelStyle: TextStyle(
-          color: ColorName.textGray,
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
-        ),
-        unselectedLabelStyle: TextStyle(
-          color: Colors.white,
-          fontSize: 12,
-          fontWeight: FontWeight.w400,
-        ),
-        items: const [
-          BottomNavigationBarItem(
-            icon: FaIcon(FontAwesomeIcons.house),
-            activeIcon: FaIcon(FontAwesomeIcons.house),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: FaIcon(FontAwesomeIcons.magnifyingGlass),
-            activeIcon: FaIcon(FontAwesomeIcons.magnifyingGlass),
-            label: 'Explore',
-          ),
-          BottomNavigationBarItem(
-            icon: FaIcon(FontAwesomeIcons.squarePlus),
-            activeIcon: FaIcon(FontAwesomeIcons.squarePlus),
-            label: 'New Post',
-          ),
-          BottomNavigationBarItem(
-            icon: FaIcon(FontAwesomeIcons.envelope),
-            activeIcon: FaIcon(FontAwesomeIcons.envelope),
-            label: 'Messages',
-          ),
-          BottomNavigationBarItem(
-            icon: FaIcon(FontAwesomeIcons.bell),
-            activeIcon: FaIcon(FontAwesomeIcons.bell),
-            label: 'Notifications',
-          ),
-          BottomNavigationBarItem(
-            icon: FaIcon(FontAwesomeIcons.user),
-            activeIcon: FaIcon(FontAwesomeIcons.user),
-            label: 'Profile',
-          ),
-        ],
-      ),
-    );
-
   }
 }
