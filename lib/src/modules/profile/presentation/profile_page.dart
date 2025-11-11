@@ -9,6 +9,7 @@ import 'component/widget__placeholder.dart';
 import 'component/widget__round_icon.dart';
 import 'component/widget__section_title.dart';
 import 'component/widget__stats_card.dart';
+import 'component/select_friends_page.dart';
 
 @RoutePage()
 class ProfilePage extends StatefulWidget {
@@ -27,7 +28,7 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 5,
+      length: 6,
       child: Scaffold(
         backgroundColor: ColorName.softBg,
         body: NestedScrollView(
@@ -88,7 +89,7 @@ class _ProfilePageState extends State<ProfilePage> {
               bottom: PreferredSize(
                 preferredSize: const Size.fromHeight(_tabBarHeight),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  padding: const EdgeInsets.only(left: 0, right: 16),
                   color: ColorName.white,
                   child: const TabBar(
                     isScrollable: true,
@@ -104,6 +105,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       Tab(text: 'Replies'),
                       Tab(text: 'Media'),
                       Tab(text: 'About'),
+                      Tab(text: 'Setting'),
                     ],
                   ),
                 ),
@@ -117,6 +119,7 @@ class _ProfilePageState extends State<ProfilePage> {
               WidgetPlaceholder(text: 'Replies'),
               WidgetPlaceholder(text: 'Media'),
               WidgetPlaceholder(text: 'About'),
+              WidgetPlaceholder(text: 'Setting'),
             ],
           ),
         ),
@@ -278,36 +281,51 @@ class _AllTab extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 24, 16, 100),
-      children: const [
-        WidgetSectionTitle('Friends'),
-        SizedBox(height: 8),
+      children: [
+        const WidgetSectionTitle('Friends'),
+        const SizedBox(height: 8),
+
+        // Dãy avatar + nút 3 chấm
         Row(
           children: [
-            WidgetFriendAvatar(
+            const WidgetFriendAvatar(
               'https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=200',
             ),
-            SizedBox(width: 10),
-            WidgetFriendAvatar(
+            const SizedBox(width: 10),
+            const WidgetFriendAvatar(
               'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=200',
             ),
-            SizedBox(width: 10),
-            WidgetFriendAvatar(
+            const SizedBox(width: 10),
+            const WidgetFriendAvatar(
               'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=200',
             ),
-            SizedBox(width: 10),
-            WidgetFriendAvatar(
+            const SizedBox(width: 10),
+            const WidgetFriendAvatar(
               'https://images.unsplash.com/photo-1520813792240-56fc4a3765a7?w=200',
+            ),
+
+            const Spacer(),
+
+            // Nút 3 chấm → mở trang chọn bạn bè
+            IconButton(
+              icon: const Icon(Icons.more_horiz),
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const SelectFriendsPage()),
+                );
+              },
+              tooltip: 'All friends',
             ),
           ],
         ),
-        SizedBox(height: 16),
-        _TwoColumnStatsAndGallery(),
+
+        const SizedBox(height: 16),
+        const _TwoColumnStatsAndGallery(),
       ],
     );
   }
 }
 
-/// Tách khối layout 2 cột ra để gọn hơn phần trên
 class _TwoColumnStatsAndGallery extends StatelessWidget {
   const _TwoColumnStatsAndGallery();
 
