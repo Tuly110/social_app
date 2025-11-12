@@ -8,6 +8,7 @@ class PostData {
   final int shares;
   final bool isLiked;
   final bool isReposted;
+  final bool isPublic;
   final bool showThread;
 
   const PostData({
@@ -20,6 +21,7 @@ class PostData {
     required this.shares,
     required this.isLiked,
     required this.isReposted,
+    required this.isPublic,
     this.showThread = false,
   });
 
@@ -33,6 +35,7 @@ class PostData {
     int? shares,
     bool? isLiked,
     bool? isReposted,
+    bool? isPublic,
     bool? showThread,
   }) {
     return PostData(
@@ -45,6 +48,7 @@ class PostData {
       shares: shares ?? this.shares,
       isLiked: isLiked ?? this.isLiked,
       isReposted: isReposted ?? this.isReposted,
+      isPublic: isPublic ?? this.isPublic,
       showThread: showThread ?? this.showThread,
     );
   }
