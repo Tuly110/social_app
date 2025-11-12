@@ -40,10 +40,6 @@ class _SignupPageState extends State<SignupPage> {
             if (!mounted) return;
             state.whenOrNull(
               authenticated: (userId) {
-                // showToastWidget(
-                //   ToastWidget(title: 'Success', description: 'Sign up successful!'),
-                //   duration: const Duration(seconds: 2),
-                // );
                 context.router.replaceAll([const HomeRoute()]);
               },
               pendingVerification: (email) {

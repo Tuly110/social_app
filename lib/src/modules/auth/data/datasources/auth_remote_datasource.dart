@@ -136,25 +136,6 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDataSource{
   @override
   Future<UserEntity> signUp({required String email, required String password}) async {
     try {
-      try {
-        // Check email exist
-        final authResponse = await supabaseClient.auth.signInWithPassword(
-          email: email,
-          password: 'dummy_password', 
-        );
-        
-        // No exception, email exist
-        throw "Email already registered. Please sign in instead.";
-      } on AuthException catch (e) {
-        if (!e.message.toLowerCase().contains('invalid login credentials')) {
-          if (e.message.toLowerCase().contains('email') || 
-              e.message.toLowerCase().contains('user')) {
-            throw "Email already registered. Please sign in instead.";
-          }
-          rethrow;
-        }
-
-      }
       
       final AuthResponse response = await supabaseClient.auth.signUp(
         password: password,
@@ -163,27 +144,55 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDataSource{
         emailRedirectTo: 'fau.socialapp://login-callback',
       );
 
+      if (response.user?.identities == null || response.user!.identities!.isEmpty) {
+        throw Exception("Email already registered. Please sign in instead.");
+      }
+
       if (response.user?.identities != null && response.user!.identities!.isNotEmpty) {
         final providers = response.user!.identities!.map((i) => i.provider).toList();
         
         if (providers.contains('google')) {
-          throw "Email already registered with Google. Please sign in with Google instead.";
+          throw Exception("Email already registered with Google. Please sign in with Google instead.");
         }
       }
 
+      if (response.user == null) {
+        throw Exception("Sign up failed - no user created");
+      }
+
       return UserEntity(
-        id: response.user?.id ?? 'pending-verification',
+        id: response.user!.id,
         email: email,
         username: email.split('@')[0],
         avatarUrl: null,
-        isEmailVerified: false,
+        isEmailVerified: response.user?.emailConfirmedAt != null,
       );
-    } on AuthException catch (e) {
-      if (e.message.contains('already registered') || e.message.contains('user_exists')) {
-        throw "Email already registered. Please sign in instead or use forgot password.";
-      }
-      rethrow;
       
+    } on AuthException catch (e) {
+
+      
+      String errorMessage;
+      
+      if (e.message.contains('already registered') || 
+          e.message.contains('user_exists') ||
+          e.message.contains('user_already_exists') ||
+          e.message.contains('email_already_in_use')) {
+        errorMessage = "Email already registered. Please sign in instead.";
+      } 
+      else if (e.message.contains('invalid_email')) {
+        errorMessage = "Invalid email format.";
+      }
+      else if (e.message.contains('weak_password')) {
+        errorMessage = "Password is too weak. Please choose a stronger password.";
+      }
+      else {
+        errorMessage = "Sign up failed: ${e.message}";
+      }
+      
+      throw Exception(errorMessage);
+      
+    } catch (e) {
+      throw Exception("Sign up failed: ${e.toString()}");
     }
   }
 

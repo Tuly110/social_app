@@ -1,20 +1,19 @@
-
-
 // 🔹 Import các component tái sử dụng
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../generated/colors.gen.dart';
+import '../../app/app_router.dart';
 import '../../auth/presentation/cubit/auth_cubit.dart';
 import '../../auth/presentation/cubit/auth_state.dart';
+import 'component/select_friends_page.dart';
 import 'component/widget__avatar.dart';
 import 'component/widget__friend_avatar.dart';
 import 'component/widget__gallery_grid.dart';
 import 'component/widget__placeholder.dart';
 import 'component/widget__section_title.dart';
 import 'component/widget__stats_card.dart';
-import 'component/select_friends_page.dart';
 
 @RoutePage()
 class ProfilePage extends StatefulWidget {
@@ -32,132 +31,150 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 4,
-      child: Scaffold(
-        backgroundColor: ColorName.softBg,
-        body: NestedScrollView(
-          headerSliverBuilder: (context, inner) => [
-            SliverAppBar(
-              pinned: true,
-              expandedHeight: _expandedHeight,
-              backgroundColor: ColorName.white,
-              surfaceTintColor: ColorName.white,
-              elevation: 0,
-              leading: IconButton(
-                icon: const Icon(Icons.arrow_back_ios_new_rounded,
-                    color: Color(0xFF9CA3AF), size: 22),
-                onPressed: () => AutoTabsRouter.of(context).setActiveIndex(0),
-              ),
-              actions: [
-                PopupMenuButton<String>(
-                  icon: Icon(
-                    Icons.more_horiz,
-                    color: inner ? ColorName.black87 : ColorName.white,
-                  ),
-                  onSelected: (value) async {
-                    if (value == 'logout') {
-                      final ok = await showDialog<bool>(
-                        context: context,
-                        builder: (ctx) => AlertDialog(
-                          title: const Text('Logout'),
-                          content: const Text('Are you sure logout?'),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.of(ctx).pop(false),
-                              child: const Text('Cancel'),
-                            ),
-                            TextButton(
-                              onPressed: () => Navigator.of(ctx).pop(true),
-                              child: const Text('Logout'),
-                            ),
-                          ],
-                        ),
-                      );
+    return BlocListener<AuthCubit, AuthState>(
+      listener: (context, state){
+        state.whenOrNull(
+           unauthenticated: (emailError, passwordError, errorMessage, isEmailValid, isPasswordValid) {
 
-                      if (ok == true) {
-                        // TODO: Logic logout sau này
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Logged out')),
+            context.router.replaceAll([const LoginRoute()]);
+          },
+          loading: () {
+
+            AuthState.loading();
+          },
+          failure: (message) {
+
+            AuthState.failure(message);
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(message)),
+            );
+          },);
+      },
+      child: DefaultTabController(
+        length: 4,
+        child: Scaffold(
+          backgroundColor: ColorName.softBg,
+          body: NestedScrollView(
+            headerSliverBuilder: (context, inner) => [
+              SliverAppBar(
+                pinned: true,
+                expandedHeight: _expandedHeight,
+                backgroundColor: ColorName.white,
+                surfaceTintColor: ColorName.white,
+                elevation: 0,
+                leading: IconButton(
+                  icon: const Icon(Icons.arrow_back_ios_new_rounded,
+                      color: Color(0xFF9CA3AF), size: 22),
+                  onPressed: () => AutoTabsRouter.of(context).setActiveIndex(0),
+                ),
+                actions: [
+                  PopupMenuButton<String>(
+                    icon: Icon(
+                      Icons.more_horiz,
+                      color: inner ? ColorName.black87 : ColorName.white,
+                    ),
+                    onSelected: (value) async {
+                      if (value == 'logout') {
+                        final ok = await showDialog<bool>(
+                          context: context,
+                          builder: (ctx) => AlertDialog(
+                            title: const Text('Logout'),
+                            content: const Text('Are you sure logout?'),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.of(ctx).pop(false),
+                                child: const Text('Cancel'),
+                              ),
+                              TextButton(
+                                onPressed: () => Navigator.of(ctx).pop(true),
+                                child: const Text('Logout'),
+                              ),
+                            ],
+                          ),
                         );
+
+                        if (ok == true) {
+                          context.read<AuthCubit>().signOut();
+                        }
                       }
-                    }
-                  },
-                  itemBuilder: (ctx) => const [
-                    PopupMenuItem(value: 'logout', child: Text('Logout')),
-                  ],
-                ),
-              ],
-              flexibleSpace: FlexibleSpaceBar(
-                background: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    Image.network(
-                      'https://images.unsplash.com/photo-1495562569060-2eec283d3391?q=80&w=1600&auto=format&fit=crop',
-                      fit: BoxFit.cover,
-                    ),
-                    const DecoratedBox(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [Colors.transparent, ColorName.black26],
+                    },
+                    itemBuilder: (ctx) => const [
+                      PopupMenuItem(value: 'logout', child: Text('Logout')),
+                    ],
+                  ),
+                ],
+                flexibleSpace: FlexibleSpaceBar(
+                  background: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      Image.network(
+                        'https://images.unsplash.com/photo-1495562569060-2eec283d3391?q=80&w=1600&auto=format&fit=crop',
+                        fit: BoxFit.cover,
+                      ),
+                      const DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [Colors.transparent, ColorName.black26],
+                          ),
                         ),
                       ),
-                    ),
-                    Align(
-                      alignment: Alignment.bottomCenter,
-                      child: Padding(
-                        padding: EdgeInsets.only(
-                          left: _horizontalMargin,
-                          right: _horizontalMargin,
-                          bottom: _avatarRadius - 6,
+                      Align(
+                        alignment: Alignment.bottomCenter,
+                        child: Padding(
+                          padding: EdgeInsets.only(
+                            left: _horizontalMargin,
+                            right: _horizontalMargin,
+                            bottom: _avatarRadius - 6,
+                          ),
+                          child: _ProfileCard(avatarRadius: _avatarRadius),
                         ),
-                        child: _ProfileCard(avatarRadius: _avatarRadius),
                       ),
-                    ),
-                  ],
-                ),
-              ),
-              bottom: PreferredSize(
-                preferredSize: const Size.fromHeight(_tabBarHeight),
-                child: Container(
-                  padding: const EdgeInsets.only(left: 8, right: 16),
-                  color: ColorName.white,
-                  child: const TabBar(
-                    isScrollable: true,
-                    labelColor: ColorName.black,
-                    unselectedLabelColor: ColorName.black54,
-                    indicatorColor: ColorName.black,
-                    indicatorWeight: 2,
-                    indicatorSize: TabBarIndicatorSize.label,
-                    labelPadding: EdgeInsets.symmetric(horizontal: 20),
-                    tabs: [
-                      Tab(text: 'All'),
-                      Tab(text: 'Post'),
-                      Tab(text: 'Replies'),
-                      Tab(text: 'Media'),
-                      // Tab(text: 'About'),
-                      // Tab(text: 'Setting'),
                     ],
                   ),
                 ),
+                bottom: PreferredSize(
+                  preferredSize: const Size.fromHeight(_tabBarHeight),
+                  child: Container(
+                    padding: const EdgeInsets.only(left: 8, right: 16),
+                    color: ColorName.white,
+                    child: const TabBar(
+                      isScrollable: true,
+                      labelColor: ColorName.black,
+                      unselectedLabelColor: ColorName.black54,
+                      indicatorColor: ColorName.black,
+                      indicatorWeight: 2,
+                      indicatorSize: TabBarIndicatorSize.label,
+                      labelPadding: EdgeInsets.symmetric(horizontal: 20),
+                      tabs: [
+                        Tab(text: 'All'),
+                        Tab(text: 'Post'),
+                        Tab(text: 'Replies'),
+                        Tab(text: 'Media'),
+                        // Tab(text: 'About'),
+                        // Tab(text: 'Setting'),
+                      ],
+                    ),
+                  ),
+                ),
               ),
-            ),
-          ],
-          body: const TabBarView(
-            children: [
-              _AllTab(),
-              WidgetPlaceholder(text: 'Post'),
-              WidgetPlaceholder(text: 'Replies'),
-              WidgetPlaceholder(text: 'Media'),
-              // WidgetPlaceholder(text: 'About'),
-              // WidgetPlaceholder(text: 'Setting'),
             ],
+            body: const TabBarView(
+              children: [
+                _AllTab(),
+                WidgetPlaceholder(text: 'Post'),
+                WidgetPlaceholder(text: 'Replies'),
+                WidgetPlaceholder(text: 'Media'),
+                // WidgetPlaceholder(text: 'About'),
+                // WidgetPlaceholder(text: 'Setting'),
+              ],
+            ),
           ),
         ),
       ),
     );
+    
   }
 }
 
@@ -171,22 +188,11 @@ class _ProfileCard extends StatelessWidget {
     final double nameBlockHeight =
         (2 * avatarRadius) + nameBlockTopPadding + 10;
 
-    return BlocBuilder<AuthCubit, AuthState>(builder: (context, state){
+    return BlocBuilder<AuthCubit, AuthState>(builder: (context, state) {
       print('state current in profile page: $state');
       final user = state.maybeWhen(
-        userInfoLoaded: (user) => user, orElse: () => null);
-      // if (user == null) {
-      //     final supabaseUser = Supabase.instance.client.auth.currentUser;
-      //     if (supabaseUser != null) {
-      //       user = UserEntity(
-      //         id: supabaseUser.id,
-      //         email: supabaseUser.email ?? '',
-      //         username: supabaseUser.userMetadata?['username'] ?? 
-      //                  supabaseUser.userMetadata?['name'] ?? 
-      //                  (supabaseUser.email?.split('@').first ?? 'User'),
-      //       );
-      //     }
-      //   }
+          userInfoLoaded: (user) => user, orElse: () => null);
+
       return Container(
         margin: const EdgeInsets.only(bottom: 0),
         padding: const EdgeInsets.only(bottom: 24),
@@ -210,6 +216,7 @@ class _ProfileCard extends StatelessWidget {
               child: Stack(
                 clipBehavior: Clip.none,
                 children: [
+                  // FIX: ĐÃ SỬA LỖI NGOẶC Ở ĐÂY
                   Positioned(
                     left: 0,
                     right: 0,
@@ -235,14 +242,14 @@ class _ProfileCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                ),
-                Positioned(
-                  left: 0,
-                  right: 0,
-                  top: -avatarRadius,
-                  child: Center(child: WidgetAvatar(radius: avatarRadius)),
-                ),
-              ],
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    top: -avatarRadius,
+                    child: Center(child: WidgetAvatar(radius: avatarRadius)),
+                  ),
+                ],
+              ),
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
@@ -288,23 +295,23 @@ class _ProfileCard extends StatelessWidget {
                             ),
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                      InkWell(
-                        onTap: () {
-                          // TODO: xử lý mở trang cài đặt sau
-                        },
-                        child: Container(
-                          width: 42,
-                          height: 42,
-                          decoration: BoxDecoration(
-                            color: ColorName.mint.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: const Icon(
-                            Icons.settings_rounded,
-                            color: ColorName.mint,
-                            size: 22,
+                        const SizedBox(width: 8),
+                        InkWell(
+                          onTap: () {
+                            // TODO: xử lý mở trang cài đặt sau
+                          },
+                          child: Container(
+                            width: 42,
+                            height: 42,
+                            decoration: BoxDecoration(
+                              color: ColorName.mint.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Icon(
+                              Icons.settings_rounded,
+                              color: ColorName.mint,
+                              size: 22,
+                            ),
                           ),
                         ),
                       ],
