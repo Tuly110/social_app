@@ -246,7 +246,7 @@ class AuthCubit extends Cubit<AuthState> {
             emit(AuthState.failure(failure.message));
         },
         
-        (_) => null,
+        (_) => emit(const AuthState.unauthenticated()),
         );
     }
     
