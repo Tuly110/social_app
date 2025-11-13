@@ -13,6 +13,7 @@ import '../notice/presentation/notice_page.dart';
 import '../profile/presentation/profile_page.dart';
 import '../profile/presentation/user_profile_page.dart';
 import '../splash_screen/presentation/splash_screen_page.dart';
+import '../setting/presentation/setting_page.dart';
 import 'tabs_shell_page.dart';
 
 part 'app_router.gr.dart';
@@ -40,5 +41,6 @@ class AppRouter extends _$AppRouter {
         AutoRoute(page: UserProfileRoute.page, path: '/user/:username'),
         AutoRoute(page: ChatDetailRoute.page, path: '/chats/:id'),
         AutoRoute(page: UpdatePasswordRoute.page, path: '/updatepassword'),
+        AutoRoute(page: SettingsRoute.page, path: '/setting'),
       ];
 }
