@@ -13,6 +13,7 @@ class TabsShellPage extends StatelessWidget {
     return AutoTabsScaffold(
       routes: [
         HomeRoute(),
+        SearchRoute(),
         CreatePostRoute(),
         ChatRoute(),
         NoticeRoute(),
@@ -22,19 +23,7 @@ class TabsShellPage extends StatelessWidget {
         return WidgetBottomNav(
           currentIndex: _externalIndexFromInternal(tabsRouter.activeIndex),
           onTap: (i) {
-            if (i == 1) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Search coming soon!')),
-              );
-              return;
-            }
-            // if (i == 2) {
-            //   showModalBottomSheet(
-            //     context: context,
-            //     builder: (_) => const _NewPostSheet(),
-            //   );
-            //   return;
-            // }
+                        
             tabsRouter.setActiveIndex(_internalIndexFromExternal(i));
           },
         );
@@ -45,10 +34,11 @@ class TabsShellPage extends StatelessWidget {
 
 int _internalIndexFromExternal(int external) {
   if (external <= 0) return 0; // Home
-  if (external == 2) return 1; // NewPost
-  if (external == 3) return 2; // Chat
-  if (external == 4) return 3; // Notice
-  if (external >= 5) return 4; // Profile
+  if (external == 1) return 1; // Search
+  if (external == 2) return 2; // NewPost
+  if (external == 3) return 3; // Chat
+  if (external == 4) return 4; // Notice
+  if (external >= 5) return 5; // Profile
   return 0;
 }
 
@@ -57,29 +47,17 @@ int _externalIndexFromInternal(int internal) {
     case 0:
       return 0; // Home
     case 1: 
+      return 1; //Search  
+    case 2: 
       return 2; //NewPost
-    case 2:
-      return 3; // Chat
     case 3:
-      return 4; // Notice
+      return 3; // Chat
     case 4:
+      return 4; // Notice
+    case 5:
       return 5; // Profile
     default:
       return 0;
   }
 }
 
-// // ===== Demo sheet cho nút Add =====
-// class _NewPostSheet extends StatelessWidget {
-//   const _NewPostSheet();
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return SafeArea(
-//       child: SizedBox(
-//         height: 220,
-//         child: Center(child: Text('Compose new post here')),
-//       ),
-//     );
-//   }
-// }

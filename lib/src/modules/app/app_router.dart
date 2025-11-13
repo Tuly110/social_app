@@ -7,6 +7,7 @@ import '../auth/presentation/signup/signup_page.dart';
 import '../chat/presentation/chat_detail_page.dart';
 import '../chat/presentation/chats_page.dart';
 import '../home/presentation/home_page.dart';
+import '../search/presentation/search_page.dart';
 import '../newpost/presentation/create_post_page.dart';
 import '../notice/presentation/notice_page.dart';
 import '../profile/presentation/profile_page.dart';
@@ -27,6 +28,7 @@ class AppRouter extends _$AppRouter {
           path: '/app',
           children: [
             AutoRoute(page: HomeRoute.page, path: 'home', initial: true),
+            AutoRoute(page: SearchRoute.page, path: 'search'),
             AutoRoute(page: CreatePostRoute.page, path: 'newpost'),
             AutoRoute(page: ChatRoute.page, path: 'chat'),
             AutoRoute(page: NoticeRoute.page, path: 'notice'),
