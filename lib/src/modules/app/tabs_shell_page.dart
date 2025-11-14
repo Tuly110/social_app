@@ -13,6 +13,7 @@ class TabsShellPage extends StatelessWidget {
     return AutoTabsScaffold(
       routes: [
         HomeRoute(),
+        CreatePostRoute(),
         ChatRoute(),
         NoticeRoute(),
         ProfileRoute(),
@@ -27,13 +28,13 @@ class TabsShellPage extends StatelessWidget {
               );
               return;
             }
-            if (i == 2) {
-              showModalBottomSheet(
-                context: context,
-                builder: (_) => const _NewPostSheet(),
-              );
-              return;
-            }
+            // if (i == 2) {
+            //   showModalBottomSheet(
+            //     context: context,
+            //     builder: (_) => const _NewPostSheet(),
+            //   );
+            //   return;
+            // }
             tabsRouter.setActiveIndex(_internalIndexFromExternal(i));
           },
         );
@@ -44,9 +45,10 @@ class TabsShellPage extends StatelessWidget {
 
 int _internalIndexFromExternal(int external) {
   if (external <= 0) return 0; // Home
-  if (external == 3) return 1; // Chat
-  if (external == 4) return 2; // Notice
-  if (external >= 5) return 3; // Profile
+  if (external == 2) return 1; // NewPost
+  if (external == 3) return 2; // Chat
+  if (external == 4) return 3; // Notice
+  if (external >= 5) return 4; // Profile
   return 0;
 }
 
@@ -54,28 +56,30 @@ int _externalIndexFromInternal(int internal) {
   switch (internal) {
     case 0:
       return 0; // Home
-    case 1:
-      return 3; // Chat
+    case 1: 
+      return 2; //NewPost
     case 2:
-      return 4; // Notice
+      return 3; // Chat
     case 3:
+      return 4; // Notice
+    case 4:
       return 5; // Profile
     default:
       return 0;
   }
 }
 
-// ===== Demo sheet cho nút Add =====
-class _NewPostSheet extends StatelessWidget {
-  const _NewPostSheet();
+// // ===== Demo sheet cho nút Add =====
+// class _NewPostSheet extends StatelessWidget {
+//   const _NewPostSheet();
 
-  @override
-  Widget build(BuildContext context) {
-    return SafeArea(
-      child: SizedBox(
-        height: 220,
-        child: Center(child: Text('Compose new post here')),
-      ),
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return SafeArea(
+//       child: SizedBox(
+//         height: 220,
+//         child: Center(child: Text('Compose new post here')),
+//       ),
+//     );
+//   }
+// }
