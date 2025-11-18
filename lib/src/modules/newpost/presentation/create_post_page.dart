@@ -4,9 +4,8 @@ import 'package:flutter/material.dart';
 import '../../../../generated/colors.gen.dart';
 import 'models/post_data.dart';
 import 'widgets/create_post_app_bar.dart';
-import 'widgets/post_content_field.dart';
 import 'widgets/post_action_bar.dart';
-import 'widgets/privacy_selector.dart';
+import 'widgets/post_content_field.dart';
 
 @RoutePage()
 class CreatePostPage extends StatefulWidget {
@@ -22,10 +21,10 @@ class _CreatePostPageState extends State<CreatePostPage> {
   int _characterCount = 0;
   final int _maxCharacters = 280;
   bool _isPublic = true;
+  bool _isFriend = true;
 
   // Mock user data
   final String _currentUsername = 'abcde';
-  final String _currentHandle = '@abcde';
 
   @override
   void initState() {
@@ -62,7 +61,6 @@ class _CreatePostPageState extends State<CreatePostPage> {
     // Create new post
     final newPost = PostData(
       username: _currentUsername,
-      handle: _currentHandle,
       time: 'Now',
       content: content,
       likes: 0,
@@ -119,7 +117,18 @@ class _CreatePostPageState extends State<CreatePostPage> {
 
   void _togglePrivacy() {
     setState(() {
-      _isPublic = !_isPublic;
+      if (_isPublic) {
+        _isPublic = false; 
+        _isFriend = true; 
+      } 
+      else if (_isFriend) {
+        _isFriend = false; 
+
+      } 
+      else {
+        _isPublic = true;  
+        _isFriend = true; 
+      }
     });
   }
 
@@ -144,11 +153,11 @@ class _CreatePostPageState extends State<CreatePostPage> {
                 postController: _postController,
                 focusNode: _focusNode,
                 currentUsername: _currentUsername,
-                currentHandle: _currentHandle,
                 isPublic: _isPublic,
                 onPrivacyChanged: _togglePrivacy,
                 characterCount: _characterCount,
-                maxCharacters: _maxCharacters,
+                maxCharacters: _maxCharacters, 
+                isFriends: _isFriend,
               ),
             ),
           ),

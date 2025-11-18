@@ -2,16 +2,31 @@ import 'package:flutter/material.dart';
 
 class PrivacySelector extends StatelessWidget {
   final bool isPublic;
+  final bool isFriends;
   final VoidCallback onPrivacyChanged;
 
   const PrivacySelector({
     super.key,
     required this.isPublic,
-    required this.onPrivacyChanged,
+    required this.onPrivacyChanged, 
+    required this.isFriends,
   });
 
   @override
   Widget build(BuildContext context) {
+    String visibilityText;
+    IconData iconData; // Thêm biến cho Icon
+
+    if (isPublic) {
+      visibilityText = 'Public';
+      iconData = Icons.public; 
+    } else if (isFriends) {
+      visibilityText = 'Friends';
+      iconData = Icons.people_outline; 
+    } else { 
+      visibilityText = 'Private';
+      iconData = Icons.lock_outline;
+    }
     return GestureDetector(
       onTap: onPrivacyChanged,
       child: Container(
@@ -31,13 +46,13 @@ class PrivacySelector extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
-              isPublic ? Icons.public : Icons.lock_outline,
+              iconData,
               size: 14,
               color: Colors.grey[600],
             ),
             const SizedBox(width: 4),
             Text(
-              isPublic ? 'Public' : 'Private',
+              visibilityText,
               style: TextStyle(
                 color: Colors.grey[600],
                 fontSize: 12,

@@ -14,37 +14,6 @@ class NoticePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final noticesAll = <NoticeItem>[
-      NoticeItem(
-        title: 'User 1',
-        message: 'liked your post',
-        time: '10:02',
-        unread: true,
-        avatarUrl: 'https://i.pravatar.cc/80?img=1',
-      ),
-      NoticeItem(
-        title: 'User 2',
-        message: 'commented: "Nice work!"',
-        time: '09:47',
-        avatarUrl: 'https://i.pravatar.cc/80?img=2',
-      ),
-      NoticeItem(
-        title: 'System',
-        message: 'Your password was changed',
-        time: 'Yesterday',
-        icon: Icons.shield_outlined,
-      ),
-    ];
-
-    final noticesMention = <NoticeItem>[
-      NoticeItem(
-        title: 'Minh Man',
-        message: 'mentioned you in a post',
-        time: '3m ago',
-        avatarUrl: 'https://i.pravatar.cc/80?img=3',
-        unread: true,
-      ),
-    ];
 
     return DefaultTabController(
       length: 3, // Activity, All, Mention
