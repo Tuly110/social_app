@@ -43,7 +43,16 @@ class _LoginPageState extends State<LoginPage> {
           listener: (context, state) {
             state.whenOrNull(
               authenticated: (userId) {
-                showToastWidget(
+                final cubit = context.read<AuthCubit>();
+                final token = cubit.accessToken;
+                final refreshToken = cubit.refreshToken;
+                
+                print('🔑 LOGIN SUCCESS - TOKEN INFO:');
+                print('   Access Token: $token');
+                print('   Refresh Token: $refreshToken');
+                print('   Token Length: ${token?.length}');
+                print('   User ID: $userId');
+                showToastWidget(  
                   ToastWidget(title: 'Success', description: 'Login successful!'),
                   duration: const Duration(seconds: 2),
                 );

@@ -124,6 +124,9 @@ class AuthCubit extends Cubit<AuthState> {
         }
     }
 
+    String? get accessToken => Supabase.instance.client.auth.currentSession?.accessToken;
+    String? get refreshToken => Supabase.instance.client.auth.currentSession?.refreshToken;
+
     Future<void> signIn({required String email, required String password}) async {
 
         final emailValid = validateEmail(email);
