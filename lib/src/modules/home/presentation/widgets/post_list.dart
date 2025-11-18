@@ -14,7 +14,6 @@ class _PostListState extends State<PostList> {
   final List<PostData> _posts = [
     PostData(
       username: 'abc',
-      handle: '@abcne',
       time: '12h',
       content: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard? #TellMeAboutYou',
       likes: 28,
@@ -22,11 +21,11 @@ class _PostListState extends State<PostList> {
       shares: 21,
       isLiked: true,
       isReposted: false,
+      isPublic: false,
       showThread: true,
     ),
     PostData(
       username: 'xyz',
-      handle: '@xyz123',
       time: '3h',
       content: 'Hello là xin chào. #Hello',
       likes: 46,
@@ -34,10 +33,10 @@ class _PostListState extends State<PostList> {
       shares: 363,
       isLiked: true,
       isReposted: true,
+      isPublic: true,
     ),
     PostData(
       username: 'student',
-      handle: '@student1',
       time: '14h',
       content: 'Kobe\'s passing is really sticking w/ me in a way I didn\'t expect.\n\nHe was an icon, the kind of person who wouldn\'t die this way. My wife compared it to Princess Di\'s accident.\n\nBut the end can happen for anyone at any time, & I can\'t help but think of anything else lately.',
       likes: 7,
@@ -45,10 +44,10 @@ class _PostListState extends State<PostList> {
       shares: 11,
       isLiked: false,
       isReposted: false,
+      isPublic: true,
     ),
     PostData(
       username: 'karennne',
-      handle: '@karennne',
       time: '10h',
       content: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text over since the 1500s.',
       likes: 0,
@@ -56,6 +55,7 @@ class _PostListState extends State<PostList> {
       shares: 0,
       isLiked: false,
       isReposted: false,
+      isPublic: true,
     ),
   ];
 

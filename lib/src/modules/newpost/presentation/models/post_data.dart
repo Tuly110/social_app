@@ -25,7 +25,6 @@ class PostData {
 
   PostData copyWith({
     String? username,
-    String? handle,
     String? time,
     String? content,
     int? likes,

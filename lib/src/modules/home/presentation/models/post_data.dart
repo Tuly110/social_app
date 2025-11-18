@@ -1,6 +1,5 @@
 class PostData {
   final String username;
-  final String handle;
   final String time;
   final String content;
   final int likes;
@@ -8,11 +7,11 @@ class PostData {
   final int shares;
   final bool isLiked;
   final bool isReposted;
+  final bool isPublic;
   final bool showThread;
 
   const PostData({
     required this.username,
-    required this.handle,
     required this.time,
     required this.content,
     required this.likes,
@@ -20,12 +19,12 @@ class PostData {
     required this.shares,
     required this.isLiked,
     required this.isReposted,
+    required this.isPublic,
     this.showThread = false,
   });
 
   PostData copyWith({
     String? username,
-    String? handle,
     String? time,
     String? content,
     int? likes,
@@ -33,11 +32,11 @@ class PostData {
     int? shares,
     bool? isLiked,
     bool? isReposted,
+    bool? isPublic,
     bool? showThread,
   }) {
     return PostData(
       username: username ?? this.username,
-      handle: handle ?? this.handle,
       time: time ?? this.time,
       content: content ?? this.content,
       likes: likes ?? this.likes,
@@ -45,6 +44,7 @@ class PostData {
       shares: shares ?? this.shares,
       isLiked: isLiked ?? this.isLiked,
       isReposted: isReposted ?? this.isReposted,
+      isPublic: isPublic ?? this.isPublic,
       showThread: showThread ?? this.showThread,
     );
   }

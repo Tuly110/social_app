@@ -298,7 +298,7 @@ class _ProfileCard extends StatelessWidget {
                         const SizedBox(width: 8),
                         InkWell(
                           onTap: () {
-                            // TODO: xử lý mở trang cài đặt sau
+                            context.router.replace(const SettingsRoute());
                           },
                           child: Container(
                             width: 42,
