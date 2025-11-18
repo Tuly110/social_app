@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
-import '../../../../../generated/colors.gen.dart';
 
-import 'user_avatar.dart';
+import '../../../../../generated/colors.gen.dart';
 import 'privacy_selector.dart';
+import 'user_avatar.dart';
 
 class PostContentField extends StatelessWidget {
   final TextEditingController postController;
   final FocusNode focusNode;
   final String currentUsername;
-  final String currentHandle;
   final bool isPublic;
+  final bool isFriends;
   final VoidCallback onPrivacyChanged;
   final int characterCount;
   final int maxCharacters;
@@ -19,8 +19,8 @@ class PostContentField extends StatelessWidget {
     required this.postController,
     required this.focusNode,
     required this.currentUsername,
-    required this.currentHandle,
     required this.isPublic,
+    required this.isFriends,
     required this.onPrivacyChanged,
     required this.characterCount,
     required this.maxCharacters,
@@ -55,20 +55,15 @@ class PostContentField extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 6),
-                      Text(
-                        currentHandle,
-                        style: TextStyle(
-                          color: ColorName.textGray,
-                          fontSize: 14,
-                        ),
-                      ),
+                      
                     ],
                   ),
                   const SizedBox(height: 4),
                   // Privacy selector
                   PrivacySelector(
                     isPublic: isPublic,
-                    onPrivacyChanged: onPrivacyChanged,
+                    onPrivacyChanged: onPrivacyChanged, 
+                    isFriends: isFriends,
                   ),
                   const SizedBox(height: 8),
                   // Text field
