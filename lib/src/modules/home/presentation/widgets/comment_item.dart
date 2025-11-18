@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import '../../../../../generated/colors.gen.dart';
+
 import '../models/comment_data.dart';
 import 'like_button.dart';
 
@@ -30,7 +33,7 @@ class CommentItem extends StatelessWidget {
             width: 32,
             height: 32,
             decoration: BoxDecoration(
-              color: const Color(0xFF1D9BF0),
+              color: ColorName.mint,
               borderRadius: BorderRadius.circular(16),
             ),
             child: Center(
@@ -60,13 +63,7 @@ class CommentItem extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 4),
-                    Text(
-                      '${comment.handle} · ${comment.time}',
-                      style: const TextStyle(
-                        color: Colors.grey,
-                        fontSize: 12,
-                      ),
-                    ),
+                    
                   ],
                 ),
                 const SizedBox(height: 4),

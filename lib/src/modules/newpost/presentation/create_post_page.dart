@@ -62,7 +62,6 @@ class _CreatePostPageState extends State<CreatePostPage> {
     // Create new post
     final newPost = PostData(
       username: _currentUsername,
-      handle: _currentHandle,
       time: 'Now',
       content: content,
       likes: 0,

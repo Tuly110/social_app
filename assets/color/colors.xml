@@ -49,7 +49,7 @@
     <color name="border_light">#E5E5E5</color>
     <color name="border_dark">#2F3336</color>
     <!-- State Colors -->
-    <color name="like_red">#FF0000</color>
-    <color name="repost_green">#00FF00</color>
-    <color name="heart_red">#FF0000</color>
+    <color name="like_red">#fa7d7d</color>
+    <color name="repost_green">#b2e8b0</color>
+    <color name="heart_red">#fa7d7d</color>
 </resources> 

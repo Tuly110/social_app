@@ -14,7 +14,6 @@ class SearchResultsList extends StatelessWidget {
   List<PostData> get _searchResults => [
     PostData(
       username: 'tech_guru',
-      handle: '@techguru',
       time: '2h',
       content: 'Just built an amazing Flutter app with the new features! #Flutter #Dart',
       likes: 245,
@@ -22,10 +21,11 @@ class SearchResultsList extends StatelessWidget {
       shares: 12,
       isLiked: false,
       isReposted: false,
+      isPublic: true,
+
     ),
     PostData(
       username: 'flutter_dev',
-      handle: '@flutterdev',
       time: '4h',
       content: 'Anyone else excited about the Flutter 3.0 release? The performance improvements are incredible!',
       likes: 567,
@@ -33,10 +33,10 @@ class SearchResultsList extends StatelessWidget {
       shares: 45,
       isLiked: true,
       isReposted: false,
+      isPublic: true,
     ),
     PostData(
       username: 'coding_wizard',
-      handle: '@codingwizard',
       time: '6h',
       content: 'Working on a new social media app with Flutter. The hot reload feature is a game-changer!',
       likes: 123,
@@ -44,6 +44,7 @@ class SearchResultsList extends StatelessWidget {
       shares: 8,
       isLiked: false,
       isReposted: true,
+      isPublic: true,
     ),
   ];
 
