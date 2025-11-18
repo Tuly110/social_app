@@ -4,9 +4,8 @@ import 'package:flutter/material.dart';
 import '../../../../generated/colors.gen.dart';
 import 'models/post_data.dart';
 import 'widgets/create_post_app_bar.dart';
-import 'widgets/post_content_field.dart';
 import 'widgets/post_action_bar.dart';
-import 'widgets/privacy_selector.dart';
+import 'widgets/post_content_field.dart';
 
 @RoutePage()
 class CreatePostPage extends StatefulWidget {
