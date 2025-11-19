@@ -33,16 +33,21 @@ class AuthRepositoryImpl implements AuthRepository {
     return authRemoteDataSource.signInWithGoogle();
   }
 
+
   @override
-  Future<Either<Failure, UserEntity>> signUp({required String email, required String password}) async{
-    try{
+  Future<Either<Failure, UserEntity>> signUp({required String email, required String password}) async {
+    try {
+      
+
       final userEntity = await authRemoteDataSource.signUp(email: email, password: password);
       return Right(userEntity);
-    }on Exception catch(e){
+    } on Exception catch(e) {
       print('Repository Exception: ${e.toString()}');
-      return Left(ServerFailure(e.toString()));
+      
+          return Left(AuthFailure(e.toString()));
     }
   }
+
 
   @override
   Future<Either<Failure, void>> signOut() async{
@@ -88,6 +93,16 @@ class AuthRepositoryImpl implements AuthRepository {
     try{
       await authRemoteDataSource.updatePassword(newPassword: newPassword);
       return Right(null);
+    }catch(e){
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+  
+  @override
+  Future<Either<Failure, UserEntity>> getUserInfo() async {
+    try{
+      final user = await authRemoteDataSource.getUserInfo();
+      return Right(user);
     }catch(e){
       return Left(ServerFailure(e.toString()));
     }

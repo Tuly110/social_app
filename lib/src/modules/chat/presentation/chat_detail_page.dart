@@ -1,11 +1,10 @@
+// lib/src/modules/chat/presentation/chat_detail_page.dart
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-
 import '../../../../generated/colors.gen.dart';
 import 'component/widget__chat_input.dart';
 import 'component/widget__messages_list.dart';
 import 'model/message_model.dart';
-
 
 @RoutePage()
 class ChatDetailPage extends StatelessWidget {
@@ -13,7 +12,7 @@ class ChatDetailPage extends StatelessWidget {
   final String userAvatarUrl;
 
   const ChatDetailPage({
-    super.key,
+    // super.key,  // ❶ BỎ DÒNG NÀY
     this.userName = 'xyz',
     this.userAvatarUrl =
         'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200',
@@ -42,31 +41,24 @@ class ChatDetailPage extends StatelessWidget {
           icon: const Icon(Icons.arrow_back, color: ColorName.black87),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: Text(
-          userName,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            color: ColorName.black87,
-          ),
-        ),
+        title: Text(userName,
+            style: const TextStyle(
+                fontWeight: FontWeight.bold, color: ColorName.black87)),
         centerTitle: true,
-        actions: [
-          const Padding(
-            padding: EdgeInsets.only(right: 16.0),
-            child: CircleAvatar(
-              radius: 16,
-            ),
-          ),
+        actions: const [
+          Padding(
+              padding: EdgeInsets.only(right: 16.0),
+              child: CircleAvatar(radius: 16))
         ],
       ),
       body: Column(
         children: [
-          Expanded(child: WidgetMessagesList(messages: messages)),
-          WidgetChatInput(
-            onSend: (text) {
-              // TODO: handle send logic
-            },
-          ),
+          Expanded(
+              child: WidgetMessagesList(messages: [
+            Message(text: 'Hello', isMe: false),
+            // ...
+          ])),
+          WidgetChatInput(onSend: (text) {}),
         ],
       ),
     );

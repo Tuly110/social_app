@@ -28,7 +28,6 @@ class _CommentsPageState extends State<CommentsPage> {
   final List<CommentData> _comments = [
     CommentData(
       username: 'user1',
-      handle: '@user1',
       time: '2h',
       content: 'Great post! I totally agree with this.',
       likes: 5,
@@ -36,7 +35,6 @@ class _CommentsPageState extends State<CommentsPage> {
     ),
     CommentData(
       username: 'user2',
-      handle: '@user2',
       time: '1h',
       content: 'Thanks for sharing this information!',
       likes: 3,
@@ -44,7 +42,6 @@ class _CommentsPageState extends State<CommentsPage> {
     ),
     CommentData(
       username: 'user3',
-      handle: '@user3',
       time: '30m',
       content: 'This is very helpful, thank you!',
       likes: 1,
@@ -130,13 +127,7 @@ class _CommentsPageState extends State<CommentsPage> {
                             ),
                           ),
                           const SizedBox(width: 4),
-                          Text(
-                            '${widget.post.handle} · ${widget.post.time}',
-                            style: TextStyle(
-                              color: ColorName.textGray,
-                              fontSize: 14,
-                            ),
-                          ),
+                          
                         ],
                       ),
                       const SizedBox(height: 4),

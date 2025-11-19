@@ -40,7 +40,7 @@ class PostItem extends StatelessWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: ColorName.primaryBlue,
+              color: ColorName.mint,
               borderRadius: BorderRadius.circular(20),
             ),
             child: Center(
@@ -59,7 +59,7 @@ class PostItem extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Header with username, handle, time
+                // Header with username, time
                 Row(
 =======
           Row(
@@ -132,10 +132,18 @@ class PostItem extends StatelessWidget {
                     ),
 <<<<<<< Updated upstream
                     const SizedBox(width: 4),
+                    // Placeholder cho private/public
+                    Icon(
+                      postData.isPublic ? Icons.public : Icons.lock_outline,
+                      size: 14,
+                      color: Colors.grey.shade600,
+                    ),
+                    const SizedBox(width: 4),
                     Text(
-                      '${postData.handle} · ${postData.time}',
+                      postData.time,
                       style: TextStyle(
-                        color: ColorName.textGray,
+                        color: ColorName.textBlack,
+                        fontWeight: FontWeight.bold,
                         fontSize: 14,
 =======
                     const SizedBox(height: 12),
@@ -197,7 +205,7 @@ class PostItem extends StatelessWidget {
                     child: Text(
                       'Show this thread',
                       style: TextStyle(
-                        color: ColorName.primaryBlue,
+                        color: ColorName.mint,
                         fontSize: 14,
                       ),
                     ),

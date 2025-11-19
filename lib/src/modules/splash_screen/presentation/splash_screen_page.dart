@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -18,89 +20,84 @@ class SplashScreenPage extends StatefulWidget {
 }
 
 class _SplashScreenPageState extends State<SplashScreenPage> {
-
+  StreamSubscription? _authSubscription;
+  bool _hasNavigated = false; 
 
   @override
   void initState() {
     super.initState();
-    navigateHome();
+    _setupAuthListener();
   }
-  void navigateHome() async {
-    await Future.delayed(const Duration(seconds: 3));
+
+  void _setupAuthListener() {
+    final authCubit = context.read<AuthCubit>();
+
+    _checkAuthState(authCubit.state);
     
-if (!mounted) return;
-    final supabase = context.read<AuthCubit>().supabaseClient;
-    final currentSession = supabase.auth.currentSession;
-
-    // Nếu user đang trong flow reset password (có access token đặc biệt)
-    if (currentSession?.user != null &&
-        currentSession?.user.email != null &&
-        currentSession!.user.emailConfirmedAt == null) {
-      // Chuyển sang trang cập nhật mật khẩu
-      if (!mounted) return;
-      context.router.replace(const UpdatePasswordRoute());
-      return;
-    }
-
-    // Nếu user đã login
-    if (currentSession?.user != null) {
-      if (!mounted) return;
-      context.router.replace(const HomeRoute());
-      return;
-    }
-
-    // Mặc định quay lại trang login
-    if (!mounted) return;
-    context.router.replace(const LoginRoute());
-  
+    _authSubscription = authCubit.stream.listen((state) {
+      if (!_hasNavigated) { 
+        _checkAuthState(state);
+      }
+    });
   }
+
+  void _checkAuthState(AuthState state) {
+    if (_hasNavigated) return; 
+    
+    state.maybeWhen(
+      authenticated: (_) {
+        _hasNavigated = true;
+        context.router.replace(const HomeRoute());
+      },
+      passwordRecovery: () {
+        _hasNavigated = true;
+        context.router.replace(const UpdatePasswordRoute());
+      },
+      unauthenticated: (_, __, ___, ____, _____) {
+        _hasNavigated = true;
+        context.router.replace(const LoginRoute());
+      },
+      orElse: () {
+        // Fallback sau 3 giây
+        Future.delayed(const Duration(seconds: 3), () {
+          if (!mounted || _hasNavigated) return;
+          _hasNavigated = true;
+          context.router.replace(const LoginRoute());
+        });
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    _authSubscription?.cancel(); //cancel subscription
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: ColorName.background,
-      body: BlocListener<AuthCubit, AuthState>(
-        listener: (context, state) {
-          state.maybeWhen(
-            authenticated: (_) {
-              context.router.replace(const HomeRoute());
-            },
-            unauthenticated: (_, __, ___, ____, _____) {
-              context.router.replace(const LoginRoute());
-            },
-            passwordRecovery: () {
-              // ✅ Khi Supabase phát hiện user click link reset password
-              context.router.replace(const UpdatePasswordRoute());
-            },
-            orElse: () {},
-          );
-        },
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Center(
-              child: Assets.authImages.splash.image(
-                width: 250.w,
-                height: 250.h,
-              ),
+            Assets.authImages.splash.image(
+              width: 250.w,
+              height: 250.h,
             ),
-            Center(
-              child: Text( 
-                'City Life',
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  color: ColorName.textSplash,
-                  fontWeight: FontWeight.bold,fontSize: 35.sp,
-                  fontFamily: 'Asimovian'
-                ),
+            Text(
+              'City Life',
+              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                color: ColorName.textSplash,
+                fontWeight: FontWeight.bold,
+                fontSize: 35.sp,
+                fontFamily: 'Asimovian'
               ),
             ),
           ],
         ),
-        )
-      )
+      ),
     );
-    
   }
 }

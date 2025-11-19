@@ -8,45 +8,12 @@ import 'component/widget__notice_app_bar.dart';
 import 'component/widget__notice_list.dart';
 import 'model/notice_model.dart';
 
-
 @RoutePage()
 class NoticePage extends StatelessWidget {
   const NoticePage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Data mẫu cho tab All/Mention (dùng lại model NoticeItem bạn đang có)
-    final noticesAll = <NoticeItem>[
-      NoticeItem(
-        title: 'User 1',
-        message: 'liked your post',
-        time: '10:02',
-        unread: true,
-        avatarUrl: 'https://i.pravatar.cc/80?img=1',
-      ),
-      NoticeItem(
-        title: 'User 2',
-        message: 'commented: "Nice work!"',
-        time: '09:47',
-        avatarUrl: 'https://i.pravatar.cc/80?img=2',
-      ),
-      NoticeItem(
-        title: 'System',
-        message: 'Your password was changed',
-        time: 'Yesterday',
-        icon: Icons.shield_outlined,
-      ),
-    ];
-
-    final noticesMention = <NoticeItem>[
-      NoticeItem(
-        title: 'Minh Man',
-        message: 'mentioned you in a post',
-        time: '3m ago',
-        avatarUrl: 'https://i.pravatar.cc/80?img=3',
-        unread: true,
-      ),
-    ];
 
     return DefaultTabController(
       length: 3, // Activity, All, Mention
@@ -94,7 +61,6 @@ class _NoticeTabViews extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Có thể lấy data thực từ Provider/BLoC thay vì hard-code
     final noticesAll = <NoticeItem>[
       NoticeItem(
         title: 'User 1',
@@ -129,13 +95,8 @@ class _NoticeTabViews extends StatelessWidget {
 
     return TabBarView(
       children: [
-        // 1) Activity - khôi phục layout gốc: Today/This week + RightContent
         const WidgetNoticeActivityTab(),
-
-        // 2) All - dùng lại list tile đã tách
         SafeArea(child: WidgetNoticeList(items: noticesAll)),
-
-        // 3) Mention - dùng lại list tile đã tách
         SafeArea(child: WidgetNoticeList(items: noticesMention)),
       ],
     );

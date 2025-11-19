@@ -1,17 +1,20 @@
+// lib/src/modules/app/app_router.dart
 import 'package:auto_route/auto_route.dart';
-import 'package:flutter/material.dart';
 import 'package:injectable/injectable.dart';
-
 import '../auth/presentation/login/login_page.dart';
 import '../auth/presentation/reset_password/update_password_page.dart';
 import '../auth/presentation/signup/signup_page.dart';
 import '../chat/presentation/chat_detail_page.dart';
 import '../chat/presentation/chats_page.dart';
 import '../home/presentation/home_page.dart';
+import '../search/presentation/search_page.dart';
+import '../newpost/presentation/create_post_page.dart';
 import '../notice/presentation/notice_page.dart';
 import '../profile/presentation/profile_page.dart';
 import '../profile/presentation/user_profile_page.dart';
 import '../splash_screen/presentation/splash_screen_page.dart';
+import '../setting/presentation/setting_page.dart';
+import 'tabs_shell_page.dart';
 
 part 'app_router.gr.dart';
 
@@ -20,7 +23,6 @@ part 'app_router.gr.dart';
 class AppRouter extends _$AppRouter {
   @override
   List<AutoRoute> get routes => [
-<<<<<<< Updated upstream
     AutoRoute(page: SplashScreenRoute.page, path: '/', initial: true),
     AutoRoute(page: HomeRoute.page, path: '/home'),
     AutoRoute(page: LoginRoute.page, path: '/login'),
@@ -32,7 +34,6 @@ class AppRouter extends _$AppRouter {
     AutoRoute(page: ChatDetailRoute.page, path: '/chats/:id'),
     AutoRoute(page: NoticeRoute.page, path: '/notifications')
   ];
-=======
         AutoRoute(page: SplashScreenRoute.page, path: '/', initial: true),
         AutoRoute(
           page: TabsShellRoute.page,
@@ -52,7 +53,5 @@ class AppRouter extends _$AppRouter {
         AutoRoute(page: UpdatePasswordRoute.page, path: '/updatepassword'),
         AutoRoute(page: SettingsRoute.page, path: '/setting'),
         AutoRoute(page: SearchRoute.page, path: '/search'),
-
       ];
->>>>>>> Stashed changes
 }

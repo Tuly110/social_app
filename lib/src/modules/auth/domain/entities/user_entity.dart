@@ -10,6 +10,8 @@ class UserEntity with _$UserEntity {
     required String email,
     String? avatarUrl,
     @Default(true) isEmailVerified,
+    String? accessToken,
+    String? refreshToken,
   }) = $_UserEntity;
    factory UserEntity.fromJson(Map<String, dynamic> json) => _$UserEntityFromJson(json);
 }

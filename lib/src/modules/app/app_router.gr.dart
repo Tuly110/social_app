@@ -21,7 +21,6 @@ abstract class _$AppRouter extends RootStackRouter {
       return AutoRoutePage<dynamic>(
         routeData: routeData,
         child: ChatDetailPage(
-          key: args.key,
           userName: args.userName,
           userAvatarUrl: args.userAvatarUrl,
         ),
@@ -31,6 +30,12 @@ abstract class _$AppRouter extends RootStackRouter {
       return AutoRoutePage<dynamic>(
         routeData: routeData,
         child: const ChatPage(),
+      );
+    },
+    CreatePostRoute.name: (routeData) {
+      return AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: const CreatePostPage(),
       );
     },
     HomeRoute.name: (routeData) {
@@ -69,6 +74,12 @@ abstract class _$AppRouter extends RootStackRouter {
         child: const SplashScreenPage(),
       );
     },
+    TabsShellRoute.name: (routeData) {
+      return AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: const TabsShellPage(),
+      );
+    },
     UpdatePasswordRoute.name: (routeData) {
       return AutoRoutePage<dynamic>(
         routeData: routeData,
@@ -88,7 +99,6 @@ abstract class _$AppRouter extends RootStackRouter {
 /// [ChatDetailPage]
 class ChatDetailRoute extends PageRouteInfo<ChatDetailRouteArgs> {
   ChatDetailRoute({
-    Key? key,
     String userName = 'xyz',
     String userAvatarUrl =
         'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200',
@@ -96,7 +106,6 @@ class ChatDetailRoute extends PageRouteInfo<ChatDetailRouteArgs> {
   }) : super(
           ChatDetailRoute.name,
           args: ChatDetailRouteArgs(
-            key: key,
             userName: userName,
             userAvatarUrl: userAvatarUrl,
           ),
@@ -111,13 +120,10 @@ class ChatDetailRoute extends PageRouteInfo<ChatDetailRouteArgs> {
 
 class ChatDetailRouteArgs {
   const ChatDetailRouteArgs({
-    this.key,
     this.userName = 'xyz',
     this.userAvatarUrl =
         'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200',
   });
-
-  final Key? key;
 
   final String userName;
 
@@ -125,7 +131,7 @@ class ChatDetailRouteArgs {
 
   @override
   String toString() {
-    return 'ChatDetailRouteArgs{key: $key, userName: $userName, userAvatarUrl: $userAvatarUrl}';
+    return 'ChatDetailRouteArgs{userName: $userName, userAvatarUrl: $userAvatarUrl}';
   }
 }
 
@@ -139,6 +145,20 @@ class ChatRoute extends PageRouteInfo<void> {
         );
 
   static const String name = 'ChatRoute';
+
+  static const PageInfo<void> page = PageInfo<void>(name);
+}
+
+/// generated route for
+/// [CreatePostPage]
+class CreatePostRoute extends PageRouteInfo<void> {
+  const CreatePostRoute({List<PageRouteInfo>? children})
+      : super(
+          CreatePostRoute.name,
+          initialChildren: children,
+        );
+
+  static const String name = 'CreatePostRoute';
 
   static const PageInfo<void> page = PageInfo<void>(name);
 }
@@ -223,6 +243,20 @@ class SplashScreenRoute extends PageRouteInfo<void> {
         );
 
   static const String name = 'SplashScreenRoute';
+
+  static const PageInfo<void> page = PageInfo<void>(name);
+}
+
+/// generated route for
+/// [TabsShellPage]
+class TabsShellRoute extends PageRouteInfo<void> {
+  const TabsShellRoute({List<PageRouteInfo>? children})
+      : super(
+          TabsShellRoute.name,
+          initialChildren: children,
+        );
+
+  static const String name = 'TabsShellRoute';
 
   static const PageInfo<void> page = PageInfo<void>(name);
 }

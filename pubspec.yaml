@@ -91,7 +91,6 @@ flutter:
   uses-material-design: true
   assets:
     - assets/auth_images/
-    - assets/app_images/
   fonts:
     - family: Poppins
       fonts: 

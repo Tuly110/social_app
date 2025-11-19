@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:auto_route/auto_route.dart';
 import '../../../../../generated/colors.gen.dart';
 
 class WidgetNoticeAppBar extends StatelessWidget
@@ -12,21 +12,41 @@ class WidgetNoticeAppBar extends StatelessWidget
       backgroundColor: ColorName.white,
       surfaceTintColor: ColorName.white,
       elevation: 0,
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back_ios_new_rounded,
+            color: ColorName.black54),
+        onPressed: () {
+          final r = context.router;
+
+          if (r.canPop()) {
+            r.pop();
+            return;
+          }
+
+          final parent = r.parent();
+          if (parent != null && parent.canPop()) {
+            parent.pop();
+            return;
+          }
+
+          try {
+            final tabs = AutoTabsRouter.of(context);
+            tabs.setActiveIndex(0);
+            return;
+          } catch (_) {}
+
+          final root = r.root;
+          root.popUntilRoot();
+          root.replaceNamed('/');
+        },
+        tooltip: 'Back',
+      ),
       title: const Text(
         'Notifications',
-        style: TextStyle(
-          fontWeight: FontWeight.bold,
-          color: ColorName.black87,
-        ),
+        style: TextStyle(fontWeight: FontWeight.bold, color: ColorName.black87),
       ),
       centerTitle: true,
-      actions: [
-        IconButton(
-          onPressed: () {},
-          icon: const Icon(Icons.settings_outlined, color: ColorName.black54),
-          tooltip: 'Settings',
-        ),
-      ],
+      actions: const [],
     );
   }
 
