@@ -20,6 +20,7 @@ part 'app_router.gr.dart';
 class AppRouter extends _$AppRouter {
   @override
   List<AutoRoute> get routes => [
+<<<<<<< Updated upstream
     AutoRoute(page: SplashScreenRoute.page, path: '/', initial: true),
     AutoRoute(page: HomeRoute.page, path: '/home'),
     AutoRoute(page: LoginRoute.page, path: '/login'),
@@ -31,4 +32,27 @@ class AppRouter extends _$AppRouter {
     AutoRoute(page: ChatDetailRoute.page, path: '/chats/:id'),
     AutoRoute(page: NoticeRoute.page, path: '/notifications')
   ];
+=======
+        AutoRoute(page: SplashScreenRoute.page, path: '/', initial: true),
+        AutoRoute(
+          page: TabsShellRoute.page,
+          path: '/app',
+          children: [
+            AutoRoute(page: HomeRoute.page, path: 'home', initial: true),
+            AutoRoute(page: ChatRoute.page, path: 'chat'),
+            AutoRoute(page: CreatePostRoute.page, path: 'newpost'),
+            AutoRoute(page: NoticeRoute.page, path: 'notice'),
+            AutoRoute(page: ProfileRoute.page, path: 'profile'),
+          ],
+        ),
+        AutoRoute(page: LoginRoute.page, path: '/login'),
+        AutoRoute(page: SignupRoute.page, path: '/signup'),
+        AutoRoute(page: UserProfileRoute.page, path: '/user/:username'),
+        AutoRoute(page: ChatDetailRoute.page, path: '/chats/:id'),
+        AutoRoute(page: UpdatePasswordRoute.page, path: '/updatepassword'),
+        AutoRoute(page: SettingsRoute.page, path: '/setting'),
+        AutoRoute(page: SearchRoute.page, path: '/search'),
+
+      ];
+>>>>>>> Stashed changes
 }
