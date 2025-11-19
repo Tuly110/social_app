@@ -29,7 +29,6 @@ class AppRouter extends _$AppRouter {
           path: '/app',
           children: [
             AutoRoute(page: HomeRoute.page, path: 'home', initial: true),
-            AutoRoute(page: SearchRoute.page, path: 'search'),
             AutoRoute(page: CreatePostRoute.page, path: 'newpost'),
             AutoRoute(page: ChatRoute.page, path: 'chat'),
             AutoRoute(page: NoticeRoute.page, path: 'notice'),
@@ -42,5 +41,6 @@ class AppRouter extends _$AppRouter {
         AutoRoute(page: ChatDetailRoute.page, path: '/chats/:id'),
         AutoRoute(page: UpdatePasswordRoute.page, path: '/updatepassword'),
         AutoRoute(page: SettingsRoute.page, path: '/setting'),
+        AutoRoute(page: SearchRoute.page, path: '/search'),
       ];
 }

@@ -72,7 +72,7 @@ class UserItem extends StatelessWidget {
               if (user.isVerified)
                 const FaIcon(
                   FontAwesomeIcons.solidCircleCheck,
-                  color: ColorName.primaryBlue,
+                  color: ColorName.mint,
                   size: 14,
                 ),
             ],
