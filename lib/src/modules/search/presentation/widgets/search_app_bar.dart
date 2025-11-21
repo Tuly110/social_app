@@ -8,6 +8,7 @@ class SearchAppBar extends StatelessWidget implements PreferredSizeWidget {
   final TabController tabController;
   final VoidCallback onClearSearch;
   final VoidCallback onPerformSearch;
+  final VoidCallback onBackPressed; 
 
   const SearchAppBar({
     super.key,
@@ -16,6 +17,7 @@ class SearchAppBar extends StatelessWidget implements PreferredSizeWidget {
     required this.tabController,
     required this.onClearSearch,
     required this.onPerformSearch,
+    required this.onBackPressed,
   });
 
   @override
@@ -77,6 +79,10 @@ class SearchAppBar extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       backgroundColor: ColorName.backgroundWhite,
       elevation: 1,
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back_ios_new_rounded),
+        onPressed: onBackPressed,
+      ),
       title: _buildSearchField(),
       bottom: TabBar(
         controller: tabController,

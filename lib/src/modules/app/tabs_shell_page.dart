@@ -14,7 +14,6 @@ class TabsShellPage extends StatelessWidget {
       routes: [
         HomeRoute(),
         SearchRoute(),
-        CreatePostRoute(),
         ChatRoute(),
         NoticeRoute(),
         ProfileRoute(),
@@ -34,11 +33,10 @@ class TabsShellPage extends StatelessWidget {
 
 int _internalIndexFromExternal(int external) {
   if (external <= 0) return 0; // Home
-  if (external == 1) return 1; // Search
+  if (external == 1) return 1; // Chat
   if (external == 2) return 2; // NewPost
-  if (external == 3) return 3; // Chat
-  if (external == 4) return 4; // Notice
-  if (external >= 5) return 5; // Profile
+  if (external == 3) return 4; // Notice
+  if (external >= 4) return 4; // Profile
   return 0;
 }
 
@@ -47,15 +45,13 @@ int _externalIndexFromInternal(int internal) {
     case 0:
       return 0; // Home
     case 1: 
-      return 1; //Search  
-    case 2: 
-      return 2; //NewPost
+      return 1; //Chat
+    case 2:
+      return 2; // NewPost
     case 3:
-      return 3; // Chat
+      return 3; // Notice
     case 4:
-      return 4; // Notice
-    case 5:
-      return 5; // Profile
+      return 4; // Profile
     default:
       return 0;
   }

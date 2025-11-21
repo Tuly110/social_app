@@ -1,6 +1,8 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:social_app/src/modules/app/app_router.dart';
+
 import '../../../../../generated/colors.gen.dart';
 import 'widgets/post_list.dart';
 
@@ -74,19 +76,27 @@ class _HomePageState extends State<HomePage>
             child: Row(
               children: [
                 IconButton(
+                  icon: const FaIcon(FontAwesomeIcons.magnifyingGlass, color: Colors.black, size: 20),
+                  onPressed: () {
+                    context.router.replace(const SearchRoute());
+                  },
+                ),
+                IconButton(
                   icon: const FaIcon(FontAwesomeIcons.bell, color: Colors.black, size: 20),
-                  onPressed: () {},
+                  onPressed: () {
+                    context.router.navigate(const NoticeRoute());
+                  },
                 ),
                 const SizedBox(width: 8),
                 GestureDetector(
                   onTap: () {
-                    //TODO route profile
+                    context.router.navigate(const ProfileRoute());
                   },
-                  child: const Icon(
-                    FontAwesomeIcons.userCircle,
-                    color: Colors.black,
-                    size: 24,
-                  ),
+                  child: CircleAvatar(
+                    radius: 16,
+                    // backgroundImage: NetworkImage(postData.avatarUrl),
+                    backgroundColor: ColorName.grey,
+                  )
                 ),
               ],
             ),
