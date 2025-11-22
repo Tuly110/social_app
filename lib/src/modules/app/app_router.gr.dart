@@ -38,6 +38,12 @@ abstract class _$AppRouter extends RootStackRouter {
         child: const CreatePostPage(),
       );
     },
+    EmptyShellRoute.name: (routeData) {
+      return AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: const EmptyShellPage(),
+      );
+    },
     HomeRoute.name: (routeData) {
       return AutoRoutePage<dynamic>(
         routeData: routeData,
@@ -84,12 +90,6 @@ abstract class _$AppRouter extends RootStackRouter {
       return AutoRoutePage<dynamic>(
         routeData: routeData,
         child: const SplashScreenPage(),
-      );
-    },
-    TabsShellRoute.name: (routeData) {
-      return AutoRoutePage<dynamic>(
-        routeData: routeData,
-        child: const TabsShellPage(),
       );
     },
     UpdatePasswordRoute.name: (routeData) {
@@ -171,6 +171,20 @@ class CreatePostRoute extends PageRouteInfo<void> {
         );
 
   static const String name = 'CreatePostRoute';
+
+  static const PageInfo<void> page = PageInfo<void>(name);
+}
+
+/// generated route for
+/// [EmptyShellPage]
+class EmptyShellRoute extends PageRouteInfo<void> {
+  const EmptyShellRoute({List<PageRouteInfo>? children})
+      : super(
+          EmptyShellRoute.name,
+          initialChildren: children,
+        );
+
+  static const String name = 'EmptyShellRoute';
 
   static const PageInfo<void> page = PageInfo<void>(name);
 }
@@ -283,20 +297,6 @@ class SplashScreenRoute extends PageRouteInfo<void> {
         );
 
   static const String name = 'SplashScreenRoute';
-
-  static const PageInfo<void> page = PageInfo<void>(name);
-}
-
-/// generated route for
-/// [TabsShellPage]
-class TabsShellRoute extends PageRouteInfo<void> {
-  const TabsShellRoute({List<PageRouteInfo>? children})
-      : super(
-          TabsShellRoute.name,
-          initialChildren: children,
-        );
-
-  static const String name = 'TabsShellRoute';
 
   static const PageInfo<void> page = PageInfo<void>(name);
 }
