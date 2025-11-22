@@ -52,11 +52,19 @@ analysis_benchmark.json
 .packages.generated
 
 # Generated
-lib/generated/
+
 *.freezed.dart
 *.g.dart
 *.gr.dart
 *.config.dart
+
+# Ignore build_runner generated files inside lib/generated
+lib/generated/*.g.dart
+lib/generated/*.gr.dart
+lib/generated/*.freezed.dart
+
+# Nhưng giữ lại file FlutterGen
+!lib/generated/*.gen.dart
 
 # Flutter/Dart/Pub related
 **/doc/api/

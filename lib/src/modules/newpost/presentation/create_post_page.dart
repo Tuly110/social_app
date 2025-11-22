@@ -142,7 +142,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
       appBar: CreatePostAppBar(
         canPost: canPost,
         onPostPressed: _createPost,
-        onBackPressed: () => AutoTabsRouter.of(context).setActiveIndex(0),
+         onBackPressed:() => context.router.pop() ,
       ),
       body: Column(
         children: [

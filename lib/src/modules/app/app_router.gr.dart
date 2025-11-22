@@ -38,6 +38,12 @@ abstract class _$AppRouter extends RootStackRouter {
         child: const CreatePostPage(),
       );
     },
+    EmptyShellRoute.name: (routeData) {
+      return AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: const EmptyShellPage(),
+      );
+    },
     HomeRoute.name: (routeData) {
       return AutoRoutePage<dynamic>(
         routeData: routeData,
@@ -62,6 +68,18 @@ abstract class _$AppRouter extends RootStackRouter {
         child: const ProfilePage(),
       );
     },
+    SearchRoute.name: (routeData) {
+      return AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: const SearchPage(),
+      );
+    },
+    SettingsRoute.name: (routeData) {
+      return AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: const SettingsPage(),
+      );
+    },
     SignupRoute.name: (routeData) {
       return AutoRoutePage<dynamic>(
         routeData: routeData,
@@ -72,12 +90,6 @@ abstract class _$AppRouter extends RootStackRouter {
       return AutoRoutePage<dynamic>(
         routeData: routeData,
         child: const SplashScreenPage(),
-      );
-    },
-    TabsShellRoute.name: (routeData) {
-      return AutoRoutePage<dynamic>(
-        routeData: routeData,
-        child: const TabsShellPage(),
       );
     },
     UpdatePasswordRoute.name: (routeData) {
@@ -164,6 +176,20 @@ class CreatePostRoute extends PageRouteInfo<void> {
 }
 
 /// generated route for
+/// [EmptyShellPage]
+class EmptyShellRoute extends PageRouteInfo<void> {
+  const EmptyShellRoute({List<PageRouteInfo>? children})
+      : super(
+          EmptyShellRoute.name,
+          initialChildren: children,
+        );
+
+  static const String name = 'EmptyShellRoute';
+
+  static const PageInfo<void> page = PageInfo<void>(name);
+}
+
+/// generated route for
 /// [HomePage]
 class HomeRoute extends PageRouteInfo<void> {
   const HomeRoute({List<PageRouteInfo>? children})
@@ -220,6 +246,34 @@ class ProfileRoute extends PageRouteInfo<void> {
 }
 
 /// generated route for
+/// [SearchPage]
+class SearchRoute extends PageRouteInfo<void> {
+  const SearchRoute({List<PageRouteInfo>? children})
+      : super(
+          SearchRoute.name,
+          initialChildren: children,
+        );
+
+  static const String name = 'SearchRoute';
+
+  static const PageInfo<void> page = PageInfo<void>(name);
+}
+
+/// generated route for
+/// [SettingsPage]
+class SettingsRoute extends PageRouteInfo<void> {
+  const SettingsRoute({List<PageRouteInfo>? children})
+      : super(
+          SettingsRoute.name,
+          initialChildren: children,
+        );
+
+  static const String name = 'SettingsRoute';
+
+  static const PageInfo<void> page = PageInfo<void>(name);
+}
+
+/// generated route for
 /// [SignupPage]
 class SignupRoute extends PageRouteInfo<void> {
   const SignupRoute({List<PageRouteInfo>? children})
@@ -243,20 +297,6 @@ class SplashScreenRoute extends PageRouteInfo<void> {
         );
 
   static const String name = 'SplashScreenRoute';
-
-  static const PageInfo<void> page = PageInfo<void>(name);
-}
-
-/// generated route for
-/// [TabsShellPage]
-class TabsShellRoute extends PageRouteInfo<void> {
-  const TabsShellRoute({List<PageRouteInfo>? children})
-      : super(
-          TabsShellRoute.name,
-          initialChildren: children,
-        );
-
-  static const String name = 'TabsShellRoute';
 
   static const PageInfo<void> page = PageInfo<void>(name);
 }
