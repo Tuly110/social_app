@@ -12,6 +12,7 @@ const SUPABASE_URL = "https://miagiyhyjpibwljojfbk.supabase.co" ;
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1pYWdpeWh5anBpYndsam9qZmJrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE1NzI2OTQsImV4cCI6MjA3NzE0ODY5NH0.QhfFq2EPuGjk730X7QJi2PR12HOKB42oA7XkC8FIIdo" ;
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  configLoading();
   await GetItUtils.setup();
   await Supabase.initialize(
       url: SUPABASE_URL,

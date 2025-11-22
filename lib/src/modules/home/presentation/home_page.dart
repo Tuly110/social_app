@@ -16,7 +16,6 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage>
     with SingleTickerProviderStateMixin {
-  int _currentIndex = 0;
   late TabController _tabController;
 
   @override
@@ -36,7 +35,7 @@ class _HomePageState extends State<HomePage>
     return Scaffold(
       appBar: AppBar(
         backgroundColor: ColorName.backgroundWhite,
-        elevation: 1,
+        // elevation: 1,
         title: RichText(
             text: TextSpan(
               style: TextStyle(

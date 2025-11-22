@@ -91,11 +91,11 @@ class ColorName {
   /// Color: #F0F0F0
   static const Color greyF0 = Color(0xFFF0F0F0);
 
-  /// Color: #FF0000
-  static const Color heartRed = Color(0xFFFF0000);
+  /// Color: #fa7d7d
+  static const Color heartRed = Color(0xFFFA7D7D);
 
-  /// Color: #FF0000
-  static const Color likeRed = Color(0xFFFF0000);
+  /// Color: #fa7d7d
+  static const Color likeRed = Color(0xFFFA7D7D);
 
   /// MaterialColor:
   ///   50: #FFFFEBE4
@@ -142,8 +142,8 @@ class ColorName {
   /// Color: #00FF00
   static const Color primaryGreen = Color(0xFF00FF00);
 
-  /// Color: #00FF00
-  static const Color repostGreen = Color(0xFF00FF00);
+  /// Color: #b2e8b0
+  static const Color repostGreen = Color(0xFFB2E8B0);
 
   /// Color: #F5F6F8
   static const Color softBg = Color(0xFFF5F6F8);
