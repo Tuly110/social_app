@@ -4,11 +4,11 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:social_app/src/modules/app/app_router.dart';
 
 import '../../../../generated/colors.gen.dart';
-import 'widgets/settings_app_bar.dart';
-import 'widgets/settings_section.dart';
-import 'widgets/settings_item.dart';
-import 'widgets/switch_settings_item.dart';
 import 'widgets/action_dialogs.dart';
+import 'widgets/settings_app_bar.dart';
+import 'widgets/settings_item.dart';
+import 'widgets/settings_section.dart';
+import 'widgets/switch_settings_item.dart';
 
 @RoutePage()
 class SettingsPage extends StatefulWidget {

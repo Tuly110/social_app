@@ -59,7 +59,9 @@ class PostItem extends StatelessWidget {
               ),
             ),
           ),
+
           const SizedBox(width: 12),
+
           // Content
           Expanded(
             child: Column(
@@ -137,7 +139,7 @@ class PostItem extends StatelessWidget {
                   ),
                 ),
 
-                // 🔽🔽🔽 THÊM ĐOẠN NÀY ĐỂ HIỂN THỊ ẢNH 🔽🔽🔽
+                // Hiển thị ảnh nếu có
                 if (postData.imageUrl != null &&
                     postData.imageUrl!.isNotEmpty) ...[
                   const SizedBox(height: 8),
@@ -146,7 +148,6 @@ class PostItem extends StatelessWidget {
                     child: Image.network(
                       postData.imageUrl!,
                       fit: BoxFit.cover,
-                      // Loading trong lúc tải ảnh
                       loadingBuilder: (context, child, loadingProgress) {
                         if (loadingProgress == null) return child;
                         return const SizedBox(
@@ -156,7 +157,6 @@ class PostItem extends StatelessWidget {
                           ),
                         );
                       },
-                      // Nếu lỗi tải ảnh
                       errorBuilder: (context, error, stackTrace) {
                         return const SizedBox(
                           height: 120,
@@ -184,6 +184,7 @@ class PostItem extends StatelessWidget {
                       ),
                     ),
                   ),
+
                 // Action buttons
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -215,4 +216,50 @@ class PostItem extends StatelessWidget {
       ),
     );
   }
+}
+
+void _showPostOptions(BuildContext context) {
+  showModalBottomSheet(
+    context: context,
+    builder: (BuildContext context) {
+      return SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.flag_outlined),
+              title: const Text('Report post'),
+              onTap: () {
+                Navigator.pop(context);
+                // TODO: Xử lý report post
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.notifications_off_outlined),
+              title: const Text('Mute this author'),
+              onTap: () {
+                Navigator.pop(context);
+                // TODO: Xử lý mute author
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.block),
+              title: const Text('Block this author'),
+              onTap: () {
+                Navigator.pop(context);
+                // TODO: Xử lý block author
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.link),
+              title: const Text('Copy link'),
+              onTap: () {
+                Navigator.pop(context);
+                // TODO: Xử lý copy link
+              },
+            ),
+          ],
+        ),
+      );
+    },
+  );
 }

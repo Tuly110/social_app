@@ -15,9 +15,8 @@ class WidgetBottomNav extends StatelessWidget {
   Widget build(BuildContext context) {
     const icons = <IconData>[
       Icons.home_rounded,
-      Icons.search_rounded,
-      Icons.add_box_rounded,
       Icons.chat_bubble_rounded,
+      Icons.add_box_rounded,
       Icons.notifications_rounded,
       Icons.person_rounded,
     ];

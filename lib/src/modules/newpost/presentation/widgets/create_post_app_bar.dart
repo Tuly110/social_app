@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../../../../generated/colors.gen.dart';
 class CreatePostAppBar extends StatelessWidget implements PreferredSizeWidget {
   final bool canPost;
@@ -22,8 +23,7 @@ class CreatePostAppBar extends StatelessWidget implements PreferredSizeWidget {
       elevation: 1,
       leading: IconButton(
         icon: const Icon(Icons.arrow_back_ios_new_rounded),
-        onPressed: onBackPressed,
-      ),
+        onPressed: onBackPressed ),
       title: Text(
         'Create Post',
         style: TextStyle(

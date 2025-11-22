@@ -18,7 +18,6 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage>
     with SingleTickerProviderStateMixin {
-  int _currentIndex = 0;
   late TabController _tabController;
 
   /// Token dùng để force rebuild PostList (đổi key)
@@ -56,7 +55,7 @@ class _HomePageState extends State<HomePage>
     return Scaffold(
       appBar: AppBar(
         backgroundColor: ColorName.backgroundWhite,
-        elevation: 1,
+        // elevation: 1,
         title: RichText(
           text: const TextSpan(
             style: TextStyle(
@@ -96,26 +95,29 @@ class _HomePageState extends State<HomePage>
             child: Row(
               children: [
                 IconButton(
-                  icon: const FaIcon(
-                    FontAwesomeIcons.bell,
-                    color: Colors.black,
-                    size: 20,
-                  ),
+                  icon: const FaIcon(FontAwesomeIcons.magnifyingGlass,
+                      color: Colors.black, size: 20),
                   onPressed: () {
-                    // TODO: route notification
+                    context.router.replace(const SearchRoute());
+                  },
+                ),
+                IconButton(
+                  icon: const FaIcon(FontAwesomeIcons.bell,
+                      color: Colors.black, size: 20),
+                  onPressed: () {
+                    context.router.navigate(const NoticeRoute());
                   },
                 ),
                 const SizedBox(width: 8),
                 GestureDetector(
-                  onTap: () {
-                    // TODO: route profile
-                  },
-                  child: const Icon(
-                    FontAwesomeIcons.userCircle,
-                    color: Colors.black,
-                    size: 24,
-                  ),
-                ),
+                    onTap: () {
+                      context.router.navigate(const ProfileRoute());
+                    },
+                    child: CircleAvatar(
+                      radius: 16,
+                      // backgroundImage: NetworkImage(postData.avatarUrl),
+                      backgroundColor: ColorName.grey,
+                    )),
               ],
             ),
           ),

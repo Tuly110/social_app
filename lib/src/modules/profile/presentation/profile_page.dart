@@ -71,7 +71,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 leading: IconButton(
                   icon: const Icon(Icons.arrow_back_ios_new_rounded,
                       color: Color(0xFF9CA3AF), size: 22),
-                  onPressed: () => AutoTabsRouter.of(context).setActiveIndex(0),
+                  onPressed: () => context.router.pop(),
                 ),
                 actions: [
                   PopupMenuButton<String>(

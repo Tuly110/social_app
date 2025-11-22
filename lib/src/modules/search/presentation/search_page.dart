@@ -1,5 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:social_app/src/modules/app/app_router.dart';
 
 import '../../../../generated/colors.gen.dart';
 import 'widgets/search_app_bar.dart';
@@ -120,6 +121,7 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
         tabController: _tabController,
         onClearSearch: _clearSearch,
         onPerformSearch: _performSearch,
+        onBackPressed:() => context.router.replace(const HomeRoute()),
       ),
       body: TabBarView(
         controller: _tabController,
