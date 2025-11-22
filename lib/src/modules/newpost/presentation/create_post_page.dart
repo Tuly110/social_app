@@ -1,8 +1,15 @@
+import 'dart:io';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../generated/colors.gen.dart';
-import 'models/post_data.dart';
+import '../../app/app_router.dart';
+import '../../auth/presentation/cubit/auth_cubit.dart';
+import '../../auth/presentation/cubit/auth_state.dart';
+
+import 'controller/create_post_controller.dart';
 import 'widgets/create_post_app_bar.dart';
 import 'widgets/post_action_bar.dart';
 import 'widgets/post_content_field.dart';
@@ -16,67 +23,61 @@ class CreatePostPage extends StatefulWidget {
 }
 
 class _CreatePostPageState extends State<CreatePostPage> {
-  final TextEditingController _postController = TextEditingController();
+  late final CreatePostController _controller;
   final FocusNode _focusNode = FocusNode();
-  int _characterCount = 0;
-  final int _maxCharacters = 280;
-  bool _isPublic = true;
-  bool _isFriend = true;
-
-  // Mock user data
-  final String _currentUsername = 'abcde';
 
   @override
   void initState() {
     super.initState();
-    _postController.addListener(_updateCharacterCount);
+
+    // Lấy username từ AuthCubit
+    final authState = context.read<AuthCubit>().state;
+    final currentUsername = authState.maybeWhen(
+          userInfoLoaded: (user) => user.username,
+          orElse: () => null,
+        ) ??
+        'Unknown'; // luôn là String (không null)
+
+    _controller = CreatePostController(
+      currentUsername: currentUsername,
+      baseUrl: 'http://10.0.2.2:8001',
+      maxCharacters: 280,
+    );
   }
 
   @override
   void dispose() {
-    _postController.dispose();
+    _controller.disposeController();
     _focusNode.dispose();
     super.dispose();
   }
 
-  void _updateCharacterCount() {
-    setState(() {
-      _characterCount = _postController.text.length;
-    });
-  }
+  Future<void> _handlePost() async {
+    try {
+      final createdPost = await _controller.submit();
+      if (!mounted) return;
 
-  void _createPost() {
-    final String content = _postController.text.trim();
-    
-    if (content.isEmpty) {
-      _showErrorDialog('Please write something before posting.');
-      return;
+      // Hiển thị thông báo thành công
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Post created successfully!'),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 2),
+          behavior: SnackBarBehavior.floating,
+          margin: EdgeInsets.only(
+            bottom: 100,
+            left: 20,
+            right: 20,
+          ),
+        ),
+      );
+
+      // Quay về màn trước, trả PostResponse để list có thể refresh nếu cần
+      context.router.pop(createdPost);
+    } catch (e) {
+      if (!mounted) return;
+      _showErrorDialog(e.toString());
     }
-
-    if (content.length > _maxCharacters) {
-      _showErrorDialog('Post exceeds the character limit of $_maxCharacters.');
-      return;
-    }
-
-    // Create new post
-    final newPost = PostData(
-      username: _currentUsername,
-      time: 'Now',
-      content: content,
-      likes: 0,
-      comments: 0,
-      shares: 0,
-      isLiked: false,
-      isReposted: false,
-      isPublic: _isPublic,
-    );
-
-    _postController.clear();
-
-    // Show success message
-    _showSuccessDialog();
-    
-    AutoTabsRouter.of(context).setActiveIndex(0);
   }
 
   void _showErrorDialog(String message) {
@@ -87,7 +88,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
         content: Text(message),
         actions: [
           TextButton(
-            onPressed: () => AutoTabsRouter.of(context).setActiveIndex(0),
+            onPressed: () => Navigator.of(context).pop(),
             child: const Text('OK'),
           ),
         ],
@@ -95,102 +96,95 @@ class _CreatePostPageState extends State<CreatePostPage> {
     );
   }
 
-  void _showSuccessDialog() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Post created successfully!'),
-        backgroundColor: Colors.green,
-        duration: Duration(seconds: 2),
-        behavior: SnackBarBehavior.floating,
-        margin: EdgeInsets.only(
-          bottom: 100,
-          left: 20,
-          right: 20,
-        ),
-      ),
-    );
-  }
-
-  void _clearPost() {
-    _postController.clear();
-  }
-
-  void _togglePrivacy() {
-    setState(() {
-      if (_isPublic) {
-        _isPublic = false; 
-        _isFriend = true; 
-      } 
-      else if (_isFriend) {
-        _isFriend = false; 
-
-      } 
-      else {
-        _isPublic = true;  
-        _isFriend = true; 
-      }
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
-    final bool canPost = _postController.text.trim().isNotEmpty &&
-        _postController.text.length <= _maxCharacters;
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, _) {
+        final canPost = _controller.canPost;
 
-    return Scaffold(
-      backgroundColor: ColorName.backgroundWhite,
-      appBar: CreatePostAppBar(
-        canPost: canPost,
-        onPostPressed: _createPost,
-        onBackPressed: () => AutoTabsRouter.of(context).setActiveIndex(0),
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: PostContentField(
-                postController: _postController,
-                focusNode: _focusNode,
-                currentUsername: _currentUsername,
-                isPublic: _isPublic,
-                onPrivacyChanged: _togglePrivacy,
-                characterCount: _characterCount,
-                maxCharacters: _maxCharacters, 
-                isFriends: _isFriend,
+        return Scaffold(
+          backgroundColor: ColorName.backgroundWhite,
+          appBar: CreatePostAppBar(
+            canPost: canPost,
+            // luôn truyền callback sync, bên trong gọi async
+            onPostPressed: () {
+              _handlePost();
+            },
+            onBackPressed: () => AutoTabsRouter.of(context).setActiveIndex(0),
+          ),
+          body: Column(
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    children: [
+                      PostContentField(
+                        postController: _controller.contentController,
+                        focusNode: _focusNode,
+                        currentUsername: _controller.currentUsername,
+                        isPublic: _controller.isPublic,
+                        onPrivacyChanged: _controller.togglePrivacy,
+                        characterCount: _controller.characterCount,
+                        maxCharacters: _controller.maxCharacters,
+                        isFriends: _controller.isFriends,
+                      ),
+
+                      // Preview ảnh đã chọn
+                      if (_controller.selectedImage != null) ...[
+                        const SizedBox(height: 12),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(16),
+                          child: Image.file(
+                            File(_controller.selectedImage!.path),
+                            height: 220,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
               ),
-            ),
+              PostActionBar(
+                postController: _controller.contentController,
+                onClearPost: _controller.clearPost,
+                onAddPhoto: () async {
+                  try {
+                    await _controller.pickImage();
+                  } catch (e) {
+                    if (!mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Không chọn được ảnh: $e'),
+                        duration: const Duration(seconds: 2),
+                      ),
+                    );
+                  }
+                },
+                onAddMention: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Mention coming soon!'),
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
+                },
+                onAddEmoji: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Emoji picker coming soon!'),
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
+                },
+              ),
+            ],
           ),
-          PostActionBar(
-            postController: _postController,
-            onClearPost: _clearPost,
-            onAddPhoto: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Photo picker coming soon!'),
-                  duration: Duration(seconds: 2),
-                ),
-              );
-            },
-            onAddMention: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Mention coming soon!'),
-                  duration: Duration(seconds: 2),
-                ),
-              );
-            },
-            onAddEmoji: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Emoji picker coming soon!'),
-                  duration: Duration(seconds: 2),
-                ),
-              );
-            },
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

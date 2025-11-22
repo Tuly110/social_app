@@ -2,15 +2,18 @@ class PostData {
   final String username;
   final String time;
   final String content;
+
   final int likes;
   final int comments;
   final int shares;
+
   final bool isLiked;
   final bool isReposted;
   final bool isPublic;
   final bool showThread;
+  final String? imageUrl;
 
-  const PostData({
+  PostData({
     required this.username,
     required this.time,
     required this.content,
@@ -21,6 +24,7 @@ class PostData {
     required this.isReposted,
     required this.isPublic,
     this.showThread = false,
+    this.imageUrl,
   });
 
   PostData copyWith({
@@ -34,6 +38,7 @@ class PostData {
     bool? isReposted,
     bool? isPublic,
     bool? showThread,
+    String? imageUrl,
   }) {
     return PostData(
       username: username ?? this.username,
@@ -46,6 +51,7 @@ class PostData {
       isReposted: isReposted ?? this.isReposted,
       isPublic: isPublic ?? this.isPublic,
       showThread: showThread ?? this.showThread,
+      imageUrl: imageUrl ?? this.imageUrl,
     );
   }
 }

@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:intl/intl.dart';
+
 import '../models/post_data.dart';
 import 'post_item.dart';
 import '../pages/comments_page.dart';
+
+import '../../../newpost/presentation/models/post_api_models.dart';
+import '../../../newpost/presentation/edit_post_page.dart'; // 👈 THÊM
+import '../../../../core/data/api/post_api.dart';
 
 class PostList extends StatefulWidget {
   const PostList({super.key});
@@ -11,83 +18,52 @@ class PostList extends StatefulWidget {
 }
 
 class _PostListState extends State<PostList> {
-  final List<PostData> _posts = [
-    PostData(
-      username: 'abc',
-      time: '12h',
-      content: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard? #TellMeAboutYou',
-      likes: 28,
-      comments: 5,
-      shares: 21,
-      isLiked: true,
-      isReposted: false,
-      isPublic: false,
-      showThread: true,
-    ),
-    PostData(
-      username: 'xyz',
-      time: '3h',
-      content: 'Hello là xin chào. #Hello',
-      likes: 46,
-      comments: 18,
-      shares: 363,
-      isLiked: true,
-      isReposted: true,
-      isPublic: true,
-    ),
-    PostData(
-      username: 'student',
-      time: '14h',
-      content: 'Kobe\'s passing is really sticking w/ me in a way I didn\'t expect.\n\nHe was an icon, the kind of person who wouldn\'t die this way. My wife compared it to Princess Di\'s accident.\n\nBut the end can happen for anyone at any time, & I can\'t help but think of anything else lately.',
-      likes: 7,
-      comments: 1,
-      shares: 11,
-      isLiked: false,
-      isReposted: false,
-      isPublic: true,
-    ),
-    PostData(
-      username: 'karennne',
-      time: '10h',
-      content: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text over since the 1500s.',
-      likes: 0,
-      comments: 0,
+  late final PostApi _postApi;
+
+  @override
+  void initState() {
+    super.initState();
+    _postApi = PostApi(baseUrl: 'http://10.0.2.2:8001');
+  }
+
+  Future<List<PostResponse>> _loadPosts() async {
+    // Gọi API lấy danh sách post từ backend
+    return _postApi.getPosts();
+  }
+
+  String formatTwitterTime(DateTime dt) {
+    final hour = DateFormat('h:mm a').format(dt);
+    final date = DateFormat('MMM d, yyyy').format(dt);
+    return '$hour · $date';
+  }
+
+  PostData _mapToPostData(PostResponse p) {
+    final timeText = formatTwitterTime(p.createdAt);
+
+    return PostData(
+      username: p.username ?? 'User',
+      time: timeText,
+      content: p.content,
+      likes: p.likeCount,
+      comments: p.commentCount,
       shares: 0,
-      isLiked: false,
+      isLiked: p.isLiked,
       isReposted: false,
-      isPublic: true,
-    ),
-  ];
-
-  void _toggleLike(int index) {
-    setState(() {
-      _posts[index] = _posts[index].copyWith(
-        isLiked: !_posts[index].isLiked,
-        likes: _posts[index].isLiked 
-            ? _posts[index].likes - 1 
-            : _posts[index].likes + 1,
-      );
-    });
+      isPublic: p.visibility == 'public',
+      showThread: false,
+      imageUrl: p.imageUrl,
+    );
   }
 
-  void _toggleRepost(int index) {
-    setState(() {
-      _posts[index] = _posts[index].copyWith(
-        isReposted: !_posts[index].isReposted,
-        shares: _posts[index].isReposted 
-            ? _posts[index].shares - 1 
-            : _posts[index].shares + 1,
-      );
-    });
-  }
-
-  void _openComments(int index, BuildContext context) {
+  void _openComments(PostData post, BuildContext context) {
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => CommentsPage(
-          post: _posts[index],
-          onLikePressed: () => _toggleLike(index),
+          post: post,
+          onLikePressed: () {
+            // TODO: sau này bạn có thể thêm logic like local
+          },
         ),
       ),
     );
@@ -95,16 +71,101 @@ class _PostListState extends State<PostList> {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      children: [
-        for (int i = 0; i < _posts.length; i++)
-          PostItem(
-            postData: _posts[i],
-            onLikePressed: () => _toggleLike(i),
-            onRepostPressed: () => _toggleRepost(i),
-            onCommentPressed: () => _openComments(i, context),
-          ),
-      ],
+    final currentUserId = Supabase.instance.client.auth.currentUser?.id;
+
+    return FutureBuilder<List<PostResponse>>(
+      future: _loadPosts(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (snapshot.hasError) {
+          return Center(
+            child: Text('Lỗi tải bài viết:\n${snapshot.error}'),
+          );
+        }
+
+        final apiPosts = snapshot.data ?? [];
+
+        if (apiPosts.isEmpty) {
+          return const Center(child: Text('Chưa có bài viết nào'));
+        }
+
+        return ListView.builder(
+          itemCount: apiPosts.length,
+          itemBuilder: (context, i) {
+            final p = apiPosts[i];
+            final post = _mapToPostData(p);
+
+            final bool isMine =
+                currentUserId != null && p.userId == currentUserId;
+
+            return PostItem(
+              postData: post,
+              onLikePressed: () {
+                // TODO: sau này nếu muốn like local thì thêm logic ở đây
+              },
+              onRepostPressed: () {
+                // TODO: sau này nếu muốn repost local thì thêm logic ở đây
+              },
+              onCommentPressed: () => _openComments(post, context),
+              canManage: isMine,
+              onEdit: isMine
+                  ? () async {
+                      final updated =
+                          await Navigator.of(context).push<PostResponse>(
+                        MaterialPageRoute(
+                          builder: (_) => EditPostPage(post: p),
+                        ),
+                      );
+
+                      if (updated != null && mounted) {
+                        setState(() {});
+                      }
+                    }
+                  : null,
+              onDelete: isMine
+                  ? () async {
+                      final confirm = await showDialog<bool>(
+                            context: context,
+                            builder: (ctx) => AlertDialog(
+                              title: const Text('Xoá bài viết'),
+                              content: const Text(
+                                  'Bạn có chắc muốn xoá bài viết này không?'),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(ctx, false),
+                                  child: const Text('Huỷ'),
+                                ),
+                                TextButton(
+                                  onPressed: () => Navigator.pop(ctx, true),
+                                  child: const Text('Xoá'),
+                                ),
+                              ],
+                            ),
+                          ) ??
+                          false;
+
+                      if (!confirm) return;
+
+                      try {
+                        await _postApi.deletePost(p.id);
+                        if (mounted) setState(() {});
+                      } catch (e) {
+                        if (!mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Xoá thất bại: $e'),
+                          ),
+                        );
+                      }
+                    }
+                  : null,
+            );
+          },
+        );
+      },
     );
   }
 }

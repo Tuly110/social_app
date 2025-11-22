@@ -5,7 +5,6 @@ import 'comment_button.dart';
 import 'repost_button.dart';
 import 'like_button.dart';
 import 'action_button.dart';
-
 import '../../../../../generated/colors.gen.dart';
 
 class PostItem extends StatelessWidget {
@@ -14,12 +13,19 @@ class PostItem extends StatelessWidget {
   final VoidCallback onRepostPressed;
   final VoidCallback onCommentPressed;
 
+  final bool canManage;
+  final VoidCallback? onEdit;
+  final VoidCallback? onDelete;
+
   const PostItem({
     super.key,
     required this.postData,
     required this.onLikePressed,
     required this.onRepostPressed,
     required this.onCommentPressed,
+    this.canManage = false,
+    this.onEdit,
+    this.onDelete,
   });
 
   @override
@@ -61,34 +67,66 @@ class PostItem extends StatelessWidget {
               children: [
                 // Header with username, time
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      postData.username,
-                      style: TextStyle(
-                        color: ColorName.textBlack,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 15,
+                    // phần thông tin user + thời gian
+                    Expanded(
+                      child: Row(
+                        children: [
+                          Text(
+                            postData.username,
+                            style: TextStyle(
+                              color: ColorName.textBlack,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Icon(
+                            postData.isPublic
+                                ? Icons.public
+                                : Icons.lock_outline,
+                            size: 14,
+                            color: Colors.grey.shade600,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            postData.time,
+                            style: TextStyle(
+                              color: ColorName.textBlack,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(width: 4),
-                    // Placeholder cho private/public
-                    Icon(
-                      postData.isPublic ? Icons.public : Icons.lock_outline,
-                      size: 14,
-                      color: Colors.grey.shade600,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      postData.time,
-                      style: TextStyle(
-                        color: ColorName.textBlack,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
+
+                    // icon 3 chấm cho bài của chính mình
+                    if (canManage)
+                      PopupMenuButton<String>(
+                        onSelected: (value) {
+                          if (value == 'edit') {
+                            if (onEdit != null) onEdit!();
+                          } else if (value == 'delete') {
+                            if (onDelete != null) onDelete!();
+                          }
+                        },
+                        itemBuilder: (context) => const [
+                          PopupMenuItem<String>(
+                            value: 'edit',
+                            child: Text('Edit'),
+                          ),
+                          PopupMenuItem<String>(
+                            value: 'delete',
+                            child: Text('Delete'),
+                          ),
+                        ],
                       ),
-                    ),
                   ],
                 ),
                 const SizedBox(height: 4),
+
                 // Content text
                 Text(
                   postData.content,
@@ -98,7 +136,42 @@ class PostItem extends StatelessWidget {
                     height: 1.4,
                   ),
                 ),
+
+                // 🔽🔽🔽 THÊM ĐOẠN NÀY ĐỂ HIỂN THỊ ẢNH 🔽🔽🔽
+                if (postData.imageUrl != null &&
+                    postData.imageUrl!.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.network(
+                      postData.imageUrl!,
+                      fit: BoxFit.cover,
+                      // Loading trong lúc tải ảnh
+                      loadingBuilder: (context, child, loadingProgress) {
+                        if (loadingProgress == null) return child;
+                        return const SizedBox(
+                          height: 180,
+                          child: Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                        );
+                      },
+                      // Nếu lỗi tải ảnh
+                      errorBuilder: (context, error, stackTrace) {
+                        return const SizedBox(
+                          height: 120,
+                          child: Center(
+                            child: Text('Không tải được ảnh'),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                ],
+
                 const SizedBox(height: 12),
+
                 // Show thread button (if applicable)
                 if (postData.showThread)
                   Container(
