@@ -13,9 +13,13 @@ class PostItem extends StatelessWidget {
   final VoidCallback onRepostPressed;
   final VoidCallback onCommentPressed;
 
+  /// true nếu là chủ bài đăng (hiện Edit/Delete)
   final bool canManage;
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
+
+  /// Khi tap vào avatar hoặc username
+  final VoidCallback? onUserTap;
 
   const PostItem({
     super.key,
@@ -26,6 +30,7 @@ class PostItem extends StatelessWidget {
     this.canManage = false,
     this.onEdit,
     this.onDelete,
+    this.onUserTap,
   });
 
   @override
@@ -41,20 +46,25 @@ class PostItem extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Avatar
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: ColorName.mint,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Center(
-              child: Text(
-                postData.username[0].toUpperCase(),
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
+          // Avatar (tap để vào profile)
+          GestureDetector(
+            onTap: onUserTap,
+            child: Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: ColorName.mint,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Center(
+                child: Text(
+                  postData.username.isNotEmpty
+                      ? postData.username[0].toUpperCase()
+                      : '?',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),
@@ -71,42 +81,52 @@ class PostItem extends StatelessWidget {
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // phần thông tin user + thời gian
+                    // phần thông tin user + thời gian (tap để vào profile)
                     Expanded(
-                      child: Row(
-                        children: [
-                          Text(
-                            postData.username,
-                            style: TextStyle(
-                              color: ColorName.textBlack,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 15,
+                      child: GestureDetector(
+                        onTap: onUserTap,
+                        behavior: HitTestBehavior.opaque,
+                        child: Row(
+                          children: [
+                            Text(
+                              postData.username,
+                              style: TextStyle(
+                                color: ColorName.textBlack,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15,
+                              ),
                             ),
-                          ),
-                          const SizedBox(width: 4),
-                          Icon(
-                            postData.isPublic
-                                ? Icons.public
-                                : Icons.lock_outline,
-                            size: 14,
-                            color: Colors.grey.shade600,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            postData.time,
-                            style: TextStyle(
-                              color: ColorName.textBlack,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
+                            const SizedBox(width: 4),
+                            Icon(
+                              postData.isPublic
+                                  ? Icons.public
+                                  : Icons.lock_outline,
+                              size: 14,
+                              color: Colors.grey.shade600,
                             ),
-                          ),
-                        ],
+                            const SizedBox(width: 4),
+                            Text(
+                              postData.time,
+                              style: TextStyle(
+                                color: ColorName.textBlack,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
 
-                    // icon 3 chấm cho bài của chính mình
+                    // icon 3 chấm:
+                    // - Nếu là chủ bài (canManage = true) -> Edit/Delete
+                    // - Nếu không -> Report/Mute/Block/Copy link
                     if (canManage)
                       PopupMenuButton<String>(
+                        icon: Icon(
+                          Icons.more_vert,
+                          color: Colors.grey.shade600,
+                        ),
                         onSelected: (value) {
                           if (value == 'edit') {
                             if (onEdit != null) onEdit!();
@@ -124,6 +144,14 @@ class PostItem extends StatelessWidget {
                             child: Text('Delete'),
                           ),
                         ],
+                      )
+                    else
+                      IconButton(
+                        icon: Icon(
+                          Icons.more_vert,
+                          color: Colors.grey.shade600,
+                        ),
+                        onPressed: () => _showPostOptions(context),
                       ),
                   ],
                 ),

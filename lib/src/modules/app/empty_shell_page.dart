@@ -28,28 +28,28 @@ class _EmptyShellPageState extends State<EmptyShellPage> {
   }
 
   void _onNavItemTapped(int index) {
-  setState(() {
-    _currentIndex = index;
-  });
+    setState(() {
+      _currentIndex = index;
+    });
 
-  switch (index) {
-    case 0: // Home
-      context.router.navigate(const HomeRoute());
-      break;
-    case 1: // Chat
-      context.router.navigate(const ChatRoute());
-      break;
-    case 2: // CreatePost
-      context.router.navigate(const CreatePostRoute());
-      break;
-    case 3: // Notice
-      context.router.navigate(const NoticeRoute());
-      break;
-    case 4: // Profile
-      context.router.navigate(const ProfileRoute());
-      break;
+    switch (index) {
+      case 0: // Home
+        context.router.navigate(const HomeRoute());
+        break;
+      case 1: // Chat
+        context.router.navigate(const ChatRoute());
+        break;
+      case 2: // CreatePost
+        context.router.navigate(const CreatePostRoute());
+        break;
+      case 3: // Notice
+        context.router.navigate(const NoticeRoute());
+        break;
+      case 4: // Profile
+        context.router.navigate(const ProfileRoute());
+        break;
+    }
   }
-}
 
   @override
   void didChangeDependencies() {
@@ -59,7 +59,7 @@ class _EmptyShellPageState extends State<EmptyShellPage> {
 
   void _updateCurrentIndex() {
     final currentPath = context.router.currentPath;
-    
+
     if (currentPath.contains('home')) {
       _currentIndex = 0;
     } else if (currentPath.contains('chat')) {
@@ -71,7 +71,7 @@ class _EmptyShellPageState extends State<EmptyShellPage> {
     } else if (currentPath.contains('profile')) {
       _currentIndex = 4;
     }
-    
+
     if (mounted) setState(() {});
   }
 }

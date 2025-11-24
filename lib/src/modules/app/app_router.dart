@@ -18,7 +18,8 @@ import '../search/presentation/search_page.dart';
 import '../setting/presentation/setting_page.dart';
 import '../newpost/presentation/edit_post_page.dart';
 import '../newpost/presentation/models/post_api_models.dart';
-
+import '../profile/presentation/followers_page.dart';
+import '../profile/presentation/following_page.dart';
 import '../splash_screen/presentation/splash_screen_page.dart';
 import 'empty_shell_page.dart';
 
@@ -40,11 +41,15 @@ class AppRouter extends _$AppRouter {
             AutoRoute(page: ChatRoute.page, path: 'chat'),
             AutoRoute(page: NoticeRoute.page, path: 'notice'),
             AutoRoute(page: ProfileRoute.page, path: 'profile'),
+            AutoRoute(
+                page: FollowersRoute.page, path: 'user/:userId/followers'),
+            AutoRoute(
+                page: FollowingRoute.page, path: 'user/:userId/following'),
           ],
         ),
         AutoRoute(page: LoginRoute.page, path: '/login'),
         AutoRoute(page: SignupRoute.page, path: '/signup'),
-        AutoRoute(page: UserProfileRoute.page, path: '/user/:username'),
+        AutoRoute(page: UserProfileRoute.page, path: '/user/:userId'),
         AutoRoute(page: ChatDetailRoute.page, path: '/chats/:id'),
         AutoRoute(page: UpdatePasswordRoute.page, path: '/updatepassword'),
         AutoRoute(page: SettingsRoute.page, path: '/setting'),

@@ -1,5 +1,7 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:social_app/src/modules/app/app_router.dart';
 import 'package:intl/intl.dart';
 
 import '../models/post_data.dart';
@@ -7,7 +9,7 @@ import 'post_item.dart';
 import '../pages/comments_page.dart';
 
 import '../../../newpost/presentation/models/post_api_models.dart';
-import '../../../newpost/presentation/edit_post_page.dart'; // 👈 THÊM
+import '../../../newpost/presentation/edit_post_page.dart';
 import '../../../../core/data/api/post_api.dart';
 
 class PostList extends StatefulWidget {
@@ -162,6 +164,24 @@ class _PostListState extends State<PostList> {
                       }
                     }
                   : null,
+
+              // 👇 Thêm onUserTap: mở UserProfilePage
+              onUserTap: () {
+                if (p.userId.isEmpty) return;
+
+                final currentUserId =
+                    Supabase.instance.client.auth.currentUser?.id;
+
+                if (currentUserId != null && p.userId == currentUserId) {
+                  // Chính chủ → mở trang profile của mình
+                  context.router.navigate(const ProfileRoute());
+                } else {
+                  // Người khác → mở UserProfilePage
+                  context.router.push(
+                    UserProfileRoute(userId: p.userId),
+                  );
+                }
+              },
             );
           },
         );

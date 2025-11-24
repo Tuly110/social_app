@@ -4,16 +4,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' show Supabase;
 
+import 'package:intl/intl.dart';
+
 import '../../../../generated/colors.gen.dart';
 import '../../app/app_router.dart';
 import '../../auth/presentation/cubit/auth_cubit.dart';
 import '../../auth/presentation/cubit/auth_state.dart';
 import '../../home/presentation/widgets/post_item.dart';
 import '../../home/presentation/models/post_data.dart';
-import 'package:intl/intl.dart';
 import '../../newpost/presentation/edit_post_page.dart';
 import '../../newpost/presentation/models/post_api_models.dart';
 import '../../../core/data/api/post_api.dart';
+import '../../../core/data/api/profile_api.dart';
+import '../../../core/data/api/profile_api_models.dart';
 import 'component/select_friends_page.dart';
 import 'component/widget__avatar.dart';
 import 'component/widget__friend_avatar.dart';
@@ -21,6 +24,7 @@ import 'component/widget__gallery_grid.dart';
 import 'component/widget__placeholder.dart';
 import 'component/widget__section_title.dart';
 import 'component/widget__stats_card.dart';
+import 'edit_profile_page.dart';
 
 @RoutePage()
 class ProfilePage extends StatefulWidget {
@@ -35,6 +39,33 @@ class _ProfilePageState extends State<ProfilePage> {
   static const double _horizontalMargin = 24;
   static const double _tabBarHeight = 48;
   static final double _expandedHeight = 310 + _avatarRadius * 1.5;
+
+  late final ProfileApi _profileApi;
+  ProfileModel? _profile;
+  bool _profileLoading = true;
+  String? _profileError;
+
+  @override
+  void initState() {
+    super.initState();
+    _profileApi = ProfileApi(baseUrl: 'http://10.0.2.2:8001');
+    _loadMyProfile();
+  }
+
+  Future<void> _loadMyProfile() async {
+    try {
+      final p = await _profileApi.getMyProfile();
+      setState(() {
+        _profile = p;
+        _profileLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _profileLoading = false;
+        _profileError = e.toString();
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -69,8 +100,11 @@ class _ProfilePageState extends State<ProfilePage> {
                 surfaceTintColor: ColorName.white,
                 elevation: 0,
                 leading: IconButton(
-                  icon: const Icon(Icons.arrow_back_ios_new_rounded,
-                      color: Color(0xFF9CA3AF), size: 22),
+                  icon: const Icon(
+                    Icons.arrow_back_ios_new_rounded,
+                    color: Color(0xFF9CA3AF),
+                    size: 22,
+                  ),
                   onPressed: () => context.router.pop(),
                 ),
                 actions: [
@@ -134,7 +168,27 @@ class _ProfilePageState extends State<ProfilePage> {
                             right: _horizontalMargin,
                             bottom: _avatarRadius - 6,
                           ),
-                          child: _ProfileCard(avatarRadius: _avatarRadius),
+                          child: _ProfileCard(
+                            avatarRadius: _avatarRadius,
+                            profile: _profile,
+                            loading: _profileLoading,
+                            error: _profileError,
+                            onEdit: () async {
+                              final updated = await Navigator.of(context)
+                                  .push<ProfileModel>(
+                                MaterialPageRoute(
+                                  builder: (_) =>
+                                      EditProfilePage(initialProfile: _profile),
+                                ),
+                              );
+
+                              if (updated != null && mounted) {
+                                setState(() {
+                                  _profile = updated;
+                                });
+                              }
+                            },
+                          ),
                         ),
                       ),
                     ],
@@ -181,7 +235,18 @@ class _ProfilePageState extends State<ProfilePage> {
 
 class _ProfileCard extends StatelessWidget {
   final double avatarRadius;
-  const _ProfileCard({required this.avatarRadius});
+  final ProfileModel? profile;
+  final bool loading;
+  final String? error;
+  final VoidCallback? onEdit;
+
+  const _ProfileCard({
+    required this.avatarRadius,
+    this.profile,
+    this.loading = false,
+    this.error,
+    this.onEdit,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -193,6 +258,12 @@ class _ProfileCard extends StatelessWidget {
       print('state current in profile page: $state');
       final user =
           state.maybeWhen(userInfoLoaded: (user) => user, orElse: () => null);
+
+      final p = profile;
+
+      final displayUsername = p?.username ?? user?.username ?? 'User Name';
+      final displayEmail = p?.email ?? user?.email ?? 'email@example.com';
+      final displayBio = p?.bio ?? 'Trong bộ tộc Bodi Tribe (Ethiopia)...';
 
       return Container(
         margin: const EdgeInsets.only(bottom: 0),
@@ -217,7 +288,6 @@ class _ProfileCard extends StatelessWidget {
               child: Stack(
                 clipBehavior: Clip.none,
                 children: [
-                  // FIX: ĐÃ SỬA LỖI NGOẶC Ở ĐÂY
                   Positioned(
                     left: 0,
                     right: 0,
@@ -225,7 +295,7 @@ class _ProfileCard extends StatelessWidget {
                     child: Column(
                       children: [
                         Text(
-                          user?.username ?? 'User Name',
+                          displayUsername,
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 20,
@@ -234,7 +304,7 @@ class _ProfileCard extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          user?.email ?? 'email@example.com',
+                          displayEmail,
                           style: TextStyle(
                             color: ColorName.grey600,
                             fontSize: 13,
@@ -247,7 +317,9 @@ class _ProfileCard extends StatelessWidget {
                     left: 0,
                     right: 0,
                     top: -avatarRadius,
-                    child: Center(child: WidgetAvatar(radius: avatarRadius)),
+                    child: Center(
+                        child: WidgetAvatar(
+                            radius: avatarRadius, imageUrl: p?.avatarUrl)),
                   ),
                 ],
               ),
@@ -260,7 +332,7 @@ class _ProfileCard extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 4.0),
                     child: Text(
-                      'Trong bộ tộc Bodi Tribe (Ethiopia)...',
+                      displayBio,
                       maxLines: 3,
                       overflow: TextOverflow.ellipsis,
                       textAlign: TextAlign.center,
@@ -280,7 +352,7 @@ class _ProfileCard extends StatelessWidget {
                           child: SizedBox(
                             height: 42,
                             child: ElevatedButton(
-                              onPressed: () {},
+                              onPressed: onEdit,
                               style: ElevatedButton.styleFrom(
                                 elevation: 0,
                                 backgroundColor: ColorName.mint,
@@ -538,14 +610,31 @@ class _TwoColumnStatsAndGallery extends StatefulWidget {
 
 class _TwoColumnStatsAndGalleryState extends State<_TwoColumnStatsAndGallery> {
   final postApi = PostApi(baseUrl: 'http://10.0.2.2:8001');
+  final profileApi = ProfileApi(baseUrl: 'http://10.0.2.2:8001');
 
   List<String> myImages = [];
-  bool loading = true;
+  bool loadingImages = true;
+
+  ProfileModel? myProfile;
+  bool loadingProfile = true;
 
   @override
   void initState() {
     super.initState();
     _loadMyImages();
+    _loadMyProfile();
+  }
+
+  Future<void> _loadMyProfile() async {
+    try {
+      final p = await profileApi.getMyProfile();
+      setState(() {
+        myProfile = p;
+        loadingProfile = false;
+      });
+    } catch (e) {
+      setState(() => loadingProfile = false);
+    }
   }
 
   Future<void> _loadMyImages() async {
@@ -554,13 +643,12 @@ class _TwoColumnStatsAndGalleryState extends State<_TwoColumnStatsAndGallery> {
       final currentUserId = currentUser?.id;
 
       if (currentUserId == null) {
-        setState(() => loading = false);
+        setState(() => loadingImages = false);
         return;
       }
 
       final posts = await postApi.getPosts();
 
-      // lọc ảnh của user
       final imgs = posts
           .where((p) =>
               p.userId == currentUserId &&
@@ -571,10 +659,10 @@ class _TwoColumnStatsAndGalleryState extends State<_TwoColumnStatsAndGallery> {
 
       setState(() {
         myImages = imgs;
-        loading = false;
+        loadingImages = false;
       });
     } catch (e) {
-      setState(() => loading = false);
+      setState(() => loadingImages = false);
     }
   }
 
@@ -588,13 +676,13 @@ class _TwoColumnStatsAndGalleryState extends State<_TwoColumnStatsAndGallery> {
           children: [
             SizedBox(
               width: isNarrow ? 96 : 110,
-              child: const WidgetStatsCard(),
+              child: WidgetStatsCard(profile: myProfile),
             ),
             const SizedBox(width: 16),
 
             // HIỂN THỊ GALLERY
             Expanded(
-              child: loading
+              child: loadingImages
                   ? const Center(child: CircularProgressIndicator())
                   : WidgetGalleryGrid(imageUrls: myImages),
             ),

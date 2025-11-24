@@ -54,6 +54,28 @@ abstract class _$AppRouter extends RootStackRouter {
         child: const EmptyShellPage(),
       );
     },
+    FollowersRoute.name: (routeData) {
+      final args = routeData.argsAs<FollowersRouteArgs>();
+      return AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: FollowersPage(
+          key: args.key,
+          userId: args.userId,
+          username: args.username,
+        ),
+      );
+    },
+    FollowingRoute.name: (routeData) {
+      final args = routeData.argsAs<FollowingRouteArgs>();
+      return AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: FollowingPage(
+          key: args.key,
+          userId: args.userId,
+          username: args.username,
+        ),
+      );
+    },
     HomeRoute.name: (routeData) {
       return AutoRoutePage<dynamic>(
         routeData: routeData,
@@ -109,9 +131,13 @@ abstract class _$AppRouter extends RootStackRouter {
       );
     },
     UserProfileRoute.name: (routeData) {
+      final args = routeData.argsAs<UserProfileRouteArgs>();
       return AutoRoutePage<dynamic>(
         routeData: routeData,
-        child: const UserProfilePage(),
+        child: UserProfilePage(
+          key: args.key,
+          userId: args.userId,
+        ),
       );
     },
   };
@@ -235,6 +261,92 @@ class EmptyShellRoute extends PageRouteInfo<void> {
   static const String name = 'EmptyShellRoute';
 
   static const PageInfo<void> page = PageInfo<void>(name);
+}
+
+/// generated route for
+/// [FollowersPage]
+class FollowersRoute extends PageRouteInfo<FollowersRouteArgs> {
+  FollowersRoute({
+    Key? key,
+    required String userId,
+    required String username,
+    List<PageRouteInfo>? children,
+  }) : super(
+          FollowersRoute.name,
+          args: FollowersRouteArgs(
+            key: key,
+            userId: userId,
+            username: username,
+          ),
+          initialChildren: children,
+        );
+
+  static const String name = 'FollowersRoute';
+
+  static const PageInfo<FollowersRouteArgs> page =
+      PageInfo<FollowersRouteArgs>(name);
+}
+
+class FollowersRouteArgs {
+  const FollowersRouteArgs({
+    this.key,
+    required this.userId,
+    required this.username,
+  });
+
+  final Key? key;
+
+  final String userId;
+
+  final String username;
+
+  @override
+  String toString() {
+    return 'FollowersRouteArgs{key: $key, userId: $userId, username: $username}';
+  }
+}
+
+/// generated route for
+/// [FollowingPage]
+class FollowingRoute extends PageRouteInfo<FollowingRouteArgs> {
+  FollowingRoute({
+    Key? key,
+    required String userId,
+    required String username,
+    List<PageRouteInfo>? children,
+  }) : super(
+          FollowingRoute.name,
+          args: FollowingRouteArgs(
+            key: key,
+            userId: userId,
+            username: username,
+          ),
+          initialChildren: children,
+        );
+
+  static const String name = 'FollowingRoute';
+
+  static const PageInfo<FollowingRouteArgs> page =
+      PageInfo<FollowingRouteArgs>(name);
+}
+
+class FollowingRouteArgs {
+  const FollowingRouteArgs({
+    this.key,
+    required this.userId,
+    required this.username,
+  });
+
+  final Key? key;
+
+  final String userId;
+
+  final String username;
+
+  @override
+  String toString() {
+    return 'FollowingRouteArgs{key: $key, userId: $userId, username: $username}';
+  }
 }
 
 /// generated route for
@@ -365,14 +477,38 @@ class UpdatePasswordRoute extends PageRouteInfo<void> {
 
 /// generated route for
 /// [UserProfilePage]
-class UserProfileRoute extends PageRouteInfo<void> {
-  const UserProfileRoute({List<PageRouteInfo>? children})
-      : super(
+class UserProfileRoute extends PageRouteInfo<UserProfileRouteArgs> {
+  UserProfileRoute({
+    Key? key,
+    required String userId,
+    List<PageRouteInfo>? children,
+  }) : super(
           UserProfileRoute.name,
+          args: UserProfileRouteArgs(
+            key: key,
+            userId: userId,
+          ),
           initialChildren: children,
         );
 
   static const String name = 'UserProfileRoute';
 
-  static const PageInfo<void> page = PageInfo<void>(name);
+  static const PageInfo<UserProfileRouteArgs> page =
+      PageInfo<UserProfileRouteArgs>(name);
+}
+
+class UserProfileRouteArgs {
+  const UserProfileRouteArgs({
+    this.key,
+    required this.userId,
+  });
+
+  final Key? key;
+
+  final String userId;
+
+  @override
+  String toString() {
+    return 'UserProfileRouteArgs{key: $key, userId: $userId}';
+  }
 }

@@ -1,60 +1,113 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../generated/colors.gen.dart';
-
+import '../../../app/app_router.dart';
+import '../../../../core/data/api/profile_api_models.dart';
 
 class WidgetStatsCard extends StatelessWidget {
-  const WidgetStatsCard({super.key});
+  final ProfileModel? profile;
+
+  const WidgetStatsCard({
+    super.key,
+    required this.profile,
+  });
 
   @override
   Widget build(BuildContext context) {
-    Widget item(String value, String label) => Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(value,
-                style:
-                    const TextStyle(fontWeight: FontWeight.w800, fontSize: 18)),
-            const SizedBox(height: 2),
-            Text(label,
-                textAlign: TextAlign.center,
-                style: TextStyle(color: ColorName.grey600, fontSize: 12)),
-          ],
-        );
+    final p = profile;
 
-    return Card(
-      elevation: 0,
-      margin: EdgeInsets.zero,
-      color: ColorName.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 18),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            item('1K', 'Likes'),
-            const WidgetDivider(),
-            item('120', 'Following'),
-            const WidgetDivider(),
-            item('1.2K', 'Followers'),
-          ],
-        ),
+    if (p == null) return const SizedBox.shrink();
+
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      decoration: BoxDecoration(
+        color: ColorName.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: ColorName.black15,
+            blurRadius: 20,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          _StatBlock(
+            count: "${p.postCount}",
+            label: "Likes",
+            onTap: () {},
+          ),
+          const Divider(height: 28),
+          _StatBlock(
+            count: "${p.followingCount}",
+            label: "Following",
+            onTap: () {
+              context.router.push(
+                FollowingRoute(
+                  userId: p.id,
+                  username: p.username,
+                ),
+              );
+            },
+          ),
+          const Divider(height: 28),
+          _StatBlock(
+            count: "${p.followerCount}",
+            label: "Followers",
+            onTap: () {
+              context.router.push(
+                FollowersRoute(
+                  userId: p.id,
+                  username: p.username,
+                ),
+              );
+            },
+          ),
+        ],
       ),
     );
   }
 }
 
-// ✅ divider tách riêng cho dễ tái sử dụng
-class WidgetDivider extends StatelessWidget {
-  const WidgetDivider({super.key});
+class _StatBlock extends StatelessWidget {
+  final String count;
+  final String label;
+  final VoidCallback onTap;
+
+  const _StatBlock({
+    super.key,
+    required this.count,
+    required this.label,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 14),
-      child: Container(
-        height: 1,
-        color: ColorName.greyE5e7eb,
-        margin: const EdgeInsets.symmetric(horizontal: 14),
+    return InkWell(
+      onTap: onTap,
+      child: SizedBox(
+        height: 56,
+        child: Column(
+          children: [
+            Text(
+              count,
+              style: const TextStyle(
+                fontSize: 17,
+                fontWeight: FontWeight.bold,
+                color: ColorName.black87,
+              ),
+            ),
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: 13,
+                color: ColorName.grey600,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
