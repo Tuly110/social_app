@@ -9,6 +9,16 @@
 
 import 'package:flutter/widgets.dart';
 
+class $EnvGen {
+  const $EnvGen();
+
+  /// File path: env/.env.dev
+  String get aEnv => 'env/.env.dev';
+
+  /// List of all assets
+  List<String> get values => [aEnv];
+}
+
 class $AssetsAuthImagesGen {
   const $AssetsAuthImagesGen();
 
@@ -32,6 +42,7 @@ class Assets {
   const Assets._();
 
   static const $AssetsAuthImagesGen authImages = $AssetsAuthImagesGen();
+  static const $EnvGen env = $EnvGen();
 }
 
 class AssetGenImage {
