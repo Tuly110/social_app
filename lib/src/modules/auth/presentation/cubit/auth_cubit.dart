@@ -45,7 +45,7 @@ class AuthCubit extends Cubit<AuthState> {
         supabaseClient = supabaseClient,
         super(const AuthState.loading()) 
         {
-            _authSubscription = supabaseClient.auth.onAuthStateChange.listen((response) {
+            _authSubscription = supabaseClient.auth.onAuthStateChange.listen((response) async{
             if (isClosed) return;
             final event = response.event;
             final session = response.session;
@@ -57,10 +57,17 @@ class AuthCubit extends Cubit<AuthState> {
             } 
             
             if (user != null) {
-                emit(AuthState.authenticated(user.id)); 
+              print('✅ AUTH STATE CHANGE - User authenticated: ${user.id}');
+              emit(AuthState.authenticated(user.id)); 
+              
+              // Thêm delay nhỏ để đảm bảo session ready
+              await Future.delayed(const Duration(milliseconds: 500));
+              
+              if (!isClosed) {
                 getUserInfo();
+              }
             } else {
-                emit(const AuthState.unauthenticated());
+              emit(const AuthState.unauthenticated());
             }
         });
     }
@@ -185,11 +192,10 @@ class AuthCubit extends Cubit<AuthState> {
             ));
           },
           (user){
-            // *****************************
-            emit(const AuthState.unauthenticated(
-              errorMessage:null,
-            ));
-            getUserInfo();
+              // ✅ CHỈ emit loading hoặc waiting, KHÔNG emit authenticated
+              // AuthStateChange listener sẽ tự xử lý khi OAuth hoàn tất
+              emit(const AuthState.loading());
+              print('🔄 Google OAuth initiated - waiting for callback...');
           }
         );
 

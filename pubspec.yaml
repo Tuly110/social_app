@@ -18,12 +18,16 @@ dependencies:
 
   #local storage
   shared_preferences: ^2.2.2
-  flutter_secure_storage: ^9.0.0
+  flutter_secure_storage: ^8.1.0
   rx_shared_preferences: ^3.1.0
 
   #state management
   bloc: ^8.1.4
   flutter_bloc: ^8.1.5
+
+  # talker
+  talker_flutter: ^2.0.5
+  talker_dio_logger: ^1.3.0
 
   dartz: ^0.10.1
   dartx: ^1.2.0
@@ -87,10 +91,14 @@ dev_dependencies:
   injectable_generator: ^2.6.1
   retrofit_generator: ^8.1.0
 
+dependency_overrides:
+  share_plus: ^6.3.0  # Dùng version cũ ổn định hơn
+
 flutter:
   uses-material-design: true
   assets:
     - assets/auth_images/
+    - env/.env.dev
   fonts:
     - family: Poppins
       fonts: 
