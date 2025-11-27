@@ -1,110 +1,276 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-import '../models/post_data.dart';
-import 'post_item.dart';
-import '../pages/comments_page.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-class PostList extends StatefulWidget {
+import '../../../app/app_router.dart';
+import '../../../newpost/domain/entities/post_entity.dart';
+import '../../../newpost/presentation/cubit/post_cubit.dart';
+import '../../../../../generated/colors.gen.dart';
+import 'post_item.dart';
+
+class PostList extends StatelessWidget {
   const PostList({super.key});
 
   @override
-  State<PostList> createState() => _PostListState();
-}
-
-class _PostListState extends State<PostList> {
-  final List<PostData> _posts = [
-    PostData(
-      username: 'abc',
-      time: '12h',
-      content: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard? #TellMeAboutYou',
-      likes: 28,
-      comments: 5,
-      shares: 21,
-      isLiked: true,
-      isReposted: false,
-      isPublic: false,
-      showThread: true,
-    ),
-    PostData(
-      username: 'xyz',
-      time: '3h',
-      content: 'Hello là xin chào. #Hello',
-      likes: 46,
-      comments: 18,
-      shares: 363,
-      isLiked: true,
-      isReposted: true,
-      isPublic: true,
-    ),
-    PostData(
-      username: 'student',
-      time: '14h',
-      content: 'Kobe\'s passing is really sticking w/ me in a way I didn\'t expect.\n\nHe was an icon, the kind of person who wouldn\'t die this way. My wife compared it to Princess Di\'s accident.\n\nBut the end can happen for anyone at any time, & I can\'t help but think of anything else lately.',
-      likes: 7,
-      comments: 1,
-      shares: 11,
-      isLiked: false,
-      isReposted: false,
-      isPublic: true,
-    ),
-    PostData(
-      username: 'karennne',
-      time: '10h',
-      content: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text over since the 1500s.',
-      likes: 0,
-      comments: 0,
-      shares: 0,
-      isLiked: false,
-      isReposted: false,
-      isPublic: true,
-    ),
-  ];
-
-  void _toggleLike(int index) {
-    setState(() {
-      _posts[index] = _posts[index].copyWith(
-        isLiked: !_posts[index].isLiked,
-        likes: _posts[index].isLiked 
-            ? _posts[index].likes - 1 
-            : _posts[index].likes + 1,
-      );
-    });
-  }
-
-  void _toggleRepost(int index) {
-    setState(() {
-      _posts[index] = _posts[index].copyWith(
-        isReposted: !_posts[index].isReposted,
-        shares: _posts[index].isReposted 
-            ? _posts[index].shares - 1 
-            : _posts[index].shares + 1,
-      );
-    });
-  }
-
-  void _openComments(int index, BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => CommentsPage(
-          post: _posts[index],
-          onLikePressed: () => _toggleLike(index),
-        ),
-      ),
-    );
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return ListView(
-      children: [
-        for (int i = 0; i < _posts.length; i++)
-          PostItem(
-            postData: _posts[i],
-            onLikePressed: () => _toggleLike(i),
-            onRepostPressed: () => _toggleRepost(i),
-            onCommentPressed: () => _openComments(i, context),
-          ),
-      ],
+    // Lấy id user hiện tại từ Supabase
+    final currentUserId = Supabase.instance.client.auth.currentUser?.id;
+
+    return BlocBuilder<PostCubit, PostState>(
+      builder: (context, state) {
+        if (state is PostStateLoading || state is PostStateInitial) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (state is PostStateError) {
+          return Center(
+            child: Text(
+              'Error: ${state.message}',
+              style: const TextStyle(color: Colors.red),
+            ),
+          );
+        }
+
+        if (state is PostStateLoaded) {
+          final posts = state.posts;
+          if (posts.isEmpty) {
+            return const Center(
+              child: Text('No posts yet. Be the first to post!'),
+            );
+          }
+
+          final cubit = context.read<PostCubit>();
+
+          return ListView.separated(
+            itemCount: posts.length,
+            separatorBuilder: (_, __) =>
+                const Divider(height: 1, color: ColorName.borderLight),
+            itemBuilder: (context, index) {
+              final PostEntity post = posts[index];
+
+              // Xem có phải chủ bài viết không
+              final bool isOwner =
+                  currentUserId != null && currentUserId == post.authorId;
+
+              return PostItem(
+                post: post,
+                onLikePressed: () => cubit.toggleLike(post.id),
+                onCommentPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Comment coming soon')),
+                  );
+                },
+                onRepostPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Repost coming soon')),
+                  );
+                },
+                onMorePressed: () {
+                  // 🔥 3 chấm: mở bottom sheet
+                  _showMoreBottomSheet(
+                    context: context,
+                    cubit: cubit,
+                    post: post,
+                    isOwner: isOwner,
+                  );
+                },
+
+                /// 🔥 Khi bấm avatar / tên tác giả
+                onAuthorPressed: () {
+                  if (currentUserId == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Please log in to view profiles'),
+                      ),
+                    );
+                    return;
+                  }
+
+                  if (isOwner) {
+                    // 👉 Đây là bài của chính mình -> đi tới trang profile chính
+                    context.router.push(
+                      const ProfileRoute(), // nếu route tên khác thì đổi lại
+                    );
+                  } else {
+                    // 👉 Bài của người khác -> đi tới UserProfilePage (module user_profile)
+                    context.router.push(
+                      UserProfileRoute(userId: post.authorId),
+                    );
+                  }
+                },
+              );
+            },
+          );
+        }
+
+        return const SizedBox.shrink();
+      },
     );
+  }
+
+  void _showMoreBottomSheet({
+    required BuildContext context,
+    required PostCubit cubit,
+    required PostEntity post,
+    required bool isOwner,
+  }) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: ColorName.softBg,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.only(
+              left: 16,
+              right: 16,
+              top: 8,
+              bottom: 16,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: isOwner
+                  ? _buildOwnerActions(ctx, cubit, post)
+                  : _buildOtherActions(ctx, post),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  /// 🔹 Menu cho chủ bài viết: Edit + Delete
+  List<Widget> _buildOwnerActions(
+    BuildContext context,
+    PostCubit cubit,
+    PostEntity post,
+  ) {
+    return [
+      ListTile(
+        leading: const Icon(Icons.edit_outlined),
+        title: const Text(
+          'Edit post',
+          style: TextStyle(fontWeight: FontWeight.w600),
+        ),
+        onTap: () async {
+          Navigator.pop(context); // đóng bottom sheet
+
+          final result = await context.router.push(EditPostRoute(post: post));
+
+          if (result == true && context.mounted) {
+            context.read<PostCubit>().loadFeed(); // reload lại sau khi edit
+          }
+        },
+      ),
+      ListTile(
+        leading: const Icon(
+          Icons.delete_outline,
+          color: Colors.red,
+        ),
+        title: const Text(
+          'Delete post',
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            color: Colors.red,
+          ),
+        ),
+        onTap: () async {
+          Navigator.pop(context);
+
+          final confirm = await showDialog<bool>(
+            context: context,
+            builder: (ctx) => AlertDialog(
+              title: const Text('Delete post'),
+              content: const Text('Are you sure you want to delete this post?'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx, false),
+                  child: const Text('Cancel'),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx, true),
+                  child: const Text('Delete'),
+                ),
+              ],
+            ),
+          );
+
+          if (confirm == true) {
+            final ok = await cubit.deletePost(post.id);
+            if (!context.mounted) return;
+            if (ok) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Post deleted')),
+              );
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Failed to delete post')),
+              );
+            }
+          }
+        },
+      ),
+    ];
+  }
+
+  /// 🔹 Menu khi là bài của người khác
+  List<Widget> _buildOtherActions(BuildContext context, PostEntity post) {
+    return [
+      ListTile(
+        leading: const Icon(Icons.flag_outlined),
+        title: const Text(
+          'Report post',
+          style: TextStyle(fontWeight: FontWeight.w600),
+        ),
+        onTap: () {
+          Navigator.pop(context);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Report coming soon')),
+          );
+        },
+      ),
+      ListTile(
+        leading: const Icon(Icons.volume_off_outlined),
+        title: const Text(
+          'Mute this author',
+          style: TextStyle(fontWeight: FontWeight.w600),
+        ),
+        onTap: () {
+          Navigator.pop(context);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Mute author coming soon')),
+          );
+        },
+      ),
+      ListTile(
+        leading: const Icon(Icons.block),
+        title: const Text(
+          'Block this author',
+          style: TextStyle(fontWeight: FontWeight.w600),
+        ),
+        onTap: () {
+          Navigator.pop(context);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Block author coming soon')),
+          );
+        },
+      ),
+      ListTile(
+        leading: const Icon(Icons.link),
+        title: const Text(
+          'Copy link',
+          style: TextStyle(fontWeight: FontWeight.w600),
+        ),
+        onTap: () {
+          Navigator.pop(context);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Copy link coming soon')),
+          );
+        },
+      ),
+    ];
   }
 }

@@ -47,11 +47,24 @@ class _LoginPageState extends State<LoginPage> {
                 final token = cubit.accessToken;
                 final refreshToken = cubit.refreshToken;
                 
-                print('🔑 LOGIN SUCCESS - TOKEN INFO:');
+                print('🔑 LOGIN SUCCESS:');
+                print('   User ID: $userId');
+                print('   Access Token Length: ${token?.length ?? 0} chars');
+                print('   Refresh Token Length: ${refreshToken?.length ?? 0} chars');
                 print('   Access Token: $token');
                 print('   Refresh Token: $refreshToken');
-                print('   Token Length: ${token?.length}');
-                print('   User ID: $userId');
+                
+                if (token != null) {
+                    debugPrint('🎯 FULL TOKEN:', wrapWidth: 1024);
+                    debugPrint(token, wrapWidth: 1024);
+                    
+                    // Hoặc chia thành chunks
+                    final chunkSize = 200;
+                    for (int i = 0; i < token.length; i += chunkSize) {
+                      final end = i + chunkSize < token.length ? i + chunkSize : token.length;
+                      debugPrint('CHUNK${i ~/ chunkSize}: ${token.substring(i, end)}');
+                    }
+                  }
                 showToastWidget(  
                   ToastWidget(title: 'Success', description: 'Login successful!'),
                   duration: const Duration(seconds: 2),

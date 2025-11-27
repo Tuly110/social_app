@@ -231,42 +231,30 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDataSource{
   }
   
   @override
-  Future<UserEntity> getUserInfo() async {
-    try {
-      final currentUser = supabaseClient.auth.currentUser;
-      if (currentUser == null) {
-        throw Exception('No user is currently signed in');
-      }
+Future<UserEntity> getUserInfo() async {
+  // BỎ CHECK NULL HOÀN TOÀN - giả định đã có session
+  final currentUser = supabaseClient.auth.currentUser!;
+  final session = supabaseClient.auth.currentSession; 
+  
+  final profile = await supabaseClient
+    .from('profiles')
+    .select()
+    .eq('id', currentUser.id)
+    .maybeSingle();
 
-      final profile = await supabaseClient
-        .from('profiles')
-        .select()
-        .eq('id', currentUser.id)
-        .maybeSingle();
+  if (profile == null) {
+    return await mapUserandCreateProfile(currentUser, currentUser.email ?? '');
+  }
 
-      if (profile == null) {
-        return await mapUserandCreateProfile(currentUser, currentUser.email ?? '');
-      }
-
-      return UserEntity(
-        id: currentUser.id,
-        email: currentUser.email ?? 'Unknown',
-        username: profile['username'] ?? currentUser.email?.split('@')[0] ?? 'Unknown',
-        avatarUrl: profile['avatar_url'],
-        isEmailVerified: currentUser.emailConfirmedAt != null,
-      );
-    } on PostgrestException catch(e) {
-
-      if (e.code == 'PGRST116') { // No data found
-        final currentUser = supabaseClient.auth.currentUser!;
-        return await mapUserandCreateProfile(currentUser, currentUser.email ?? '');
-      }
-
-      throw Exception('Failed to fetch user info: ${e.message}');
-    } catch (e) {
-
-      throw Exception('Failed to fetch user info: ${e.toString()}');
-    }
-  } 
+  return UserEntity(
+    id: currentUser.id,
+    email: currentUser.email ?? 'Unknown',
+    username: profile['username'] ?? currentUser.email?.split('@')[0] ?? 'Unknown',
+    avatarUrl: profile['avatar_url'],
+    isEmailVerified: currentUser.emailConfirmedAt != null,
+    accessToken: session?.accessToken, // Thêm token
+    refreshToken: session?.refreshToken, // Thêm token
+  );
+}
 
 }

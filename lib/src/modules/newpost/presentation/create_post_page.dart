@@ -1,11 +1,60 @@
+// lib/src/modules/newpost/presentation/create_post_page.dart
+
+import 'dart:io';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../generated/colors.gen.dart';
-import 'models/post_data.dart';
+import '../../../common/utils/getit_utils.dart';
+import '../../auth/presentation/cubit/auth_cubit.dart';
+import '../../auth/presentation/cubit/auth_state.dart';
+import '../domain/usecase/create_post_usecase.dart';
 import 'widgets/create_post_app_bar.dart';
 import 'widgets/post_action_bar.dart';
 import 'widgets/post_content_field.dart';
+
+/// 3 chế độ hiển thị bài viết
+enum PostVisibility { public, friends, private }
+
+extension PostVisibilityX on PostVisibility {
+  String get label {
+    switch (this) {
+      case PostVisibility.public:
+        return 'public';
+      case PostVisibility.friends:
+        return 'friends_only';
+      case PostVisibility.private:
+        return 'private';
+    }
+  }
+
+  IconData get icon {
+    switch (this) {
+      case PostVisibility.public:
+        return Icons.public;
+      case PostVisibility.friends:
+        return Icons.group;
+      case PostVisibility.private:
+        return Icons.lock;
+    }
+  }
+
+  /// Nếu sau này backend dùng string kiểu 'public' | 'friends' | 'private'
+  String get backendValue {
+    switch (this) {
+      case PostVisibility.public:
+        return 'public';
+      case PostVisibility.friends:
+        return 'friends_only';
+      case PostVisibility.private:
+        return 'private';
+    }
+  }
+}
 
 @RoutePage()
 class CreatePostPage extends StatefulWidget {
@@ -18,18 +67,26 @@ class CreatePostPage extends StatefulWidget {
 class _CreatePostPageState extends State<CreatePostPage> {
   final TextEditingController _postController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
-  int _characterCount = 0;
-  final int _maxCharacters = 280;
-  bool _isPublic = true;
-  bool _isFriend = true;
 
-  // Mock user data
-  final String _currentUsername = 'abcde';
+  static const int _maxCharacters = 280;
+  int _characterCount = 0;
+
+  bool _isSubmitting = false;
+
+  /// Trạng thái hiển thị bài viết
+  PostVisibility _visibility = PostVisibility.public;
+
+  final ImagePicker _picker = ImagePicker();
+  XFile? _selectedImage;
 
   @override
   void initState() {
     super.initState();
-    _postController.addListener(_updateCharacterCount);
+    _postController.addListener(() {
+      setState(() {
+        _characterCount = _postController.text.length;
+      });
+    });
   }
 
   @override
@@ -39,55 +96,187 @@ class _CreatePostPageState extends State<CreatePostPage> {
     super.dispose();
   }
 
-  void _updateCharacterCount() {
-    setState(() {
-      _characterCount = _postController.text.length;
-    });
+  // chọn ảnh
+  Future<void> _pickImage() async {
+    final picked = await _picker.pickImage(source: ImageSource.gallery);
+    if (picked != null) {
+      setState(() {
+        _selectedImage = picked;
+      });
+    }
   }
 
-  void _createPost() {
-    final String content = _postController.text.trim();
-    
-    if (content.isEmpty) {
-      _showErrorDialog('Please write something before posting.');
-      return;
-    }
+  // upload ảnh lên Supabase bucket 'post-images'
+  Future<String?> _uploadPostImage(XFile image) async {
+    try {
+      final client = Supabase.instance.client;
+      final bytes = await image.readAsBytes();
 
-    if (content.length > _maxCharacters) {
-      _showErrorDialog('Post exceeds the character limit of $_maxCharacters.');
-      return;
-    }
+      final fileExt = image.path.split('.').last;
+      final fileName = '${DateTime.now().millisecondsSinceEpoch}.$fileExt';
+      final filePath = 'posts/$fileName';
 
-    // Create new post
-    final newPost = PostData(
-      username: _currentUsername,
-      time: 'Now',
-      content: content,
-      likes: 0,
-      comments: 0,
-      shares: 0,
-      isLiked: false,
-      isReposted: false,
-      isPublic: _isPublic,
+      await client.storage.from('post-images').uploadBinary(
+            filePath,
+            bytes,
+            fileOptions: FileOptions(
+              contentType: 'image/$fileExt',
+              upsert: false,
+            ),
+          );
+
+      final publicUrl =
+          client.storage.from('post-images').getPublicUrl(filePath);
+
+      print('>>> [Create] Upload image success: $publicUrl');
+      return publicUrl;
+    } catch (e, st) {
+      print('>>> [Create] Upload image ERROR: $e');
+      print(st);
+      return null;
+    }
+  }
+
+  /// Bottom sheet chọn Public / Friends / Private
+  Future<void> _showVisibilitySheet() async {
+    final selected = await showModalBottomSheet<PostVisibility>(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (ctx) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 8),
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(999),
+                ),
+              ),
+              const SizedBox(height: 8),
+              ListTile(
+                leading: Icon(PostVisibility.public.icon),
+                title: Text(PostVisibility.public.label),
+                trailing: _visibility == PostVisibility.public
+                    ? const Icon(Icons.check)
+                    : null,
+                onTap: () => Navigator.of(ctx).pop(PostVisibility.public),
+              ),
+              ListTile(
+                leading: Icon(PostVisibility.friends.icon),
+                title: Text(PostVisibility.friends.label),
+                trailing: _visibility == PostVisibility.friends
+                    ? const Icon(Icons.check)
+                    : null,
+                onTap: () => Navigator.of(ctx).pop(PostVisibility.friends),
+              ),
+              ListTile(
+                leading: Icon(PostVisibility.private.icon),
+                title: Text(PostVisibility.private.label),
+                trailing: _visibility == PostVisibility.private
+                    ? const Icon(Icons.check)
+                    : null,
+                onTap: () => Navigator.of(ctx).pop(PostVisibility.private),
+              ),
+              const SizedBox(height: 12),
+            ],
+          ),
+        );
+      },
     );
 
-    _postController.clear();
+    if (selected != null && selected != _visibility) {
+      setState(() {
+        _visibility = selected;
+      });
+    }
+  }
 
-    // Show success message
-    _showSuccessDialog();
-    
-    AutoTabsRouter.of(context).setActiveIndex(0);
+  Future<void> _createPost() async {
+    final content = _postController.text.trim();
+    print(
+        '>>> [Create] _createPost content="$content", visibility=${_visibility.backendValue}');
+
+    if (content.isEmpty && _selectedImage == null) {
+      _showErrorDialog(
+        'Please write something or add a photo before posting.',
+      );
+      return;
+    }
+
+    if (_characterCount > _maxCharacters) {
+      _showErrorDialog(
+        'Post exceeds the character limit of $_maxCharacters.',
+      );
+      return;
+    }
+
+    setState(() => _isSubmitting = true);
+
+    try {
+      String? imageUrl;
+
+      // nếu có ảnh thì upload trước
+      if (_selectedImage != null) {
+        imageUrl = await _uploadPostImage(_selectedImage!);
+      }
+
+      // gọi usecase trực tiếp qua getIt
+      final createUseCase = getIt<CreatePostUseCase>();
+
+      // TODO: nếu usecase support visibility thì truyền thêm vào ở đây
+      final newPost = await createUseCase(
+        content,
+        imageUrl: imageUrl,
+        visibility:
+            _visibility.backendValue, // 'public' | 'friends' | 'private'
+      );
+
+      print('>>> [Create] New post id=${newPost.id}');
+
+      if (!mounted) return;
+
+      // clear form
+      _postController.clear();
+      setState(() {
+        _selectedImage = null;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Post created successfully!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+
+      // báo cho Home biết là vừa tạo post xong
+      context.router.pop(true);
+    } catch (e, st) {
+      print('>>> [Create] ERROR: $e');
+      print(st);
+      if (!mounted) return;
+      _showErrorDialog('Failed to create post. Please try again.');
+    } finally {
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+      }
+    }
   }
 
   void _showErrorDialog(String message) {
-    showDialog(
+    showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (_) => AlertDialog(
         title: const Text('Cannot Post'),
         content: Text(message),
         actions: [
           TextButton(
-            onPressed: () => AutoTabsRouter.of(context).setActiveIndex(0),
+            onPressed: () => Navigator.pop(context),
             child: const Text('OK'),
           ),
         ],
@@ -95,99 +284,72 @@ class _CreatePostPageState extends State<CreatePostPage> {
     );
   }
 
-  void _showSuccessDialog() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Post created successfully!'),
-        backgroundColor: Colors.green,
-        duration: Duration(seconds: 2),
-        behavior: SnackBarBehavior.floating,
-        margin: EdgeInsets.only(
-          bottom: 100,
-          left: 20,
-          right: 20,
-        ),
-      ),
-    );
-  }
-
-  void _clearPost() {
-    _postController.clear();
-  }
-
-  void _togglePrivacy() {
-    setState(() {
-      if (_isPublic) {
-        _isPublic = false; 
-        _isFriend = true; 
-      } 
-      else if (_isFriend) {
-        _isFriend = false; 
-
-      } 
-      else {
-        _isPublic = true;  
-        _isFriend = true; 
-      }
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
-    final bool canPost = _postController.text.trim().isNotEmpty &&
-        _postController.text.length <= _maxCharacters;
+    // 🔥 Lấy thông tin user đang đăng nhập từ AuthCubit
+    final authState = context.watch<AuthCubit>().state;
+
+    final currentUser = authState.maybeWhen(
+      userInfoLoaded: (user) => user,
+      orElse: () => null,
+    );
+
+    final currentUsername = currentUser?.username ?? 'User';
+
+    final canPost = !_isSubmitting &&
+        (_postController.text.trim().isNotEmpty || _selectedImage != null) &&
+        _characterCount <= _maxCharacters;
 
     return Scaffold(
       backgroundColor: ColorName.backgroundWhite,
       appBar: CreatePostAppBar(
         canPost: canPost,
-        onPostPressed: _createPost,
-         onBackPressed:() => context.router.pop() ,
+        onPostPressed: _isSubmitting ? null : _createPost,
+        onBackPressed: () => context.router.pop(),
       ),
       body: Column(
         children: [
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(16),
-              child: PostContentField(
-                postController: _postController,
-                focusNode: _focusNode,
-                currentUsername: _currentUsername,
-                isPublic: _isPublic,
-                onPrivacyChanged: _togglePrivacy,
-                characterCount: _characterCount,
-                maxCharacters: _maxCharacters, 
-                isFriends: _isFriend,
+              child: Column(
+                children: [
+                  PostContentField(
+                    postController: _postController,
+                    focusNode: _focusNode,
+                    currentUsername: currentUsername,
+                    isPublic: _visibility == PostVisibility.public,
+                    isFriends: _visibility == PostVisibility.friends,
+                    onPrivacyChanged:
+                        _showVisibilitySheet, // 👈 bấm chip để chọn
+                    characterCount: _characterCount,
+                    maxCharacters: _maxCharacters,
+                  ),
+                  if (_selectedImage != null) ...[
+                    const SizedBox(height: 12),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(16),
+                      child: Image.file(
+                        File(_selectedImage!.path),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ],
+                ],
               ),
             ),
           ),
           PostActionBar(
             postController: _postController,
-            onClearPost: _clearPost,
-            onAddPhoto: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Photo picker coming soon!'),
-                  duration: Duration(seconds: 2),
-                ),
-              );
+            onClearPost: () {
+              _postController.clear();
+              setState(() {
+                _selectedImage = null;
+              });
             },
-            onAddMention: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Mention coming soon!'),
-                  duration: Duration(seconds: 2),
-                ),
-              );
-            },
-            onAddEmoji: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Emoji picker coming soon!'),
-                  duration: Duration(seconds: 2),
-                ),
-              );
-            },
+            onAddPhoto: _pickImage,
+            onAddMention: () {},
+            onAddEmoji: () {},
           ),
         ],
       ),
