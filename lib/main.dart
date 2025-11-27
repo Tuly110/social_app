@@ -9,34 +9,38 @@ import 'package:social_app/src/common/utils/app_environment.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'src/common/utils/getit_utils.dart';
-import 'src/modules/app/app_widget.dart'; // dùng router của bạn
-
+import 'src/modules/app/app_widget.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // 1. Load env
   await dotenv.load(fileName: "env/.env.dev");
 
+  // 2. Config EasyLoading
   configLoading();
 
-  await GetItUtils.setup();
-
+  // 3. Init Supabase TRƯỚC
   await Supabase.initialize(
-      url: dotenv.env['SUPABASE_URL']!,
-      anonKey: dotenv.env['SUPABASE_ANON_KEY']!,
+    url: dotenv.env['SUPABASE_URL']!,
+    anonKey: dotenv.env['SUPABASE_ANON_KEY']!,
   );
 
-  testApiConnection();
-  
-  runApp(OKToast( 
-    child: const AppWidget(),
-  ));
-  configLoading();
-  
+  // 4. Init DI (GetIt + Injectable) SAU Supabase
+  await GetItUtils.setup();
 
+  // 5. Test kết nối API (optional)
+  await testApiConnection();
+
+  // 6. Run app
+  runApp(
+    OKToast(
+      child: const AppWidget(),
+    ),
+  );
 }
 
-void testApiConnection() async {
+Future<void> testApiConnection() async {
   final dio = Dio(BaseOptions(baseUrl: AppEnvironment.apiUrl));
 
   try {
@@ -52,7 +56,6 @@ void testApiConnection() async {
     print('❌ Unexpected error: $e');
   }
 }
-
 
 void configLoading() {
   EasyLoading.instance

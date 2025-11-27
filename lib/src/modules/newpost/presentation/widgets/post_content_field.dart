@@ -1,8 +1,8 @@
+// lib/src/modules/newpost/presentation/widgets/post_content_field.dart
+
 import 'package:flutter/material.dart';
 
 import '../../../../../generated/colors.gen.dart';
-import 'privacy_selector.dart';
-import 'user_avatar.dart';
 
 class PostContentField extends StatelessWidget {
   final TextEditingController postController;
@@ -28,61 +28,83 @@ class PostContentField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // xác định label + icon cho chip
+    late final String privacyLabel;
+    late final IconData privacyIcon;
+
+    if (isPublic) {
+      privacyLabel = 'Public';
+      privacyIcon = Icons.public;
+    } else if (isFriends) {
+      privacyLabel = 'Friends';
+      privacyIcon = Icons.group;
+    } else {
+      privacyLabel = 'Private';
+      privacyIcon = Icons.lock;
+    }
+
+    final isOverLimit = characterCount > maxCharacters;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // User info and avatar
+        // Hàng avatar + username + chip privacy
         Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // User Avatar
-            UserAvatar(username: currentUsername),
+            CircleAvatar(
+              radius: 18,
+              backgroundColor: ColorName.mint.withOpacity(0.2),
+              child: Text(
+                (currentUsername.isNotEmpty ? currentUsername[0] : 'U')
+                    .toUpperCase(),
+                style: const TextStyle(
+                  fontWeight: FontWeight.w700,
+                  color: ColorName.mint,
+                ),
+              ),
+            ),
             const SizedBox(width: 12),
-            // User info and text field
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // User name and handle
-                  Row(
-                    children: [
-                      Text(
-                        currentUsername,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: ColorName.textBlack,
-                          fontSize: 16,
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      
-                    ],
+                  Text(
+                    currentUsername,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
                   ),
                   const SizedBox(height: 4),
-                  // Privacy selector
-                  PrivacySelector(
-                    isPublic: isPublic,
-                    onPrivacyChanged: onPrivacyChanged, 
-                    isFriends: isFriends,
-                  ),
-                  const SizedBox(height: 8),
-                  // Text field
-                  TextField(
-                    controller: postController,
-                    focusNode: focusNode,
-                    maxLines: null,
-                    style: TextStyle(
-                      color: ColorName.textBlack,
-                      fontSize: 18,
-                    ),
-                    decoration: const InputDecoration(
-                      hintText: "What's happening?",
-                      hintStyle: TextStyle(
-                        color: Colors.grey,
-                        fontSize: 18,
+                  InkWell(
+                    onTap: onPrivacyChanged,
+                    borderRadius: BorderRadius.circular(999),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: ColorName.grey100,
+                        borderRadius: BorderRadius.circular(999),
                       ),
-                      border: InputBorder.none,
-                      contentPadding: EdgeInsets.zero,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            privacyIcon,
+                            size: 14,
+                            color: ColorName.grey600,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            privacyLabel,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: ColorName.grey700,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ],
@@ -90,17 +112,26 @@ class PostContentField extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 20),
-        // Character count
+        const SizedBox(height: 16),
+        // Ô nhập nội dung
+        TextField(
+          controller: postController,
+          focusNode: focusNode,
+          maxLines: null,
+          decoration: const InputDecoration(
+            hintText: "What's happening?",
+            border: InputBorder.none,
+          ),
+        ),
+        const SizedBox(height: 8),
+        // counter
         Align(
           alignment: Alignment.centerRight,
           child: Text(
             '$characterCount/$maxCharacters',
             style: TextStyle(
-              color: characterCount > maxCharacters
-                  ? Colors.red
-                  : ColorName.textGray,
-              fontSize: 14,
+              fontSize: 12,
+              color: isOverLimit ? Colors.red : ColorName.grey500,
             ),
           ),
         ),

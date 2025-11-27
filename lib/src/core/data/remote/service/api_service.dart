@@ -15,45 +15,68 @@ import '../interceptors/error_interceptor.dart';
 
 @module
 abstract class ApiModule {
-  // Router
-  @singleton
-  // AppRouter get appRouter => AppRouter();
-
-  // Talker
   @singleton
   Talker get talker => Talker();
 
-  // Base URL
   @Named('baseUrl')
   String get baseUrl => AppEnvironment.apiUrl;
+  // Đảm bảo AppEnvironment.apiUrl = 'http://10.0.2.2:8001'
 
-  // Dio client
-  @singleton
-  Dio dio(@Named('baseUrl') String url, Talker talker) => Dio(
-        BaseOptions(
-          baseUrl: url,
-          headers: {'accept': 'application/json'},
-          connectTimeout: const Duration(seconds: AppConstants.connectTimeout),
-        ),
-      )..interceptors.addAll([
-          TalkerDioLogger(
-            talker: talker,
-            settings: TalkerDioLoggerSettings(
-              responsePen: AnsiPen()..blue(),
-              printResponseData: true,
-              printRequestData: true,
-              printRequestHeaders: true,
-            ),
-          ),
-          ErrorInterceptor(),
-        ]);
-
-  // Supabase client
   @lazySingleton
   SupabaseClient get supabaseClient => Supabase.instance.client;
+
+  @singleton
+  Dio dio(
+    @Named('baseUrl') String url,
+    Talker talker,
+    SupabaseClient supabaseClient,
+  ) {
+    final dio = Dio(
+      BaseOptions(
+        baseUrl: url,
+        headers: {'accept': 'application/json'},
+
+        // ⬇️ Giữ 10s cho connect + send
+        connectTimeout: const Duration(seconds: 10),
+        sendTimeout: const Duration(seconds: 10),
+
+        // ⬇️ TĂNG receiveTimeout để đỡ bị cắt sớm khi server trả hơi chậm
+        receiveTimeout: const Duration(seconds: 40),
+      ),
+    );
+
+    dio.interceptors.addAll([
+      TalkerDioLogger(
+        talker: talker,
+        settings: TalkerDioLoggerSettings(
+          responsePen: AnsiPen()..blue(),
+          printResponseData: true,
+          printRequestData: true,
+          printRequestHeaders: true,
+        ),
+      ),
+      // interceptor gắn token Supabase
+      InterceptorsWrapper(
+        onRequest: (options, handler) {
+          final session = supabaseClient.auth.currentSession;
+          final token = session?.accessToken;
+          if (kDebugMode) {
+            print('🔐 Supabase access token: ${token != null}');
+          }
+          if (token != null) {
+            options.headers['Authorization'] = 'Bearer $token';
+          }
+          return handler.next(options);
+        },
+      ),
+      ErrorInterceptor(),
+    ]);
+
+    return dio;
+  }
 }
 
-
+// Các extension phía dưới giữ nguyên
 extension FutureX<T extends Object> on Future<T> {
   Future<T> getOrThrow() async {
     try {

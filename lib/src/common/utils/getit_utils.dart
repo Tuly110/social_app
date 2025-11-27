@@ -5,7 +5,7 @@ import 'getit_utils.config.dart';
 
 final getIt = GetIt.instance;
 
-@injectableInit
+@InjectableInit()
 void configureDependencies() => getIt.init();
 
 class GetItUtils {

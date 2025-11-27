@@ -1,212 +1,253 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import '../models/post_data.dart';
-import 'comment_button.dart';
-import 'repost_button.dart';
-import 'like_button.dart';
-import 'action_button.dart';
+import 'package:intl/intl.dart';
 
+import '../../../newpost/domain/entities/post_entity.dart';
 import '../../../../../generated/colors.gen.dart';
 
 class PostItem extends StatelessWidget {
-  final PostData postData;
+  final PostEntity post;
   final VoidCallback onLikePressed;
-  final VoidCallback onRepostPressed;
   final VoidCallback onCommentPressed;
+  final VoidCallback onRepostPressed;
+  final VoidCallback onMorePressed;
+
+  /// 🔥 Callback khi bấm vào avatar hoặc tên tác giả
+  final VoidCallback onAuthorPressed;
 
   const PostItem({
     super.key,
-    required this.postData,
+    required this.post,
     required this.onLikePressed,
-    required this.onRepostPressed,
     required this.onCommentPressed,
+    required this.onRepostPressed,
+    required this.onMorePressed,
+    required this.onAuthorPressed,
   });
+
+  String get _timeLabel {
+    final dt = post.createdAt;
+    final time = DateFormat('h:mm a').format(dt);
+    final date = DateFormat('MMM d, yyyy').format(dt);
+    return '$time · $date';
+  }
+
+  // 🔥 Icon theo visibility
+  Widget _buildVisibilityIcon(String visibility) {
+    switch (visibility) {
+      case "public":
+        return const Icon(
+          Icons.public,
+          size: 12,
+          color: Colors.grey,
+        );
+
+      case "friends_only":
+        return const Icon(
+          Icons.group,
+          size: 12,
+          color: Colors.grey,
+        );
+
+      case "private":
+      default:
+        return const Icon(
+          Icons.lock,
+          size: 12,
+          color: Colors.grey,
+        );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: ColorName.backgroundWhite,
-        border: Border(
-          bottom: BorderSide(color: ColorName.borderLight, width: 0.5),
-        ),
-      ),
-      child: Stack(
+      color: ColorName.backgroundWhite,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // --- Header: avatar + name + time + more ---
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Avatar
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: ColorName.mint,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Center(
-                  child: Text(
-                    postData.username[0].toUpperCase(),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+              // Avatar (clickable)
+              InkWell(
+                onTap: onAuthorPressed,
+                borderRadius: BorderRadius.circular(100),
+                child: CircleAvatar(
+                  radius: 18,
+                  backgroundColor: ColorName.grey,
+                  backgroundImage: (post.authorAvatarUrl != null &&
+                          post.authorAvatarUrl!.isNotEmpty)
+                      ? NetworkImage(post.authorAvatarUrl!)
+                      : null,
+                  child: (post.authorAvatarUrl == null ||
+                          post.authorAvatarUrl!.isEmpty)
+                      ? Text(
+                          (post.authorName.isNotEmpty
+                                  ? post.authorName[0]
+                                  : '?')
+                              .toUpperCase(),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        )
+                      : null,
                 ),
               ),
               const SizedBox(width: 12),
-              // Content
+
+              // Name + visibility icon + time
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Header with username, time
-                    Row(
-                      children: [
-                        Text(
-                          postData.username,
-                          style: TextStyle(
-                            color: ColorName.textBlack,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15,
+                    GestureDetector(
+                      onTap: onAuthorPressed,
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              post.authorName,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14,
+                                color: Colors.black,
+                              ),
+                            ),
                           ),
-                        ),
-                        const SizedBox(width: 4),
-                        Icon(
-                          postData.isPublic ? Icons.public : Icons.lock_outline,
-                          size: 14,
-                          color: ColorName.grey,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          postData.time,
-                          style: TextStyle(
-                            color: ColorName.textBlack,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                          ),
-                        ),
-                        Expanded(child: Container()),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
 
-                    // Content text
-                    Text(
-                      postData.content,
-                      style: TextStyle(
-                        color: ColorName.textBlack,
-                        fontSize: 15,
-                        height: 1.4,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    // Show thread button (if applicable)
-                    if (postData.showThread)
-                      Container(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        child: Text(
-                          'Show this thread',
-                          style: TextStyle(
-                            color: ColorName.mint,
-                            fontSize: 14,
+                          // 🔥 Icon thay đổi theo visibility
+                          const SizedBox(width: 4),
+                          _buildVisibilityIcon(post.visibility),
+
+                          const SizedBox(width: 4),
+                          Text(
+                            _timeLabel,
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: Colors.grey,
+                            ),
                           ),
-                        ),
+                        ],
                       ),
-                    // Action buttons
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        CommentButton(
-                          commentCount: postData.comments,
-                          onPressed: onCommentPressed,
-                        ),
-                        RepostButton(
-                          isReposted: postData.isReposted,
-                          repostCount: postData.shares,
-                          onPressed: onRepostPressed,
-                        ),
-                        LikeButton(
-                          isLiked: postData.isLiked,
-                          likeCount: postData.likes,
-                          onPressed: onLikePressed,
-                        ),
-                        ActionButton(
-                          icon: FontAwesomeIcons.share,
-                          onPressed: () {},
-                        ),
-                      ],
                     ),
                   ],
                 ),
               ),
+
+              IconButton(
+                icon: const Icon(
+                  Icons.more_horiz,
+                  size: 20,
+                  color: Colors.grey,
+                ),
+                onPressed: onMorePressed,
+              ),
             ],
           ),
-          
-          // Icon 3 chấm
-          Positioned(
-            top: 0, 
-            right: 6, 
-            child: GestureDetector(
-              onTap: () {
-                _showPostOptions(context);
-              },
-              child: const Icon(
-                Icons.more_vert,
-                color: ColorName.grey,
-                size: 18,
+
+          const SizedBox(height: 8),
+
+          // --- Content text ---
+          if (post.content.isNotEmpty)
+            Text(
+              post.content,
+              style: const TextStyle(
+                fontSize: 14,
+                color: Colors.black87,
               ),
             ),
+
+          // --- Image (nếu có) ---
+          if (post.imageUrl != null && post.imageUrl!.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Image.network(
+                post.imageUrl!,
+                fit: BoxFit.fitWidth,
+              ),
+            ),
+          ],
+
+          const SizedBox(height: 8),
+
+          // --- Action bar ---
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _ActionIcon(
+                icon: FontAwesomeIcons.comment,
+                count: post.commentCount ?? 0,
+                onTap: onCommentPressed,
+              ),
+              _ActionIcon(
+                icon: FontAwesomeIcons.retweet,
+                count: 0,
+                onTap: onRepostPressed,
+              ),
+              _ActionIcon(
+                icon: post.isLiked
+                    ? FontAwesomeIcons.solidHeart
+                    : FontAwesomeIcons.heart,
+                count: post.likeCount,
+                onTap: onLikePressed,
+                active: post.isLiked,
+              ),
+              IconButton(
+                icon: const FaIcon(
+                  FontAwesomeIcons.arrowUpFromBracket,
+                  size: 16,
+                  color: Colors.grey,
+                ),
+                onPressed: () {},
+              ),
+            ],
           ),
         ],
       ),
     );
   }
+}
 
-  void _showPostOptions(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext context) {
-        return SafeArea(
-          child: Wrap(
-            children: [
-              ListTile(
-                leading: const Icon(Icons.flag_outlined),
-                title: const Text('Report post'),
-                onTap: () {
-                  Navigator.pop(context);
-                  // TODO: Xử lý report post
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.notifications_off_outlined),
-                title: const Text('Mute this author'),
-                onTap: () {
-                  Navigator.pop(context);
-                  // TODO: Xử lý mute author
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.block),
-                title: const Text('Block this author'),
-                onTap: () {
-                  Navigator.pop(context);
-                  // TODO: Xử lý block author
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.link),
-                title: const Text('Copy link'),
-                onTap: () {
-                  Navigator.pop(context);
-                  // TODO: Xử lý copy link
-                },
-              ),
-            ],
+class _ActionIcon extends StatelessWidget {
+  final IconData icon;
+  final int count;
+  final VoidCallback onTap;
+  final bool active;
+
+  const _ActionIcon({
+    required this.icon,
+    required this.count,
+    required this.onTap,
+    this.active = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final color = active ? Colors.red : Colors.grey;
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      child: Row(
+        children: [
+          FaIcon(icon, size: 16, color: color),
+          const SizedBox(width: 4),
+          Text(
+            count.toString(),
+            style: TextStyle(
+              fontSize: 12,
+              color: color,
+            ),
           ),
-        );
-      },
+        ],
+      ),
     );
   }
 }
