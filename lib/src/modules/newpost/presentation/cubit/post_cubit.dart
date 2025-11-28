@@ -3,11 +3,17 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../domain/entities/post_entity.dart';
+import '../../domain/entities/like_status_entity.dart';
 import '../../domain/usecase/create_post_usecase.dart';
 import '../../domain/usecase/get_feed_usecase.dart';
 import '../../domain/usecase/toggle_like_usecase.dart';
 import '../../domain/usecase/update_post_usecase.dart';
 import '../../domain/usecase/delete_post_usecase.dart';
+import '../../domain/usecase/get_like_status_usecase.dart';
+import '../../domain/usecase/get_daily_limits_usecase.dart';
+import '../../domain/usecase/get_like_count_usecase.dart';
+import '../../domain/usecase/get_post_likes_usecase.dart';
+import '../../domain/usecase/get_user_likes_usecase.dart';
 
 part 'post_state.dart';
 
@@ -18,6 +24,11 @@ class PostCubit extends Cubit<PostState> {
   final ToggleLikeUseCase _toggleLikeUseCase;
   final UpdatePostUseCase _updatePostUseCase;
   final DeletePostUseCase _deletePostUseCase;
+  final GetLikeStatusUseCase _getLikeStatusUseCase;
+  final GetDailyLimitsUseCase _getDailyLimitsUseCase;
+  final GetLikeCountUseCase _getLikeCountUseCase;
+  final GetPostLikesUseCase _getPostLikesUseCase;
+  final GetUserLikesUseCase _getUserLikesUseCase;
 
   PostCubit(
     this._getFeedUseCase,
@@ -25,6 +36,11 @@ class PostCubit extends Cubit<PostState> {
     this._toggleLikeUseCase,
     this._updatePostUseCase,
     this._deletePostUseCase,
+    this._getLikeStatusUseCase,
+    this._getDailyLimitsUseCase,
+    this._getLikeCountUseCase,
+    this._getPostLikesUseCase,
+    this._getUserLikesUseCase,
   ) : super(const PostStateInitial());
 
   /// load danh sách bài viết
@@ -124,4 +140,50 @@ class PostCubit extends Cubit<PostState> {
       emit(PostStateError(message: e.toString()));
     }
   }
+
+  Future<LikeStatusEntity> getLikeStatus(String postId) async {
+    try {
+      return await _getLikeStatusUseCase(postId);
+    } catch (e) {
+      print('>>> [Cubit] getLikeStatus error: $e');
+      rethrow;
+    }
+  }
+
+  Future<Map<String, dynamic>> getDailyLimits() async {
+    try {
+      return await _getDailyLimitsUseCase();
+    } catch (e) {
+      print('>>> [Cubit] getDailyLimits error: $e');
+      rethrow;
+    }
+  }
+
+  Future<int> getLikeCount(String postId) async {
+    try {
+      return await _getLikeCountUseCase(postId);
+    } catch (e) {
+      print('>>> [Cubit] getLikeCount error: $e');
+      rethrow;
+    }
+  }
+
+  Future<List<String>> getPostLikes(String postId) async {
+    try {
+      return await _getPostLikesUseCase(postId);
+    } catch (e) {
+      print('>>> [Cubit] getPostLikes error: $e');
+      rethrow;
+    }
+  }
+
+  Future<List<String>> getUserLikes() async {
+    try {
+      return await _getUserLikesUseCase();
+    } catch (e) {
+      print('>>> [Cubit] getUserLikes error: $e');
+      rethrow;
+    }
+  }
+
 }

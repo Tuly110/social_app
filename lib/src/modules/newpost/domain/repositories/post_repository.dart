@@ -1,4 +1,6 @@
 import '../entities/post_entity.dart';
+import '../entities/like_status_entity.dart';
+
 
 abstract class PostRepository {
   Future<List<PostEntity>> getFeed({int page, int limit});
@@ -18,4 +20,14 @@ abstract class PostRepository {
   });
 
   Future<void> deletePost(String postId);
+
+  Future<LikeStatusEntity> getLikeStatus(String postId);
+
+  Future<Map<String, dynamic>> getDailyLimits();
+
+  Future<int> getLikeCount(String postId);
+
+  Future<List<String>> getPostLikes(String postId);
+
+  Future<List<String>> getUserLikes();
 }

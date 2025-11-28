@@ -1,6 +1,7 @@
 import 'package:injectable/injectable.dart';
 
 import '../../domain/entities/post_entity.dart';
+import '../../domain/entities/like_status_entity.dart'; 
 import '../../domain/repositories/post_repository.dart';
 import '../datasources/post_remote_datasource.dart';
 
@@ -49,5 +50,31 @@ class PostRepositoryImpl implements PostRepository {
   @override
   Future<void> deletePost(String postId) {
     return remote.deletePost(postId);
+  }
+
+  @override
+  Future<LikeStatusEntity> getLikeStatus(String postId) async {
+    final model = await remote.getLikeStatus(postId);
+    return model.toEntity();
+  }
+
+  @override
+  Future<Map<String, dynamic>> getDailyLimits() {
+    return remote.getDailyLimits();
+  }
+
+  @override
+  Future<int> getLikeCount(String postId) {
+    return remote.getLikeCount(postId);
+  }
+
+  @override
+  Future<List<String>> getPostLikes(String postId) {
+    return remote.getPostLikes(postId);
+  }
+
+  @override
+  Future<List<String>> getUserLikes() {
+    return remote.getUserLikes();
   }
 }
