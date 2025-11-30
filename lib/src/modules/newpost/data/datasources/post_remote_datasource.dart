@@ -1,5 +1,4 @@
 import '../../domain/entities/post_entity.dart';
-import '../../data/models/like_status_model.dart';
 
 abstract class PostRemoteDataSource {
   Future<List<PostEntity>> getFeed({int page, int limit});
@@ -20,7 +19,7 @@ abstract class PostRemoteDataSource {
 
   Future<void> deletePost(String postId);
 
-  Future<LikeStatusModel> getLikeStatus(String postId);
+  Future<bool> getLikeStatus(String postId);
 
   Future<Map<String, dynamic>> getDailyLimits();
 

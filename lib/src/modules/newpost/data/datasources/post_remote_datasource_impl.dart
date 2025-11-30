@@ -6,7 +6,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../domain/entities/post_entity.dart';
 import '../models/post_model.dart';
-import '../models/like_status_model.dart';
 import 'post_remote_datasource.dart';
 
 @LazySingleton(as: PostRemoteDataSource)
@@ -195,8 +194,8 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
     }
   }
 
-@override
-  Future<LikeStatusModel> getLikeStatus(String postId) async {
+  @override
+  Future<bool> getLikeStatus(String postId) async {
     print('>>> [DS] getLikeStatus called with postId=$postId');
 
     try {
@@ -208,7 +207,7 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
       print('>>> [DS] GET /likes/status status=${response.statusCode}');
       print('>>> [DS] response.data=${response.data}');
 
-      return LikeStatusModel.fromJson(response.data as Map<String, dynamic>);
+      return response.data as bool;
     } on DioException catch (e) {
       print('>>> [DS] getLikeStatus DioException status=${e.response?.statusCode}');
       print('>>> [DS] getLikeStatus response data=${e.response?.data}');

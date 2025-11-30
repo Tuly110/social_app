@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../domain/entities/post_entity.dart';
-import '../../domain/entities/like_status_entity.dart';
 import '../../domain/usecase/create_post_usecase.dart';
 import '../../domain/usecase/get_feed_usecase.dart';
 import '../../domain/usecase/toggle_like_usecase.dart';
@@ -141,7 +140,7 @@ class PostCubit extends Cubit<PostState> {
     }
   }
 
-  Future<LikeStatusEntity> getLikeStatus(String postId) async {
+  Future<bool> getLikeStatus(String postId) async {
     try {
       return await _getLikeStatusUseCase(postId);
     } catch (e) {

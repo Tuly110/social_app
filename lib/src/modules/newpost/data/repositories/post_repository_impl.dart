@@ -1,7 +1,6 @@
 import 'package:injectable/injectable.dart';
 
 import '../../domain/entities/post_entity.dart';
-import '../../domain/entities/like_status_entity.dart'; 
 import '../../domain/repositories/post_repository.dart';
 import '../datasources/post_remote_datasource.dart';
 
@@ -53,9 +52,8 @@ class PostRepositoryImpl implements PostRepository {
   }
 
   @override
-  Future<LikeStatusEntity> getLikeStatus(String postId) async {
-    final model = await remote.getLikeStatus(postId);
-    return model.toEntity();
+  Future<bool> getLikeStatus(String postId) {
+    return remote.getLikeStatus(postId);
   }
 
   @override
