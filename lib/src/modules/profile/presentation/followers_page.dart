@@ -25,7 +25,7 @@ class FollowerUserModel {
 
 @RoutePage()
 class FollowersPage extends StatefulWidget {
-  /// userId của profile đang xem (thường là current user)
+  /// userId của profile đang xem (có thể là current user hoặc user khác)
   final String userId;
 
   const FollowersPage({
@@ -43,6 +43,11 @@ class _FollowersPageState extends State<FollowersPage> {
   final List<FollowerUserModel> _users = [];
   bool _hasChanged = false;
 
+  bool get _isOwnProfile {
+    final currentUserId = Supabase.instance.client.auth.currentUser?.id;
+    return currentUserId != null && currentUserId == widget.userId;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -53,27 +58,10 @@ class _FollowersPageState extends State<FollowersPage> {
   ///
   /// Gọi backend:
   ///   GET /users/{user_id}/followers
-  ///
-  /// Expect response dạng:
-  /// {
-  ///   "follows": [
-  ///     {
-  ///       "follower_id": "...",
-  ///       "follower_username": "...",
-  ///       "follower_avatar": "...",
-  ///       "created_at": "..."
-  ///       ...
-  ///     },
-  ///     ...
-  ///   ],
-  ///   "total": ...,
-  ///   "page": ...,
-  ///   ...
-  /// }
   Future<void> _loadFollowers() async {
     final supa = Supabase.instance.client;
 
-    // Lấy accessToken để gửi lên backend
+    // lấy accessToken để gọi backend
     final session = supa.auth.currentSession;
     final accessToken = session?.accessToken;
 
@@ -109,14 +97,14 @@ class _FollowersPageState extends State<FollowersPage> {
 
         final followerUsername = map['follower_username'] as String?;
         final followerAvatar = map['follower_avatar'] as String?;
-        // Backend hiện chưa trả email/bio, nên tạm để rỗng hoặc dùng username
+
         followers.add(
           FollowerUserModel(
             id: followerId,
             username: followerUsername ?? '',
             email: followerUsername ?? '',
             avatarUrl: followerAvatar,
-            bio: '', // Nếu sau này backend trả thêm bio thì map vào đây
+            bio: '', // sau này backend trả thêm bio thì map vào
           ),
         );
       }
@@ -140,13 +128,10 @@ class _FollowersPageState extends State<FollowersPage> {
   ///   - Người có id = followerId sẽ KHÔNG còn follow mình nữa
   ///   - Gọi backend:
   ///       DELETE /users/me/followers/{follower_id}
-  ///
-  /// Bạn đã (hoặc cần) implement ở backend:
-  ///
-  /// @router.delete("/me/followers/{follower_id}")
-  /// async def remove_follower(...):
-  ///     -> gọi FollowService.remove_follower(current_user["id"], follower_id)
   Future<void> _removeFollower(String followerId) async {
+    // chỉ cho remove khi đang xem profile của CHÍNH MÌNH
+    if (!_isOwnProfile) return;
+
     final supa = Supabase.instance.client;
 
     final currentUserId = supa.auth.currentUser?.id;
@@ -272,7 +257,11 @@ class _FollowersPageState extends State<FollowersPage> {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                trailing: (currentUserId == null || isMe)
+                // 👉 chỉ hiện nút "Remove follow" nếu:
+                // - đang xem profile của CHÍNH MÌNH (_isOwnProfile)
+                // - có currentUserId
+                // - follower đó không phải bản thân mình
+                trailing: (!_isOwnProfile || currentUserId == null || isMe)
                     ? null
                     : TextButton(
                         onPressed: () => _removeFollower(u.id),

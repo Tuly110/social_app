@@ -32,36 +32,73 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
   }
 
   @override
-  Future<List<PostEntity>> getFeed({int page = 0, int limit = 10}) async {
-    print('>>> [DS] getFeed called: page=$page, limit=$limit');
+  Future<List<PostEntity>> getFeed({int page = 0, int limit = 20}) async {
+    // page param giờ không dùng nữa, luôn load từ page=0 đến hết
+    print('>>> [DS] getFeed (FULL) called, limit=$limit');
+
+    final headers = _authHeaders();
+    print('>>> [DS] getFeed headers=$headers');
+
+    final List<PostEntity> allPosts = [];
+    int currentPage = 0;
+    bool hasNext = true;
 
     try {
-      final headers = _authHeaders();
-      print('>>> [DS] getFeed headers=$headers');
+      while (hasNext) {
+        print('>>> [DS] fetching page=$currentPage, limit=$limit');
 
-      final response = await _dio.get(
-        '/posts/',
-        queryParameters: {'page': page, 'limit': limit},
-        options: Options(headers: headers),
-      );
+        final response = await _dio.get(
+          '/posts/',
+          queryParameters: {
+            'page': currentPage,
+            'limit': limit,
+          },
+          options: Options(headers: headers),
+        );
 
-      print('>>> [DS] GET /posts status=${response.statusCode}');
-      print('>>> [DS] GET /posts data=${response.data}');
+        print('>>> [DS] GET /posts status=${response.statusCode}');
+        print('>>> [DS] GET /posts data=${response.data}');
 
-      final data = response.data;
+        final data = response.data;
 
-      final List<dynamic> items;
-      if (data is Map<String, dynamic> && data['posts'] is List<dynamic>) {
-        items = data['posts'] as List<dynamic>;
-      } else if (data is List<dynamic>) {
-        items = data;
-      } else {
-        throw Exception('Unexpected feed response: ${data.runtimeType}');
+        List<dynamic> items = [];
+        bool next = false;
+
+        if (data is Map<String, dynamic>) {
+          // backend dạng: { posts: [...], has_next: true/false, ... }
+          items = (data['posts'] as List<dynamic>? ?? []);
+          next = data['has_next'] == true;
+        } else if (data is List<dynamic>) {
+          // fallback: backend trả thẳng List
+          items = data;
+          next = false;
+        } else {
+          throw Exception('Unexpected feed response: ${data.runtimeType}');
+        }
+
+        if (items.isEmpty) {
+          // không còn gì nữa → dừng luôn
+          break;
+        }
+
+        allPosts.addAll(
+          items
+              .map(
+                (e) => PostModel.fromJson(e as Map<String, dynamic>).toEntity(),
+              )
+              .toList(),
+        );
+
+        if (!next) {
+          // has_next = false → hết trang
+          break;
+        }
+
+        currentPage++;
       }
 
-      return items
-          .map((e) => PostModel.fromJson(e as Map<String, dynamic>).toEntity())
-          .toList();
+      print('>>> [DS] total posts loaded = ${allPosts.length}');
+      return allPosts;
     } on DioException catch (e) {
       print('>>> [DS] getFeed DioException status=${e.response?.statusCode}');
       print('>>> [DS] getFeed response data=${e.response?.data}');
@@ -74,7 +111,7 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
     }
   }
 
-  @override
+  
   @override
   Future<PostEntity> createPost(
     String content, {

@@ -42,13 +42,6 @@ class PostItem extends StatelessWidget {
           color: Colors.grey,
         );
 
-      case "friends_only":
-        return const Icon(
-          Icons.group,
-          size: 12,
-          color: Colors.grey,
-        );
-
       case "private":
       default:
         return const Icon(

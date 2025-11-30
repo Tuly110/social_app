@@ -117,9 +117,16 @@ class _EditProfilePageState extends State<EditProfilePage> {
           );
 
       if (mounted) {
-        final newBio = bio.isEmpty ? null : bio;
-        // 👇 trả bio mới về cho ProfilePage
-        context.router.pop<String?>(newBio);
+        final updatedUsername =
+            username.isEmpty ? widget.initialUsername : username;
+        final updatedBio = bio.isEmpty ? null : bio;
+
+        // 👇 Trả FULL thông tin mới về cho ProfilePage
+        context.router.pop<Map<String, dynamic>>({
+          'username': updatedUsername,
+          'bio': updatedBio,
+          'avatarUrl': avatarUrl,
+        });
       }
     } catch (e) {
       if (!mounted) return;
