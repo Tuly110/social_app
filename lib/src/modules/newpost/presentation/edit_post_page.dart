@@ -224,7 +224,6 @@ class _EditPostPageState extends State<EditPostPage> {
                     onPrivacyChanged: () {},
                     characterCount: _characterCount,
                     maxCharacters: _maxCharacters,
-                    isFriends: _isFriend,
                   ),
                   const SizedBox(height: 12),
 

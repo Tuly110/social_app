@@ -8,8 +8,7 @@ class PostContentField extends StatelessWidget {
   final TextEditingController postController;
   final FocusNode focusNode;
   final String currentUsername;
-  final bool isPublic;
-  final bool isFriends;
+  final bool isPublic; // 👈 chỉ còn 1 flag
   final VoidCallback onPrivacyChanged;
   final int characterCount;
   final int maxCharacters;
@@ -20,7 +19,6 @@ class PostContentField extends StatelessWidget {
     required this.focusNode,
     required this.currentUsername,
     required this.isPublic,
-    required this.isFriends,
     required this.onPrivacyChanged,
     required this.characterCount,
     required this.maxCharacters,
@@ -28,20 +26,9 @@ class PostContentField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // xác định label + icon cho chip
-    late final String privacyLabel;
-    late final IconData privacyIcon;
-
-    if (isPublic) {
-      privacyLabel = 'Public';
-      privacyIcon = Icons.public;
-    } else if (isFriends) {
-      privacyLabel = 'Friends';
-      privacyIcon = Icons.group;
-    } else {
-      privacyLabel = 'Private';
-      privacyIcon = Icons.lock;
-    }
+    // Với 2 chế độ: nếu không public thì là private
+    final String privacyLabel = isPublic ? 'Public' : 'Private';
+    final IconData privacyIcon = isPublic ? Icons.public : Icons.lock;
 
     final isOverLimit = characterCount > maxCharacters;
 
@@ -82,7 +69,9 @@ class PostContentField extends StatelessWidget {
                     borderRadius: BorderRadius.circular(999),
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 4),
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: ColorName.grey100,
                         borderRadius: BorderRadius.circular(999),

@@ -12,7 +12,6 @@ import 'app_router.dart';
 class EmptyShellPage extends StatefulWidget implements AutoRouteWrapper {
   const EmptyShellPage({super.key});
 
-  /// 👉 Bọc toàn bộ shell bằng PostCubit
   @override
   Widget wrappedRoute(BuildContext context) {
     return BlocProvider<PostCubit>(
@@ -32,7 +31,7 @@ class _EmptyShellPageState extends State<EmptyShellPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: const AutoRouter(), // current page
+      body: const AutoRouter(), // current child route
       bottomNavigationBar: WidgetBottomNav(
         currentIndex: _currentIndex,
         onTap: _onNavItemTapped,
@@ -41,6 +40,11 @@ class _EmptyShellPageState extends State<EmptyShellPage> {
   }
 
   void _onNavItemTapped(int index) {
+    if (index == 2) {
+      context.router.push(const CreatePostRoute());
+      return;
+    }
+
     setState(() {
       _currentIndex = index;
     });
@@ -51,9 +55,6 @@ class _EmptyShellPageState extends State<EmptyShellPage> {
         break;
       case 1: // Chat
         context.router.replace(const ChatRoute());
-        break;
-      case 2: // CreatePost
-        context.router.replace(const CreatePostRoute());
         break;
       case 3: // Notice
         context.router.replace(const NoticeRoute());
@@ -77,9 +78,6 @@ class _EmptyShellPageState extends State<EmptyShellPage> {
       _currentIndex = 0;
     } else if (currentPath.contains('chat')) {
       _currentIndex = 1;
-    } else if (currentPath.contains('newpost')) {
-      // 🔁 path trong AppRouter của bạn là 'newpost'
-      _currentIndex = 2;
     } else if (currentPath.contains('notice')) {
       _currentIndex = 3;
     } else if (currentPath.contains('profile')) {

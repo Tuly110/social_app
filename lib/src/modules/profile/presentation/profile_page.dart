@@ -70,6 +70,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   String? _profileBio; // bio hiện tại hiển thị trên profile
   String? _avatarUrl; // avatar hiện tại hiển thị trên profile
+  String? _displayUsername; // ⭐ username lấy từ bảng profiles
 
   @override
   void initState() {
@@ -83,17 +84,20 @@ class _ProfilePageState extends State<ProfilePage> {
       final currentUser = client.auth.currentUser;
       if (currentUser == null) return;
 
+      // ⭐ Lấy luôn username từ bảng profiles
       final res = await client
           .from('profiles')
-          .select('bio, avatar_url')
+          .select('username, bio, avatar_url')
           .eq('id', currentUser.id)
           .maybeSingle();
 
+      final username = res?['username'] as String?;
       final bio = res?['bio'] as String?;
       final avatar = res?['avatar_url'] as String?;
 
       if (!mounted) return;
       setState(() {
+        _displayUsername = username;
         _profileBio = bio;
         _avatarUrl = avatar;
       });
@@ -111,9 +115,12 @@ class _ProfilePageState extends State<ProfilePage> {
 
     if (user == null) return;
 
+    // Dùng username từ profiles nếu có, fallback về AuthCubit
+    final initialUsername = _displayUsername ?? user.username ?? '';
+
     final result = await context.router.push<String?>(
       EditProfileRoute(
-        initialUsername: user.username ?? '',
+        initialUsername: initialUsername,
         initialBio: _profileBio,
         initialAvatarUrl: _avatarUrl,
       ),
@@ -124,13 +131,14 @@ class _ProfilePageState extends State<ProfilePage> {
 
     if (!mounted) return;
 
+    // Vẫn giữ logic cũ: nếu EditProfile trả về bio, cập nhật ngay
     if (result != null) {
       setState(() {
-        _profileBio = result; // cập nhật bio từ màn edit
+        _profileBio = result; // cập nhật bio từ màn edit (nếu có)
       });
     }
 
-    // Sau khi edit, reload lại profile từ Supabase (để lấy avatar mới)
+    // ⭐ Quan trọng: reload lại từ Supabase để lấy username & avatar mới
     await _loadProfileFromSupabase();
   }
 
@@ -242,6 +250,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             avatarRadius: _avatarRadius,
                             bio: _profileBio,
                             avatarUrl: _avatarUrl,
+                            displayUsername: _displayUsername, // ⭐ dùng tên mới
                             onEditPressed: () => _openEditProfile(context),
                           ),
                         ),
@@ -305,6 +314,7 @@ class _ProfileCard extends StatelessWidget {
   final double avatarRadius;
   final String? bio;
   final String? avatarUrl;
+  final String? displayUsername; // ⭐ username override từ profiles
   final VoidCallback? onEditPressed;
 
   const _ProfileCard({
@@ -312,6 +322,7 @@ class _ProfileCard extends StatelessWidget {
     required this.avatarRadius,
     this.bio,
     this.avatarUrl,
+    this.displayUsername,
     this.onEditPressed,
   });
 
@@ -325,6 +336,9 @@ class _ProfileCard extends StatelessWidget {
       builder: (context, state) {
         final user =
             state.maybeWhen(userInfoLoaded: (user) => user, orElse: () => null);
+
+        // ⭐ Ưu tiên username lấy từ profiles, fallback về AuthCubit
+        final nameToShow = displayUsername ?? user?.username ?? 'User Name';
 
         // avatar cho header profile
         late final ImageProvider avatarImage;
@@ -364,7 +378,7 @@ class _ProfileCard extends StatelessWidget {
                       child: Column(
                         children: [
                           Text(
-                            user?.username ?? 'User Name',
+                            nameToShow,
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: 20,
@@ -493,41 +507,163 @@ class _AllTab extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 24, 16, 100),
       children: [
-        const WidgetSectionTitle('Friends'),
+        const WidgetSectionTitle('Followers'),
         const SizedBox(height: 8),
-        Row(
-          children: [
-            const WidgetFriendAvatar(
-              'https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=200',
-            ),
-            const SizedBox(width: 10),
-            const WidgetFriendAvatar(
-              'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=200',
-            ),
-            const SizedBox(width: 10),
-            const WidgetFriendAvatar(
-              'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=200',
-            ),
-            const SizedBox(width: 10),
-            const WidgetFriendAvatar(
-              'https://images.unsplash.com/photo-1520813792240-56fc4a3765a7?w=200',
-            ),
-            const Spacer(),
-            IconButton(
-              icon: const Icon(Icons.more_horiz),
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => const SelectFriendsPage(),
-                  ),
-                );
-              },
-              tooltip: 'All friends',
-            ),
-          ],
-        ),
+        _FollowersPreviewRow(userId: userId),
         const SizedBox(height: 16),
         _TwoColumnStatsAndGallery(userId: userId),
+      ],
+    );
+  }
+}
+
+class _FollowersPreviewRow extends StatefulWidget {
+  final String userId;
+
+  const _FollowersPreviewRow({required this.userId});
+
+  @override
+  State<_FollowersPreviewRow> createState() => _FollowersPreviewRowState();
+}
+
+class _FollowerPreview {
+  final String id;
+  final String username;
+  final String? avatarUrl;
+
+  _FollowerPreview({
+    required this.id,
+    required this.username,
+    this.avatarUrl,
+  });
+}
+
+class _FollowersPreviewRowState extends State<_FollowersPreviewRow> {
+  bool _loading = true;
+  final List<_FollowerPreview> _followers = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadFollowers();
+  }
+
+  Future<void> _loadFollowers() async {
+    try {
+      final client = Supabase.instance.client;
+
+      // lấy tối đa 4 follower đầu tiên của userId
+      final rows = await client
+          .from('follows')
+          .select('follower_id')
+          .eq('following_id', widget.userId)
+          .limit(4);
+
+      final List data = (rows as List?) ?? [];
+      if (data.isEmpty) {
+        if (!mounted) return;
+        setState(() {
+          _followers.clear();
+          _loading = false;
+        });
+        return;
+      }
+
+      final futures = data.map((e) async {
+        final followerId = e['follower_id'] as String?;
+        if (followerId == null) return null;
+
+        final profile = await client
+            .from('profiles')
+            .select('id, username, avatar_url')
+            .eq('id', followerId)
+            .maybeSingle();
+
+        if (profile == null) return null;
+
+        return _FollowerPreview(
+          id: profile['id'] as String,
+          username: (profile['username'] as String?) ?? '',
+          avatarUrl: profile['avatar_url'] as String?,
+        );
+      }).toList();
+
+      final results = await Future.wait(futures);
+      final valid = results.whereType<_FollowerPreview>().toList();
+
+      if (!mounted) return;
+      setState(() {
+        _followers
+          ..clear()
+          ..addAll(valid);
+        _loading = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _followers.clear();
+        _loading = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_loading && _followers.isEmpty) {
+      return const SizedBox(
+        height: 56,
+        child: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    return Row(
+      children: [
+        if (_followers.isEmpty)
+          const Text(
+            'No followers yet',
+            style: TextStyle(color: ColorName.grey600),
+          )
+        else
+          ..._followers.map(
+            (f) => Padding(
+              padding: const EdgeInsets.only(right: 10),
+              child: GestureDetector(
+                onTap: () {
+                  context.router.push(
+                    UserProfileRoute(userId: f.id),
+                  );
+                },
+                child: CircleAvatar(
+                  radius: 18,
+                  backgroundImage:
+                      (f.avatarUrl != null && f.avatarUrl!.isNotEmpty)
+                          ? NetworkImage(f.avatarUrl!)
+                          : null,
+                  child: (f.avatarUrl == null || f.avatarUrl!.isEmpty)
+                      ? Text(
+                          f.username.isNotEmpty
+                              ? f.username[0].toUpperCase()
+                              : '?',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        )
+                      : null,
+                ),
+              ),
+            ),
+          ),
+        const Spacer(),
+        IconButton(
+          icon: const Icon(Icons.more_horiz),
+          tooltip: 'View all followers',
+          onPressed: () {
+            context.router.push(
+              FollowersRoute(userId: widget.userId),
+            );
+          },
+        ),
       ],
     );
   }

@@ -17,18 +17,16 @@ import 'widgets/create_post_app_bar.dart';
 import 'widgets/post_action_bar.dart';
 import 'widgets/post_content_field.dart';
 
-/// 3 chế độ hiển thị bài viết
-enum PostVisibility { public, friends, private }
+/// 2 chế độ hiển thị bài viết
+enum PostVisibility { public, private }
 
 extension PostVisibilityX on PostVisibility {
   String get label {
     switch (this) {
       case PostVisibility.public:
-        return 'public';
-      case PostVisibility.friends:
-        return 'friends_only';
+        return 'Public';
       case PostVisibility.private:
-        return 'private';
+        return 'Private';
     }
   }
 
@@ -36,20 +34,16 @@ extension PostVisibilityX on PostVisibility {
     switch (this) {
       case PostVisibility.public:
         return Icons.public;
-      case PostVisibility.friends:
-        return Icons.group;
       case PostVisibility.private:
         return Icons.lock;
     }
   }
 
-  /// Nếu sau này backend dùng string kiểu 'public' | 'friends' | 'private'
+  /// Giá trị gửi lên backend: 'public' | 'private'
   String get backendValue {
     switch (this) {
       case PostVisibility.public:
         return 'public';
-      case PostVisibility.friends:
-        return 'friends_only';
       case PostVisibility.private:
         return 'private';
     }
@@ -137,7 +131,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
     }
   }
 
-  /// Bottom sheet chọn Public / Friends / Private
+  /// Bottom sheet chọn Public / Private
   Future<void> _showVisibilitySheet() async {
     final selected = await showModalBottomSheet<PostVisibility>(
       context: context,
@@ -166,14 +160,6 @@ class _CreatePostPageState extends State<CreatePostPage> {
                     ? const Icon(Icons.check)
                     : null,
                 onTap: () => Navigator.of(ctx).pop(PostVisibility.public),
-              ),
-              ListTile(
-                leading: Icon(PostVisibility.friends.icon),
-                title: Text(PostVisibility.friends.label),
-                trailing: _visibility == PostVisibility.friends
-                    ? const Icon(Icons.check)
-                    : null,
-                onTap: () => Navigator.of(ctx).pop(PostVisibility.friends),
               ),
               ListTile(
                 leading: Icon(PostVisibility.private.icon),
@@ -229,12 +215,10 @@ class _CreatePostPageState extends State<CreatePostPage> {
       // gọi usecase trực tiếp qua getIt
       final createUseCase = getIt<CreatePostUseCase>();
 
-      // TODO: nếu usecase support visibility thì truyền thêm vào ở đây
       final newPost = await createUseCase(
         content,
         imageUrl: imageUrl,
-        visibility:
-            _visibility.backendValue, // 'public' | 'friends' | 'private'
+        visibility: _visibility.backendValue, // 'public' | 'private'
       );
 
       print('>>> [Create] New post id=${newPost.id}');
@@ -253,7 +237,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
           backgroundColor: Colors.green,
         ),
       );
-
+      context.router.pop(true);
       // báo cho Home biết là vừa tạo post xong
       context.router.pop(true);
     } catch (e, st) {
@@ -305,7 +289,10 @@ class _CreatePostPageState extends State<CreatePostPage> {
       appBar: CreatePostAppBar(
         canPost: canPost,
         onPostPressed: _isSubmitting ? null : _createPost,
-        onBackPressed: () => context.router.pop(),
+        onBackPressed: () {
+          print('>>> [CreatePostPage] Back callback');
+          context.router.maybePop(); // hoặc Navigator.of(context).maybePop();
+        },
       ),
       body: Column(
         children: [
@@ -319,7 +306,6 @@ class _CreatePostPageState extends State<CreatePostPage> {
                     focusNode: _focusNode,
                     currentUsername: currentUsername,
                     isPublic: _visibility == PostVisibility.public,
-                    isFriends: _visibility == PostVisibility.friends,
                     onPrivacyChanged:
                         _showVisibilitySheet, // 👈 bấm chip để chọn
                     characterCount: _characterCount,

@@ -124,17 +124,12 @@ class PostList extends StatelessWidget {
       builder: (ctx) {
         return SafeArea(
           child: Padding(
-            padding: const EdgeInsets.only(
-              left: 16,
-              right: 16,
-              top: 8,
-              bottom: 16,
-            ),
+            padding: const EdgeInsets.all(16),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: isOwner
                   ? _buildOwnerActions(ctx, cubit, post)
-                  : _buildOtherActions(ctx, post),
+                  : _buildOtherActions(ctx, post), // 👈 NHỚ TRUYỀN post VÀO
             ),
           ),
         );
@@ -142,7 +137,6 @@ class PostList extends StatelessWidget {
     );
   }
 
-  /// 🔹 Menu cho chủ bài viết: Edit + Delete
   List<Widget> _buildOwnerActions(
     BuildContext context,
     PostCubit cubit,
@@ -156,20 +150,17 @@ class PostList extends StatelessWidget {
           style: TextStyle(fontWeight: FontWeight.w600),
         ),
         onTap: () async {
-          Navigator.pop(context); // đóng bottom sheet
+          Navigator.pop(context);
 
           final result = await context.router.push(EditPostRoute(post: post));
 
           if (result == true && context.mounted) {
-            context.read<PostCubit>().loadFeed(); // reload lại sau khi edit
+            context.read<PostCubit>().loadFeed();
           }
         },
       ),
       ListTile(
-        leading: const Icon(
-          Icons.delete_outline,
-          color: Colors.red,
-        ),
+        leading: const Icon(Icons.delete_outline, color: Colors.red),
         title: const Text(
           'Delete post',
           style: TextStyle(
@@ -201,50 +192,23 @@ class PostList extends StatelessWidget {
           if (confirm == true) {
             final ok = await cubit.deletePost(post.id);
             if (!context.mounted) return;
-            if (ok) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Post deleted')),
-              );
-            } else {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Failed to delete post')),
-              );
-            }
+
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(ok ? 'Post deleted' : 'Failed to delete post'),
+              ),
+            );
           }
         },
       ),
     ];
   }
 
-  /// 🔹 Menu khi là bài của người khác
-  List<Widget> _buildOtherActions(BuildContext context, PostEntity post) {
+  List<Widget> _buildOtherActions(
+    BuildContext context,
+    PostEntity post,
+  ) {
     return [
-      ListTile(
-        leading: const Icon(Icons.flag_outlined),
-        title: const Text(
-          'Report post',
-          style: TextStyle(fontWeight: FontWeight.w600),
-        ),
-        onTap: () {
-          Navigator.pop(context);
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Report coming soon')),
-          );
-        },
-      ),
-      ListTile(
-        leading: const Icon(Icons.volume_off_outlined),
-        title: const Text(
-          'Mute this author',
-          style: TextStyle(fontWeight: FontWeight.w600),
-        ),
-        onTap: () {
-          Navigator.pop(context);
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Mute author coming soon')),
-          );
-        },
-      ),
       ListTile(
         leading: const Icon(Icons.block),
         title: const Text(

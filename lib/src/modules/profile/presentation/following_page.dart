@@ -1,4 +1,5 @@
 // lib/src/modules/profile/presentation/following_page.dart
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -24,7 +25,8 @@ class FollowingUserModel {
 
 @RoutePage()
 class FollowingPage extends StatefulWidget {
-  final String userId; // id của user đang xem profile (thường là current user)
+  /// ID của profile đang được xem (có thể là mình, có thể là user khác)
+  final String userId;
 
   const FollowingPage({
     super.key,
@@ -39,7 +41,12 @@ class _FollowingPageState extends State<FollowingPage> {
   late Future<void> _future;
   final List<FollowingUserModel> _users = [];
   Set<String> _followingIds = {};
-  bool _hasChanged = false; // dùng để báo về ProfilePage là có thay đổi
+  bool _hasChanged = false;
+
+  bool get _isOwnProfile {
+    final currentUserId = Supabase.instance.client.auth.currentUser?.id;
+    return currentUserId != null && currentUserId == widget.userId;
+  }
 
   @override
   void initState() {
@@ -47,106 +54,123 @@ class _FollowingPageState extends State<FollowingPage> {
     _future = _loadFollowing();
   }
 
+  /// 🔹 Load những người mà widget.userId đang follow
   Future<void> _loadFollowing() async {
     final client = Supabase.instance.client;
 
-    // 1. Lấy danh sách following_id: những người widget.userId đang follow
-    final followsRes = await client
-        .from('follows')
-        .select('following_id')
-        .eq('follower_id', widget.userId);
-
-    final List data = (followsRes as List?) ?? [];
-    if (data.isEmpty) {
-      setState(() {
-        _users.clear();
-        _followingIds.clear();
-      });
-      return;
-    }
-
-    final followingIds = data
-        .map((e) => e['following_id'] as String)
-        .where((id) => id.isNotEmpty)
-        .toList();
-
-    // 2. Lấy profile cho từng id (song song)
-    final futures = followingIds.map((id) async {
-      final row = await client
-          .from('profiles')
-          .select('id, username, email, avatar_url, bio')
-          .eq('id', id)
-          .maybeSingle();
-
-      if (row == null) return null;
-
-      return FollowingUserModel(
-        id: row['id'] as String,
-        username: (row['username'] as String?) ?? '',
-        email: (row['email'] as String?) ?? '',
-        avatarUrl: row['avatar_url'] as String?,
-        bio: row['bio'] as String?,
-      );
-    }).toList();
-
-    final results = await Future.wait(futures);
-    final users = results.whereType<FollowingUserModel>().toList();
-
-    setState(() {
-      _users
-        ..clear()
-        ..addAll(users);
-      _followingIds = users.map((u) => u.id).toSet();
-    });
-  }
-
-  /// 🔥 Unfollow / Follow lại (trên trang Following)
-  Future<void> _toggleFollow(String targetUserId) async {
-    final client = Supabase.instance.client;
-    final currentUserId = client.auth.currentUser?.id;
-
-    if (currentUserId == null || currentUserId == targetUserId) return;
-
-    final isFollowing = _followingIds.contains(targetUserId);
+    // user mà ta muốn xem following của họ (có thể là mình, có thể là người khác)
+    final followerId = widget.userId;
 
     try {
-      if (isFollowing) {
-        // UNFOLLOW
-        await client
-            .from('follows')
-            .delete()
-            .eq('follower_id', currentUserId)
-            .eq('following_id', targetUserId);
+      final followsRes = await client
+          .from('follows')
+          .select('following_id')
+          .eq('follower_id', followerId);
 
+      final List data = (followsRes as List?) ?? [];
+      if (data.isEmpty) {
+        setState(() {
+          _users.clear();
+          _followingIds.clear();
+        });
+        return;
+      }
+
+      final followingIds = data
+          .map((e) => e['following_id'] as String)
+          .where((id) => id.isNotEmpty)
+          .toList();
+
+      final futures = followingIds.map((id) async {
+        final row = await client
+            .from('profiles')
+            .select('id, username, email, avatar_url, bio')
+            .eq('id', id)
+            .maybeSingle();
+
+        if (row == null) return null;
+
+        return FollowingUserModel(
+          id: row['id'] as String,
+          username: (row['username'] as String?) ?? '',
+          email: (row['email'] as String?) ?? '',
+          avatarUrl: row['avatar_url'] as String?,
+          bio: row['bio'] as String?,
+        );
+      }).toList();
+
+      final results = await Future.wait(futures);
+      final users = results.whereType<FollowingUserModel>().toList();
+
+      setState(() {
+        _users
+          ..clear()
+          ..addAll(users);
+        _followingIds = users.map((u) => u.id).toSet();
+      });
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to load following: $e')),
+      );
+    }
+  }
+
+  /// 🔥 Unfollow – chỉ cho phép khi đang xem profile của CHÍNH MÌNH
+  Future<void> _toggleFollow(String targetUserId) async {
+    if (!_isOwnProfile) return; // không cho unfollow hộ người khác
+
+    final client = Supabase.instance.client;
+    final currentUserId = client.auth.currentUser?.id;
+    if (currentUserId == null || currentUserId == targetUserId) return;
+
+    try {
+      final before = await client
+          .from('follows')
+          .select('follower_id, following_id')
+          .eq('follower_id', currentUserId)
+          .eq('following_id', targetUserId);
+
+      print('>>> [FollowingPage] BEFORE toggle: $before');
+
+      final isFollowing = (before as List).isNotEmpty;
+      if (!isFollowing) return;
+
+      final deleteRes = await client
+          .from('follows')
+          .delete()
+          .eq('follower_id', currentUserId)
+          .eq('following_id', targetUserId);
+
+      print('>>> [FollowingPage] DELETE result: $deleteRes');
+
+      final after = await client
+          .from('follows')
+          .select('follower_id, following_id')
+          .eq('follower_id', currentUserId)
+          .eq('following_id', targetUserId);
+
+      print('>>> [FollowingPage] AFTER delete: $after');
+
+      if ((after as List).isEmpty) {
         if (!mounted) return;
         setState(() {
           _followingIds.remove(targetUserId);
           _users.removeWhere((u) => u.id == targetUserId);
           _hasChanged = true;
         });
-
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Unfollowed')),
         );
       } else {
-        // FOLLOW lại
-        await client.from('follows').insert({
-          'follower_id': currentUserId,
-          'following_id': targetUserId,
-        });
-
         if (!mounted) return;
-        setState(() {
-          _followingIds.add(targetUserId);
-          _hasChanged = true;
-        });
-
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Followed')),
+          const SnackBar(content: Text('Unfollow failed on server')),
         );
       }
     } catch (e) {
       if (!mounted) return;
+      print('>>> [FollowingPage] toggleFollow ERROR: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed: $e')),
       );
@@ -165,9 +189,7 @@ class _FollowingPageState extends State<FollowingPage> {
         foregroundColor: Colors.white,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            context.router.pop(_hasChanged);
-          },
+          onPressed: () => context.router.pop(_hasChanged),
         ),
       ),
       body: FutureBuilder<void>(
@@ -180,16 +202,13 @@ class _FollowingPageState extends State<FollowingPage> {
 
           if (snap.hasError) {
             return Center(
-              child: Text(
-                'Error: ${snap.error}',
-                textAlign: TextAlign.center,
-              ),
+              child: Text('Error: ${snap.error}'),
             );
           }
 
           if (_users.isEmpty) {
             return const Center(
-              child: Text('You are not following anyone yet'),
+              child: Text('No following yet'),
             );
           }
 
@@ -198,14 +217,14 @@ class _FollowingPageState extends State<FollowingPage> {
             separatorBuilder: (_, __) => const Divider(height: 1),
             itemBuilder: (context, index) {
               final u = _users[index];
-              final isMe = (currentUserId == u.id);
+              final isMe = currentUserId == u.id;
               final isFollowing = _followingIds.contains(u.id);
 
               return ListTile(
                 leading: GestureDetector(
-                  onTap: () {
-                    context.router.push(UserProfileRoute(userId: u.id));
-                  },
+                  onTap: () => context.router.push(
+                    UserProfileRoute(userId: u.id),
+                  ),
                   child: CircleAvatar(
                     backgroundColor: Colors.grey[300],
                     backgroundImage:
@@ -226,9 +245,9 @@ class _FollowingPageState extends State<FollowingPage> {
                   ),
                 ),
                 title: GestureDetector(
-                  onTap: () {
-                    context.router.push(UserProfileRoute(userId: u.id));
-                  },
+                  onTap: () => context.router.push(
+                    UserProfileRoute(userId: u.id),
+                  ),
                   child: Text(u.username),
                 ),
                 subtitle: Text(
@@ -236,7 +255,11 @@ class _FollowingPageState extends State<FollowingPage> {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                trailing: (currentUserId == null || isMe)
+                // 👉 chỉ hiện Unfollow nếu:
+                // - đang xem profile của chính mình (_isOwnProfile)
+                // - có currentUserId
+                // - không phải bản thân mình
+                trailing: (!_isOwnProfile || currentUserId == null || isMe)
                     ? null
                     : TextButton(
                         onPressed: () => _toggleFollow(u.id),
@@ -250,4 +273,3 @@ class _FollowingPageState extends State<FollowingPage> {
     );
   }
 }
-  
