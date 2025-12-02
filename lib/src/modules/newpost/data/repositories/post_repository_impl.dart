@@ -50,4 +50,29 @@ class PostRepositoryImpl implements PostRepository {
   Future<void> deletePost(String postId) {
     return remote.deletePost(postId);
   }
+
+  @override
+  Future<bool> getLikeStatus(String postId) {
+    return remote.getLikeStatus(postId);
+  }
+
+  @override
+  Future<Map<String, dynamic>> getDailyLimits() {
+    return remote.getDailyLimits();
+  }
+
+  @override
+  Future<int> getLikeCount(String postId) {
+    return remote.getLikeCount(postId);
+  }
+
+  @override
+  Future<List<String>> getPostLikes(String postId) {
+    return remote.getPostLikes(postId);
+  }
+
+  @override
+  Future<List<String>> getUserLikes() {
+    return remote.getUserLikes();
+  }
 }

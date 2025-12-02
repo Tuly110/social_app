@@ -231,6 +231,116 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
     }
   }
 
+  @override
+  Future<bool> getLikeStatus(String postId) async {
+    print('>>> [DS] getLikeStatus called with postId=$postId');
+
+    try {
+      final response = await _dio.get(
+        '/likes/status/$postId',
+        options: Options(headers: _authHeaders()),
+      );
+
+      print('>>> [DS] GET /likes/status status=${response.statusCode}');
+      print('>>> [DS] response.data=${response.data}');
+
+      return response.data as bool;
+    } on DioException catch (e) {
+      print('>>> [DS] getLikeStatus DioException status=${e.response?.statusCode}');
+      print('>>> [DS] getLikeStatus response data=${e.response?.data}');
+      rethrow;
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>> getDailyLimits() async {
+    print('>>> [DS] getDailyLimits called');
+
+    try {
+      final response = await _dio.get(
+        '/likes/daily-limits/me',
+        options: Options(headers: _authHeaders()),
+      );
+
+      print('>>> [DS] GET /likes/daily-limits status=${response.statusCode}');
+      print('>>> [DS] response.data=${response.data}');
+
+      return response.data as Map<String, dynamic>;
+    } on DioException catch (e) {
+      print('>>> [DS] getDailyLimits DioException status=${e.response?.statusCode}');
+      print('>>> [DS] getDailyLimits response data=${e.response?.data}');
+      rethrow;
+    }
+  }
+
+  @override
+  Future<int> getLikeCount(String postId) async {
+    print('>>> [DS] getLikeCount called with postId=$postId');
+
+    try {
+      final response = await _dio.get(
+        '/likes/count/$postId',
+        options: Options(headers: _authHeaders()),
+      );
+
+      print('>>> [DS] GET /likes/count status=${response.statusCode}');
+      print('>>> [DS] response.data=${response.data}');
+
+      final data = response.data as Map<String, dynamic>;
+      return data['count'] as int;
+    } on DioException catch (e) {
+      print('>>> [DS] getLikeCount DioException status=${e.response?.statusCode}');
+      print('>>> [DS] getLikeCount response data=${e.response?.data}');
+      rethrow;
+    }
+  }
+
+  @override
+  Future<List<String>> getPostLikes(String postId) async {
+    print('>>> [DS] getPostLikes called with postId=$postId');
+
+    try {
+      final response = await _dio.get(
+        '/likes/post/$postId',
+        options: Options(headers: _authHeaders()),
+      );
+
+      print('>>> [DS] GET /likes/post status=${response.statusCode}');
+      print('>>> [DS] response.data=${response.data}');
+
+      final data = response.data as Map<String, dynamic>;
+      final List<dynamic> users = data['users'] as List<dynamic>;
+      return users.map((user) => user['user_id'] as String).toList();
+    } on DioException catch (e) {
+      print('>>> [DS] getPostLikes DioException status=${e.response?.statusCode}');
+      print('>>> [DS] getPostLikes response data=${e.response?.data}');
+      rethrow;
+    }
+  }
+
+  @override
+  Future<List<String>> getUserLikes() async {
+    print('>>> [DS] getUserLikes called');
+
+    try {
+      final response = await _dio.get(
+        '/likes/user/me/likes',
+        options: Options(headers: _authHeaders()),
+      );
+
+      print('>>> [DS] GET /likes/user/me/likes status=${response.statusCode}');
+      print('>>> [DS] response.data=${response.data}');
+
+      final data = response.data as Map<String, dynamic>;
+      final List<dynamic> posts = data['posts'] as List<dynamic>;
+      return posts.map((post) => post['post_id'] as String).toList();
+    } on DioException catch (e) {
+      print('>>> [DS] getUserLikes DioException status=${e.response?.statusCode}');
+      print('>>> [DS] getUserLikes response data=${e.response?.data}');
+      rethrow;
+    }
+  }
+
   // 🔧 Helper parse PostResponse từ backend (có thể là {post: {...}} hoặc {...})
   PostEntity _parsePostFromResponse(dynamic raw) {
     late final Map<String, dynamic> json;
