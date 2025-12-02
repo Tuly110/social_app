@@ -10,7 +10,7 @@ import '../../../newpost/domain/entities/post_entity.dart';
 import '../../../../common/utils/getit_utils.dart';
 import '../cubit/comment_cubit.dart';
 import '../../domain/entities/comment_entity.dart';
-import '../../domain/errors/daily_limit_exception.dart';
+import '../../../../core/error/failures.dart';
 
 @RoutePage()
 class CommentPage extends StatefulWidget {
