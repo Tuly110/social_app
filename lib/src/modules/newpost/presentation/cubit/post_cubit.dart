@@ -4,15 +4,15 @@ import 'package:injectable/injectable.dart';
 
 import '../../domain/entities/post_entity.dart';
 import '../../domain/usecase/create_post_usecase.dart';
-import '../../domain/usecase/get_feed_usecase.dart';
-import '../../domain/usecase/toggle_like_usecase.dart';
-import '../../domain/usecase/update_post_usecase.dart';
 import '../../domain/usecase/delete_post_usecase.dart';
-import '../../domain/usecase/get_like_status_usecase.dart';
 import '../../domain/usecase/get_daily_limits_usecase.dart';
+import '../../domain/usecase/get_feed_usecase.dart';
 import '../../domain/usecase/get_like_count_usecase.dart';
+import '../../domain/usecase/get_like_status_usecase.dart';
 import '../../domain/usecase/get_post_likes_usecase.dart';
 import '../../domain/usecase/get_user_likes_usecase.dart';
+import '../../domain/usecase/toggle_like_usecase.dart';
+import '../../domain/usecase/update_post_usecase.dart';
 
 part 'post_state.dart';
 
@@ -44,11 +44,22 @@ class PostCubit extends Cubit<PostState> {
 
   /// load danh sách bài viết
   Future<void> loadFeed() async {
+    if (isClosed) { 
+      print('⚠️ PostCubit is closed, cannot load feed');
+      return;
+    }
+    
     emit(const PostStateLoading());
+    
     try {
       final posts = await _getFeedUseCase();
+      
+      if (isClosed) return; 
+      
       emit(PostStateLoaded(posts: posts));
     } catch (e) {
+      if (isClosed) return; 
+      
       emit(PostStateError(message: e.toString()));
     }
   }

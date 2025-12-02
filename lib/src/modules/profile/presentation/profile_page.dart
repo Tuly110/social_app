@@ -6,25 +6,19 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' hide AuthState;
 
 import '../../../../generated/colors.gen.dart';
+import '../../../common/utils/getit_utils.dart';
 import '../../app/app_router.dart';
 import '../../auth/presentation/cubit/auth_cubit.dart';
 import '../../auth/presentation/cubit/auth_state.dart' as auth;
-
 // Post + getIt
 import '../../newpost/presentation/cubit/post_cubit.dart';
-import '../../../common/utils/getit_utils.dart';
-
-// Widgets
-import 'component/select_friends_page.dart';
-import 'component/widget__friend_avatar.dart';
-import 'component/widget__stats_card.dart';
-import 'component/widget__section_title.dart';
-import 'component/widget__placeholder.dart';
-import 'cubit/profile_cubit.dart';
-import 'cubit/profile_state.dart';
+import 'component/user_gallery_grid.dart';
 // 2 widget mới dùng PostCubit
 import 'component/user_posts_tab.dart';
-import 'component/user_gallery_grid.dart';
+import 'component/widget__placeholder.dart';
+import 'component/widget__section_title.dart';
+import 'component/widget__stats_card.dart';
+import 'cubit/profile_cubit.dart';
 
 @RoutePage()
 class ProfilePage extends StatefulWidget implements AutoRouteWrapper {
@@ -689,7 +683,7 @@ class _TwoColumnStatsAndGallery extends StatelessWidget {
                   controller?.animateTo(1);
                 },
                 onFollowingTap: () async {
-                  final changed = await context.router.push<bool>(
+                  final changed = await context.router.push(
                     FollowingRoute(userId: userId),
                   );
                   if (changed == true && context.mounted) {
@@ -701,7 +695,7 @@ class _TwoColumnStatsAndGallery extends StatelessWidget {
                   }
                 },
                 onFollowersTap: () async {
-                  final changed = await context.router.push<bool>(
+                  final changed = await context.router.push(
                     FollowersRoute(userId: userId),
                   );
                   if (changed == true && context.mounted) {

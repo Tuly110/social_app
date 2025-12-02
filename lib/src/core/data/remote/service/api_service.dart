@@ -7,7 +7,6 @@ import 'package:talker_dio_logger/talker_dio_logger_interceptor.dart';
 import 'package:talker_dio_logger/talker_dio_logger_settings.dart';
 import 'package:talker_flutter/talker_flutter.dart';
 
-import '../../../../common/constants/app_constants.dart';
 import '../../../../common/extensions/optional_x.dart';
 import '../../../../common/utils/app_environment.dart';
 import '../base/api_error.dart';
@@ -35,12 +34,10 @@ abstract class ApiModule {
       BaseOptions(
         baseUrl: url,
         headers: {'accept': 'application/json'},
+        responseType: ResponseType.json,
 
-        // ⬇️ Giữ 10s cho connect + send
         connectTimeout: const Duration(seconds: 10),
         sendTimeout: const Duration(seconds: 10),
-
-        // ⬇️ TĂNG receiveTimeout để đỡ bị cắt sớm khi server trả hơi chậm
         receiveTimeout: const Duration(seconds: 40),
       ),
     );

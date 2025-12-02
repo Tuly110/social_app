@@ -1,4 +1,4 @@
-package com.fau.socialapp
+package com.fau.citylifeapp.tuly
 
 import io.flutter.embedding.android.FlutterActivity
 

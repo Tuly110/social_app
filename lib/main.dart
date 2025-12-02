@@ -1,11 +1,9 @@
 import 'dart:async';
 
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:oktoast/oktoast.dart';
-import 'package:social_app/src/common/utils/app_environment.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'src/common/utils/getit_utils.dart';
@@ -14,46 +12,31 @@ import 'src/modules/app/app_widget.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // 1. Load env
-  await dotenv.load(fileName: "env/.env.dev");
-
-  // 2. Config EasyLoading
-  configLoading();
-
-  // 3. Init Supabase TRƯỚC
-  await Supabase.initialize(
-    url: dotenv.env['SUPABASE_URL']!,
-    anonKey: dotenv.env['SUPABASE_ANON_KEY']!,
-  );
-
-  // 4. Init DI (GetIt + Injectable) SAU Supabase
-  await GetItUtils.setup();
-
-  // 5. Test kết nối API (optional)
-  await testApiConnection();
-
-  // 6. Run app
-  runApp(
-    OKToast(
-      child: const AppWidget(),
-    ),
-  );
-}
-
-Future<void> testApiConnection() async {
-  final dio = Dio(BaseOptions(baseUrl: AppEnvironment.apiUrl));
-
   try {
-    final response = await dio.get('/health');
-    if (response.statusCode == 200) {
-      print('✅ API connected successfully: ${response.data}');
-    } else {
-      print('⚠️ API returned status: ${response.statusCode}');
-    }
-  } on DioException catch (e) {
-    print('❌ API connection failed: ${e.message}');
-  } catch (e) {
-    print('❌ Unexpected error: $e');
+    // 1. Load env
+    await dotenv.load(fileName: "env/.env.dev");
+
+    // 2. Config EasyLoading
+    configLoading();
+
+    // 3. Init Supabase
+    await Supabase.initialize(
+      url: dotenv.env['SUPABASE_URL']!,
+      anonKey: dotenv.env['SUPABASE_ANON_KEY']!,
+    );
+
+    await GetItUtils.setup();
+
+    runApp(
+      OKToast(
+        child: const AppWidget(),
+      ),
+    );
+    
+  } catch (e, stackTrace) {
+    print('Stack trace: $stackTrace');
+    // Không runApp gì cả, để app crash và show error trong log
+    rethrow;
   }
 }
 

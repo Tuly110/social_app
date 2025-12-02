@@ -28,7 +28,7 @@ if (flutterVersionName == null) {
 }
 
 android {
-    namespace "com.fau.socialapp"
+    namespace "com.fau.citylifeapp.tuly"
     compileSdk 35  // THÊM DÒNG NÀY - SPECIFY COMPILE SDK VERSION
     ndkVersion flutter.ndkVersion
 
@@ -46,7 +46,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.fau.socialapp"
+        applicationId "com.fau.citylifeapp.tuly"
         minSdk 21  // SPECIFY MIN SDK
         targetSdk 34  // SPECIFY TARGET SDK
         versionCode flutterVersionCode.toInteger()
