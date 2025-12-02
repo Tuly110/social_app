@@ -20,3 +20,16 @@ class CacheFailure extends Failure {
 class AuthFailure extends Failure {
   const AuthFailure(String message) : super(message: message);
 }
+
+class DailyLimitException implements Exception {
+  final String message;
+  final int dailyRemaining;
+
+  DailyLimitException({
+    required this.message,
+    required this.dailyRemaining,
+  });
+
+  @override
+  String toString() => message;
+}

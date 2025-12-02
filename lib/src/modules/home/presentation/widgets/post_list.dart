@@ -9,6 +9,8 @@ import '../../../newpost/presentation/cubit/post_cubit.dart';
 import '../../../../../generated/colors.gen.dart';
 import 'post_item.dart';
 
+import '../cubit/comment_cubit.dart';
+
 class PostList extends StatelessWidget {
   const PostList({super.key});
 
@@ -41,6 +43,7 @@ class PostList extends StatelessWidget {
           }
 
           final cubit = context.read<PostCubit>();
+          final commentCubit = context.read<CommentCubit>();
 
           return ListView.separated(
             itemCount: posts.length,
@@ -57,9 +60,8 @@ class PostList extends StatelessWidget {
                 post: post,
                 onLikePressed: () => cubit.toggleLike(post.id),
                 onCommentPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Comment coming soon')),
-                  );
+                  // 🔥 ĐIỀU HƯỚNG ĐƠN GIẢN - TEST TRƯỚC
+                    context.router.push(CommentRoute(post: post));
                 },
                 onRepostPressed: () {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -108,6 +110,120 @@ class PostList extends StatelessWidget {
       },
     );
   }
+
+void _handleCommentPressed(BuildContext context, CommentCubit commentCubit, PostEntity post) {
+  _showCommentDialog(context, commentCubit, post);
+}
+
+void _showCommentDialog(BuildContext context, CommentCubit commentCubit, PostEntity post) {
+  final TextEditingController commentController = TextEditingController();
+  
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: ColorName.backgroundWhite,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+    ),
+    builder: (ctx) {
+      return Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(ctx).viewInsets.bottom,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Header
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(color: Colors.grey.shade300),
+                ),
+              ),
+              child: Row(
+                children: [
+                  const Text(
+                    'Add Comment',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const Spacer(),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.pop(ctx),
+                  ),
+                ],
+              ),
+            ),
+            
+            // Comment input
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: TextField(
+                controller: commentController,
+                maxLines: 3,
+                decoration: InputDecoration(
+                  hintText: 'Write your comment...',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ),
+            
+            // Post button
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () async {
+                    final content = commentController.text.trim();
+                    if (content.isEmpty) return;
+                    
+                    try {
+                      await commentCubit.createComment(post.id, content);
+                      if (context.mounted) {
+                        Navigator.pop(context);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Comment posted!')),
+                        );
+                      }
+                    } catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Failed to post comment: $e')),
+                        );
+                      }
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: ColorName.primaryBlue,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  child: const Text(
+                    'Post Comment',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    },
+  );
+}
 
   void _showMoreBottomSheet({
     required BuildContext context,
