@@ -1,6 +1,5 @@
 // lib/src/modules/newpost/data/datasources/post_remote_datasource_impl.dart
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -129,11 +128,33 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
     final res = await _dio.post(
       '/posts/',
       data: payload,
+      options: Options(headers: _authHeaders()), // ⭐ THÊM DÒNG NÀY
     );
 
     print('>>> [PostRemoteDS] response=${res.data}');
 
-    return PostEntity.fromJson(res.data as Map<String, dynamic>);
+    // ⭐ SỬA DÒNG NÀY: Ép kiểu an toàn
+    final responseData = res.data;
+    if (responseData is Map<String, dynamic>) {
+    // Kiểm tra nếu response có cấu trúc {success, message, post, ...}
+      if (responseData.containsKey('post') && 
+          responseData['post'] is Map<String, dynamic>) {
+        
+        print('>>> [PostRemoteDS] Found "post" key in response');
+        final postJson = responseData['post'] as Map<String, dynamic>;
+        
+        // ⭐ GỌI HELPER METHOD _parsePostFromResponse để parse đúng
+        return _parsePostFromResponse(responseData);
+        
+      } else {
+        // Fallback: giả sử response chính là post object
+        print('>>> [PostRemoteDS] No "post" key, assuming direct post object');
+        return _parsePostFromResponse(responseData);
+      }
+    } else {
+      print('❌ Unexpected response type: ${responseData.runtimeType}');
+      throw Exception('Invalid response format from server');
+    }
   }
 
   @override

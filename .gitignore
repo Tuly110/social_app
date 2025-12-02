@@ -12,70 +12,53 @@
 .swiftpm/
 migrate_working_dir/
 
-# IntelliJ related
+# IDEs
 *.iml
 *.ipr
 *.iws
 .idea/
-
-# Visual Studio Code related
 .classpath
 .project
 .settings/
 .vscode/
 
-# Flutter repo-specific
-/bin/cache/
-/bin/internal/
-/dev/benchmarks/
-/dev/bots/
-/dev/devicelab/
-/dev/docs/
-/dev/integration_tests/**/xcuserdata
-/dev/integration_tests/**/Pods
-/packages/flutter/coverage/
-version
-analysis_benchmark.json
-.packages.generated
-
-# Android Gradle & Manifest
-/android/app/build.gradle
-/android/build.gradle
-/android/app/src/main/AndroidManifest.xml
-
+# Flutter
+.dart_tool/
+.packages
+.pub/
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+.cxx/
 
 # Generated code
 *.freezed.dart
 *.g.dart
 *.gr.dart
 *.config.dart
-lib/generated/*.g.dart
-lib/generated/*.gr.dart
-lib/generated/*.freezed.dart
-# Nhưng giữ lại file FlutterGen
+
+# Allow FlutterGen generated files
 !lib/generated/*.gen.dart
 
-# Flutter/Dart/Pub related
-**/doc/api/
+# Ignore all generated folders
+lib/generated/
+
+# Environment
+*.env
+.env
+.env.*
+
+# Firebase
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist
+
+# OS-specific
 **/ios/Flutter/.last_build_id
-.dart_tool/
-.flutter-plugins
-.flutter-plugins-dependencies
-.packages
-.pub-cache/
-.pub/
-build/
-.cxx/
-
-# Android Studio build outputs
-/android/app/debug
-/android/app/profile
-/android/app/release
-
-# Web
 linux/flutter/generated_*
 macos/Flutter/GeneratedPluginRegistrant.swift
 windows/flutter/generated_*
 
-# Environment files
-*.env
+# Android Studio build
+android/app/debug/
+android/app/profile/
+android/app/release/
