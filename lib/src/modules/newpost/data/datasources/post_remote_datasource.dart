@@ -1,7 +1,7 @@
 import '../../domain/entities/post_entity.dart';
 
 abstract class PostRemoteDataSource {
-  Future<List<PostEntity>> getFeed({int page, int limit});
+  Future<List<PostEntity>> getFeed({int page = 0, int limit = 20});
 
   Future<PostEntity> createPost(
     String content, {
@@ -18,4 +18,10 @@ abstract class PostRemoteDataSource {
   });
 
   Future<void> deletePost(String postId);
+
+  Future<PostEntity> sharePost(
+    String postId, {
+    required String visibility,
+    String? content,
+  });
 }

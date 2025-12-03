@@ -6,16 +6,22 @@ abstract class PostRepository {
   Future<PostEntity> createPost(
     String content, {
     String? imageUrl,
-    required String visibility,
+    String visibility = 'public',
   });
 
   Future<PostEntity> toggleLike(String postId);
 
   Future<PostEntity> updatePost(
     String postId, {
-    required String content,
+    String? content,
     String? imageUrl,
   });
 
   Future<void> deletePost(String postId);
+
+  Future<PostEntity> sharePost(
+    String postId, {
+    required String visibility,
+    String? content,
+  });
 }

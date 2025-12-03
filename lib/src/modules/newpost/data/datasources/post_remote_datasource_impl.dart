@@ -111,7 +111,6 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
     }
   }
 
-  
   @override
   Future<PostEntity> createPost(
     String content, {
@@ -124,16 +123,59 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
       'visibility': visibility,
     };
 
-    print('>>> [PostRemoteDS] payload=$payload');
+    print('>>> [PostRemoteDS] createPost payload=$payload');
+
+    try {
+      final res = await _dio.post(
+        '/posts/',
+        data: payload,
+        options: Options(headers: _authHeaders()),
+      );
+
+      print(
+          '>>> [PostRemoteDS] createPost status=${res.statusCode}, data=${res.data}');
+
+      // backend trả PostResponse dạng map
+      return PostModel.fromJson(res.data as Map<String, dynamic>).toEntity();
+    } on DioException catch (e) {
+      print(
+          '>>> [PostRemoteDS] DioException (createPost) status=${e.response?.statusCode}');
+      print('>>> [PostRemoteDS] DioException data=${e.response?.data}');
+      print('>>> [PostRemoteDS] DioException message=${e.message}');
+      rethrow;
+    } catch (e, st) {
+      print('>>> [PostRemoteDS] OTHER ERROR (createPost): $e');
+      print(st);
+      rethrow;
+    }
+  }
+
+  /// 🔹 SHARE POST (POST /posts/{post_id}/share)
+  /// Share đơn giản: không caption, visibility = public
+  @override
+  Future<PostEntity> sharePost(
+    String postId, {
+    required String visibility,
+    String? content,
+  }) async {
+    final headers = _authHeaders();
+
+    final payload = <String, dynamic>{
+      'content': content ?? '',
+      'visibility': visibility, // 'public' hoặc 'private'
+    };
+
+    print('>>> [DS] sharePost postId=$postId payload=$payload');
 
     final res = await _dio.post(
-      '/posts/',
+      '/posts/$postId/share',
       data: payload,
+      options: Options(headers: headers),
     );
 
-    print('>>> [PostRemoteDS] response=${res.data}');
+    print('>>> [DS] sharePost response=${res.data}');
 
-    return PostEntity.fromJson(res.data as Map<String, dynamic>);
+    return _parsePostFromResponse(res.data);
   }
 
   @override

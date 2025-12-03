@@ -22,6 +22,10 @@ class PostModel with _$PostModel {
     @JsonKey(name: 'like_count') @Default(0) int likeCount,
     @JsonKey(name: 'comment_count') @Default(0) int commentCount,
     @JsonKey(name: 'is_liked') @Default(false) bool isLiked,
+
+    /// 🔥 thêm 2 field để hỗ trợ share
+    @JsonKey(name: 'type') @Default('original') String type,
+    @JsonKey(name: 'original_post_id') String? originalPostId,
   }) = _PostModel;
 
   factory PostModel.fromJson(Map<String, dynamic> json) =>
@@ -36,9 +40,13 @@ class PostModel with _$PostModel {
       imageUrl: imageUrl,
       content: content,
       createdAt: DateTime.parse(createdAt),
+      updatedAt: DateTime.parse(updatedAt),
       likeCount: likeCount,
-      commentCount: commentCount ?? 0,
+      commentCount: commentCount,
       isLiked: isLiked,
+      visibility: visibility,
+      type: type, // 👈 map xuống entity
+      originalPostId: originalPostId, // 👈 map xuống entity
     );
   }
 }

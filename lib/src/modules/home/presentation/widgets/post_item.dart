@@ -7,22 +7,30 @@ import '../../../../../generated/colors.gen.dart';
 
 class PostItem extends StatelessWidget {
   final PostEntity post;
+
+  final PostEntity? originalPost;
+
   final VoidCallback onLikePressed;
   final VoidCallback onCommentPressed;
   final VoidCallback onRepostPressed;
   final VoidCallback onMorePressed;
+  final VoidCallback onSharePressed;
 
-  /// 🔥 Callback khi bấm vào avatar hoặc tên tác giả
   final VoidCallback onAuthorPressed;
+
+  final VoidCallback? onOriginalAuthorPressed;
 
   const PostItem({
     super.key,
     required this.post,
+    this.originalPost,
     required this.onLikePressed,
     required this.onCommentPressed,
     required this.onRepostPressed,
     required this.onMorePressed,
+    required this.onSharePressed,
     required this.onAuthorPressed,
+    this.onOriginalAuthorPressed,
   });
 
   String get _timeLabel {
@@ -32,17 +40,15 @@ class PostItem extends StatelessWidget {
     return '$time · $date';
   }
 
-  // 🔥 Icon theo visibility
   Widget _buildVisibilityIcon(String visibility) {
     switch (visibility) {
-      case "public":
+      case 'public':
         return const Icon(
           Icons.public,
           size: 12,
           color: Colors.grey,
         );
-
-      case "private":
+      case 'private':
       default:
         return const Icon(
           Icons.lock,
@@ -54,17 +60,17 @@ class PostItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isShared = post.type == 'shared' && originalPost != null;
+
     return Container(
       color: ColorName.backgroundWhite,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // --- Header: avatar + name + time + more ---
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Avatar (clickable)
               InkWell(
                 onTap: onAuthorPressed,
                 borderRadius: BorderRadius.circular(100),
@@ -91,8 +97,6 @@ class PostItem extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 12),
-
-              // Name + visibility icon + time
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -103,7 +107,9 @@ class PostItem extends StatelessWidget {
                         children: [
                           Expanded(
                             child: Text(
-                              post.authorName,
+                              isShared
+                                  ? '${post.authorName} shared a post'
+                                  : post.authorName,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
@@ -113,11 +119,8 @@ class PostItem extends StatelessWidget {
                               ),
                             ),
                           ),
-
-                          // 🔥 Icon thay đổi theo visibility
                           const SizedBox(width: 4),
                           _buildVisibilityIcon(post.visibility),
-
                           const SizedBox(width: 4),
                           Text(
                             _timeLabel,
@@ -132,7 +135,6 @@ class PostItem extends StatelessWidget {
                   ],
                 ),
               ),
-
               IconButton(
                 icon: const Icon(
                   Icons.more_horiz,
@@ -143,20 +145,23 @@ class PostItem extends StatelessWidget {
               ),
             ],
           ),
-
           const SizedBox(height: 8),
-
-          // --- Content text ---
           if (post.content.isNotEmpty)
-            Text(
-              post.content,
-              style: const TextStyle(
-                fontSize: 14,
-                color: Colors.black87,
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Text(
+                post.content,
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: Colors.black87,
+                ),
               ),
             ),
-
-          // --- Image (nếu có) ---
+          if (isShared && originalPost != null)
+            _SharedPostCard(
+              originalPost: originalPost!,
+              onHeaderTap: onOriginalAuthorPressed,
+            ),
           if (post.imageUrl != null && post.imageUrl!.isNotEmpty) ...[
             const SizedBox(height: 8),
             ClipRRect(
@@ -167,10 +172,7 @@ class PostItem extends StatelessWidget {
               ),
             ),
           ],
-
           const SizedBox(height: 8),
-
-          // --- Action bar ---
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -198,10 +200,122 @@ class PostItem extends StatelessWidget {
                   size: 16,
                   color: Colors.grey,
                 ),
-                onPressed: () {},
+                onPressed: onSharePressed,
               ),
             ],
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SharedPostCard extends StatelessWidget {
+  final PostEntity originalPost;
+  final VoidCallback? onHeaderTap;
+
+  const _SharedPostCard({
+    required this.originalPost,
+    this.onHeaderTap,
+  });
+
+  String get _timeLabel {
+    final dt = originalPost.createdAt;
+    final time = DateFormat('h:mm a').format(dt);
+    final date = DateFormat('MMM d, yyyy').format(dt);
+    return '$time · $date';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      decoration: BoxDecoration(
+        color: Colors.grey[100],
+        borderRadius: BorderRadius.circular(16),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 👉 NHẤN VÀO ĐÂY ĐỂ ĐI PROFILE CỦA USER GỐC
+          InkWell(
+            onTap: onHeaderTap,
+            borderRadius: BorderRadius.circular(16),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                CircleAvatar(
+                  radius: 14,
+                  backgroundColor: Colors.grey.shade400,
+                  backgroundImage: (originalPost.authorAvatarUrl != null &&
+                          originalPost.authorAvatarUrl!.isNotEmpty)
+                      ? NetworkImage(originalPost.authorAvatarUrl!)
+                      : null,
+                  child: (originalPost.authorAvatarUrl == null ||
+                          originalPost.authorAvatarUrl!.isEmpty)
+                      ? Text(
+                          (originalPost.authorName.isNotEmpty
+                                  ? originalPost.authorName[0]
+                                  : '?')
+                              .toUpperCase(),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        )
+                      : null,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        originalPost.authorName,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        _timeLabel,
+                        style: const TextStyle(
+                          fontSize: 11,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+          if (originalPost.content.isNotEmpty)
+            Text(
+              originalPost.content,
+              style: const TextStyle(
+                fontSize: 13,
+                color: Colors.black87,
+              ),
+            ),
+          if (originalPost.imageUrl != null &&
+              originalPost.imageUrl!.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Image.network(
+                  originalPost.imageUrl!,
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
         ],
       ),
     );

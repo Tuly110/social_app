@@ -15,6 +15,12 @@ abstract class _$AppRouter extends RootStackRouter {
 
   @override
   final Map<String, PageFactory> pagesMap = {
+    BlockedUsersRoute.name: (routeData) {
+      return AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: const BlockedUsersPage(),
+      );
+    },
     ChatDetailRoute.name: (routeData) {
       final args = routeData.argsAs<ChatDetailRouteArgs>(
           orElse: () => const ChatDetailRouteArgs());
@@ -155,6 +161,20 @@ abstract class _$AppRouter extends RootStackRouter {
       );
     },
   };
+}
+
+/// generated route for
+/// [BlockedUsersPage]
+class BlockedUsersRoute extends PageRouteInfo<void> {
+  const BlockedUsersRoute({List<PageRouteInfo>? children})
+      : super(
+          BlockedUsersRoute.name,
+          initialChildren: children,
+        );
+
+  static const String name = 'BlockedUsersRoute';
+
+  static const PageInfo<void> page = PageInfo<void>(name);
 }
 
 /// generated route for

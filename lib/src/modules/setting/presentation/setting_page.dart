@@ -65,10 +65,11 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
               SettingsItem(
                 icon: FontAwesomeIcons.eye,
-                title: 'Content Preferences',
-                subtitle: 'Adjust what you see on your timeline',
+                title: 'Block',
+                subtitle: 'User blocked list',
                 onTap: () {
-                  // Navigate to content preferences
+                  // 👉 Mở trang block list
+                  context.router.push(const BlockedUsersRoute());
                 },
               ),
             ],
