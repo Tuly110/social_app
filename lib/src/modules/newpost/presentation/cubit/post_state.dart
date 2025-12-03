@@ -24,3 +24,6 @@ class PostStateError extends PostState {
 
   const PostStateError({required this.message});
 }
+class PostStateLikeLimitReached extends PostState {
+  const PostStateLikeLimitReached();
+}

@@ -138,27 +138,58 @@ class PostCubit extends Cubit<PostState> {
     final current = state;
     if (current is! PostStateLoaded) return;
 
+    final post = current.posts.firstWhere((p) => p.id == postId);
+
+    // Nếu hành động là LIKE (không phải Unlike)
+    final bool isTryingToLike = !post.isLiked;
+
+    // Kiểm tra giới hạn like
+    if (isTryingToLike) {
+      final allowed = await _canLike();
+      if (!allowed) {
+        emit(PostStateLikeLimitReached());
+        return;
+      }
+    }
+
+    final updatedLocalPost = post.copyWith(
+      isLiked: !post.isLiked,
+      likeCount: post.isLiked 
+          ? post.likeCount - 1 
+          : post.likeCount + 1,
+    );
+
+    final newList = current.posts.map((p) {
+      return p.id == postId ? updatedLocalPost : p;
+    }).toList();
+
+    if (isTryingToLike && !await _canLike()) {
+      emit(PostStateLikeLimitReached());
+      return;
+    }
+
+
+    // Gọi backend
     try {
-      final updatedPost = await _toggleLikeUseCase(postId);
-
-      final updatedList = current.posts
-          .map((p) => p.id == updatedPost.id ? updatedPost : p)
-          .toList();
-
-      emit(PostStateLoaded(posts: updatedList));
+      await _toggleLikeUseCase(postId);
     } catch (e) {
-      emit(PostStateError(message: e.toString()));
+      print("toggle like API error: $e");
     }
   }
 
-  Future<bool> getLikeStatus(String postId) async {
+  Future<bool> _canLike() async {
     try {
-      return await _getLikeStatusUseCase(postId);
+      final limits = await _getDailyLimitsUseCase(); 
+      final used = limits['likesUsed'] ?? 0;
+      final limit = limits['likeLimit'] ?? 5;
+
+      return used < limit;
     } catch (e) {
-      print('>>> [Cubit] getLikeStatus error: $e');
-      rethrow;
+      print('Error checking like limit $e');
+      return true; // an toàn: vẫn cho like nếu backend gặp lỗi
     }
   }
+
 
   Future<Map<String, dynamic>> getDailyLimits() async {
     try {
