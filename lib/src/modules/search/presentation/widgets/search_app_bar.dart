@@ -3,103 +3,61 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../../../generated/colors.gen.dart';
 
 class SearchAppBar extends StatelessWidget implements PreferredSizeWidget {
-  final TextEditingController searchController;
-  final String searchQuery;
-  final TabController tabController;
-  final VoidCallback onClearSearch;
-  final VoidCallback onPerformSearch;
-  final VoidCallback onBackPressed; 
+  final TextEditingController controller;
+  final Function(String) onChanged;
+  final VoidCallback onBackPressed;
+  final TabController tabController; // Thêm lại TabController
 
   const SearchAppBar({
     super.key,
-    required this.searchController,
-    required this.searchQuery,
-    required this.tabController,
-    required this.onClearSearch,
-    required this.onPerformSearch,
+    required this.controller,
+    required this.onChanged,
     required this.onBackPressed,
+    required this.tabController,
   });
 
   @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight * 2);
-
-  Widget _buildSearchField() {
-    return Container(
-      height: 50,
-      margin: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: ColorName.backgroundLight,
-        borderRadius: BorderRadius.circular(25),
-        border: Border.all(color: ColorName.borderLight),
-      ),
-      child: Row(
-        children: [
-          const SizedBox(width: 16),
-          const FaIcon(
-            FontAwesomeIcons.magnifyingGlass,
-            color: ColorName.textGray,
-            size: 20,
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: TextField(
-              controller: searchController,
-              decoration: InputDecoration(
-                hintText: 'Search...',
-                hintStyle: TextStyle(
-                  color: ColorName.textGray,
-                ),
-                border: InputBorder.none,
-                contentPadding: EdgeInsets.zero,
-              ),
-              style: TextStyle(
-                color: ColorName.textBlack,
-                fontSize: 16,
-              ),
-              onSubmitted: (_) => onPerformSearch(),
-            ),
-          ),
-          if (searchQuery.isNotEmpty)
-            IconButton(
-              icon: const FaIcon(
-                FontAwesomeIcons.xmark,
-                size: 16,
-                color: ColorName.textGray,
-              ),
-              onPressed: onClearSearch,
-            ),
-          const SizedBox(width: 8),
-        ],
-      ),
-    );
-  }
+  Size get preferredSize => const Size.fromHeight(100); // Tăng chiều cao để chứa TabBar
 
   @override
   Widget build(BuildContext context) {
     return AppBar(
       backgroundColor: ColorName.backgroundWhite,
-      elevation: 1,
+      elevation: 0,
       leading: IconButton(
-        icon: const Icon(Icons.arrow_back_ios_new_rounded),
+        icon: const Icon(Icons.arrow_back_ios_new_rounded, color: ColorName.textBlack),
         onPressed: onBackPressed,
       ),
-      title: _buildSearchField(),
+      titleSpacing: 0,
+      title: Container(
+        height: 40,
+        margin: const EdgeInsets.only(right: 16),
+        decoration: BoxDecoration(
+          color: ColorName.backgroundLight,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: ColorName.borderLight),
+        ),
+        child: TextField(
+          controller: controller,
+          onChanged: onChanged,
+          decoration: const InputDecoration(
+            hintText: 'Search...',
+            prefixIcon: Icon(FontAwesomeIcons.magnifyingGlass, size: 16, color: ColorName.textGray),
+            border: InputBorder.none,
+            contentPadding: EdgeInsets.symmetric(vertical: 8), 
+            isDense: true,
+          ),
+        ),
+      ),
       bottom: TabBar(
         controller: tabController,
-        indicatorColor: ColorName.navBackground,
-        labelColor: ColorName.textBlack,
+        labelColor: ColorName.mint,
         unselectedLabelColor: ColorName.textGray,
-        labelStyle: const TextStyle(
-          fontWeight: FontWeight.w600,
-        ),
-        unselectedLabelStyle: const TextStyle(
-          fontWeight: FontWeight.w400,
-        ),
+        indicatorColor: ColorName.mint,
         tabs: const [
-          Tab(text: 'Top'),
-          Tab(text: 'Latest'),
-          Tab(text: 'People'),
-          Tab(text: 'Media'),
+          Tab(text: "All"),
+          Tab(text: "Posts"),
+          Tab(text: "Users"),
         ],
       ),
     );
