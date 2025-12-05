@@ -89,7 +89,7 @@ class AuthRepositoryImpl implements AuthRepository {
   }
   
   @override
-  Future<Either<Failure, void>> updatePasswprd({required String newPassword}) async {
+  Future<Either<Failure, void>> updatePassword({required String newPassword}) async {
     try{
       await authRemoteDataSource.updatePassword(newPassword: newPassword);
       return Right(null);
@@ -103,6 +103,30 @@ class AuthRepositoryImpl implements AuthRepository {
     try{
       final user = await authRemoteDataSource.getUserInfo();
       return Right(user);
+    }catch(e){
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+  
+  @override
+  Future<Either<Failure, void>> changePassword({required String newPassword, required String currentPassword}) async{
+    try{
+      await authRemoteDataSource.changePassword(newPassword: newPassword, currentPassword: currentPassword);
+      return Right(null);
+    }catch(e){
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+  
+  @override
+  Future<Either<Failure, void>> deleteAccount() async{
+    try{
+      final token = supabaseClient.auth.currentSession?.accessToken;
+      if (token == null) {
+        throw Exception('Not authenticated');
+      }
+      await authRemoteDataSource.deleteAccount(token);
+      return const Right(null);
     }catch(e){
       return Left(ServerFailure(e.toString()));
     }

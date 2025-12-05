@@ -76,6 +76,9 @@ dependencies:
 
   #socket
   web_socket_channel: ^3.0.1
+  firebase_core: ^3.4.0
+  firebase_messaging: ^15.1.0
+  flutter_local_notifications: ^19.5.0
   # reset password
   # app_links: ^6.4.1
 

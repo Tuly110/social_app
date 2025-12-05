@@ -5,6 +5,7 @@ import 'package:social_app/src/modules/app/app_router.dart';
 
 import '../../../../generated/colors.gen.dart';
 import 'widgets/action_dialogs.dart';
+import 'widgets/change_password.dart';
 import 'widgets/settings_app_bar.dart';
 import 'widgets/settings_item.dart';
 import 'widgets/settings_section.dart';
@@ -166,7 +167,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
           // Actions
           SettingsSection(
-            title: 'ACTIONS',
+            title: 'ACCOUNT',
             children: [
               SettingsItem(
                 icon: FontAwesomeIcons.arrowRightFromBracket,
@@ -181,6 +182,20 @@ class _SettingsPageState extends State<SettingsPage> {
                 subtitle: 'Permanently delete your account',
                 onTap: () => _actionDialogs.showDeleteAccountDialog(context),
                 showArrow: false,
+              ),
+              SettingsItem(
+                icon: FontAwesomeIcons.key,
+                title: 'Change Password',
+                subtitle: 'Change your password account',
+                showArrow: false,
+                onTap: (){
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    backgroundColor: Colors.transparent, 
+                    builder: (context) => ChangePasswordBottomSheet(),
+                  );
+                },
               ),
             ],
           ),

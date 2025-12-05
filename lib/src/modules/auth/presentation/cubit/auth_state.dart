@@ -20,4 +20,6 @@ class AuthState with _$AuthState {
   const factory AuthState.userInfoLoaded(UserEntity user) = _UserInfoLoaded;
   const factory AuthState.updatePasswordSuccess() = _UpdatePasswordSuccess;
   const factory AuthState.passwordResetSent({required String email}) = _PasswordResetSent;
+  const factory AuthState.changePassword() = _ChangePassword;
+  const factory AuthState.deleteAccount() = _DeleteAccount;
 }

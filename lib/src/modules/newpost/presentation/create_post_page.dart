@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gap/gap.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -184,8 +185,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
 
   Future<void> _createPost() async {
     final content = _postController.text.trim();
-    print(
-        '>>> [Create] _createPost content="$content", visibility=${_visibility.backendValue}');
+    print('[Create] _createPost content="$content", visibility=${_visibility.backendValue}');
 
     if (content.isEmpty && _selectedImage == null) {
       _showErrorDialog(
@@ -232,11 +232,46 @@ class _CreatePostPageState extends State<CreatePostPage> {
       );
       context.router.pop(true);
     } catch (e, st) {
-      print('>>> [Create] ERROR: $e');
-      print(st);
-      if (!mounted) return;
-      _showErrorDialog('Failed to create post. Please try again.');
-    } finally {
+    print('>>> [Create] ERROR TYPE: ${e.runtimeType}');
+    print('>>> [Create] ERROR TO STRING: "${e.toString()}"');
+    print('>>> [Create] ERROR MESSAGE: "${(e as Exception).toString()}"');
+    
+    // detail log
+    final errorStr = e.toString();
+    print('>>> [Create] Error contains "daily": ${errorStr.contains("daily")}');
+    print('>>> [Create] Error contains "limit": ${errorStr.contains("limit")}');
+    print('>>> [Create] Error contains "exceeded": ${errorStr.contains("exceeded")}');
+    
+    if (!mounted) return;
+    
+    String errorMessage = 'Failed to create post. Please try again.';
+    bool isDailyLimitError = false;
+
+    if (errorStr.contains('Daily posts limit exceeded') ||
+        errorStr.contains('daily post limit') ||
+        errorStr.contains('limit exceeded') ||
+        errorStr.contains('daily limit')) {
+      errorMessage = '''DAILY POST LIMIT REACHED
+
+        You have used all your daily posts for today.
+
+        • **Limit:** 1 post per day
+        • **Reset:** Every day at midnight
+        • **Remaining:** 0 posts left today
+
+        Please come back tomorrow to share more! ''';
+      
+      isDailyLimitError = true;
+    }
+
+    if (isDailyLimitError) {
+      print('>>> [Create] Showing daily limit dialog');
+      _showDailyLimitDialog();
+    } else {
+      print('>>> [Create] Showing general error dialog: $errorMessage');
+      _showErrorDialog(errorMessage);
+    }
+  }finally {
       if (mounted) {
         setState(() => _isSubmitting = false);
       }
@@ -244,20 +279,142 @@ class _CreatePostPageState extends State<CreatePostPage> {
   }
 
   void _showErrorDialog(String message) {
+  // Kiểm tra mounted trước
+    if (!mounted) return;
+    
     showDialog<void>(
       context: context,
+      barrierDismissible: false, // Ngăn tap outside để close
       builder: (_) => AlertDialog(
         title: const Text('Cannot Post'),
         content: Text(message),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () {
+              // Kiểm tra mounted trước khi pop
+              if (mounted) {
+                Navigator.of(context, rootNavigator: true).pop();
+              }
+            },
             child: const Text('OK'),
           ),
         ],
       ),
     );
   }
+
+  void _showDailyLimitDialog() {
+  // Delay để đảm bảo mounted
+  Future.delayed(Duration.zero, () {
+    if (!mounted) return;
+    
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => WillPopScope(
+        onWillPop: () async {
+          // Khi user ấn back hardware, đóng dialog và màn hình create
+          if (mounted) {
+            Navigator.of(context, rootNavigator: true).pop();
+            Future.delayed(Duration.zero, () {
+              if (mounted) context.router.pop();
+            });
+          }
+          return false;
+        },
+        child: AlertDialog(
+          title: Expanded(
+            child: Row(
+              children: [
+                Icon(Icons.timer_off_rounded, color: ColorName.navBackground),
+                Gap(10),
+                const Text(
+                  'Daily Limit ',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'You have reached your daily posting limit.',
+                  style: TextStyle(fontSize: 16, color: Colors.grey[800]),
+                ),
+                Gap(10),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.orange[50],
+                    borderRadius: BorderRadius.circular(8),
+                    // border: Border.all(color: Colors.orange[200]),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.info_outline, color: Colors.orange[800], size: 18),
+                          const SizedBox(width: 8),
+                          Text(
+                            'LIMIT DETAILS',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.orange[800],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        '• 1 post per day per user\n• Resets at midnight (00:00)\n• No carryover to next day',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Colors.orange[800],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 15),
+                Text(
+                  'Please come back tomorrow to share more!',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontStyle: FontStyle.italic,
+                    color: Colors.grey[600],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context, rootNavigator: true).pop();
+                // Đóng màn hình create post sau khi OK
+                Future.delayed(const Duration(milliseconds: 300), () {
+                  if (mounted) {
+                    context.router.pop();
+                  }
+                });
+              },
+              style: TextButton.styleFrom(
+                backgroundColor: ColorName.navBackground,
+                foregroundColor: ColorName.black,
+              ),
+              child: const Text('Ok, I understand'),
+            ),
+          ],
+        ),
+      ),
+    );
+  });
+}
 
   @override
   Widget build(BuildContext context) {

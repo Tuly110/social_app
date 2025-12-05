@@ -89,7 +89,6 @@ class _UpdatePasswordPageState extends State<UpdatePasswordPage> {
               ),
             ),
             child: SingleChildScrollView(
-              // QUAN TRỌNG: Thêm các property này
               physics: const ClampingScrollPhysics(),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -120,14 +119,7 @@ class _UpdatePasswordPageState extends State<UpdatePasswordPage> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min, 
                       children: [
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            "New password", 
-                            style: TextStyle(fontSize: 15.sp),
-                          ),
-                        ),
-                        Gap(8.h),
+                        
                         Container(
                           decoration: BoxDecoration(
                             color: ColorName.white,

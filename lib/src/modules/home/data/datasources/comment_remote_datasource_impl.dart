@@ -2,8 +2,8 @@ import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../../core/error/failures.dart';
 import '../../domain/entities/comment_entity.dart';
-import '../../domain/errors/daily_limit_exception.dart  ';
 import '../models/comment_model.dart';
 import 'comment_remote_datasource.dart';
 
