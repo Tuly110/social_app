@@ -4,11 +4,11 @@ import 'package:social_app/src/modules/auth/domain/repositories/auth_repository.
 
 import '../../../../core/error/failures.dart';
 @lazySingleton
-class UpdatePasswordUsecase {
+class DeleteAccountUsecase {
   final AuthRepository authRepository;
-  UpdatePasswordUsecase(this.authRepository);
+  DeleteAccountUsecase(this.authRepository);
 
-  Future<Either<Failure, void>> call({required String newPassword}){
-    return authRepository.updatePassword(newPassword: newPassword);
+  Future<Either<Failure, void>> call(){
+    return authRepository.deleteAccount();
   }
 }

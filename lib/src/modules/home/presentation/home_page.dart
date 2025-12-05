@@ -145,7 +145,7 @@ class _HomePageState extends State<HomePage>
                 GestureDetector(
                   onTap: () async {
                     final changed =
-                        await context.router.push<bool>(const ProfileRoute());
+                        await context.router.push( ProfileRoute());
 
                     if (changed == true) {
                       _loadMyAvatar();

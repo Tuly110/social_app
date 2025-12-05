@@ -1,4 +1,6 @@
 // lib/src/modules/newpost/data/datasources/post_remote_datasource_impl.dart
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -6,6 +8,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../domain/entities/post_entity.dart';
 import '../models/post_model.dart';
 import 'post_remote_datasource.dart';
+
 
 @LazySingleton(as: PostRemoteDataSource)
 class PostRemoteDataSourceImpl implements PostRemoteDataSource {
@@ -125,35 +128,81 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
 
     print('>>> [PostRemoteDS] payload=$payload');
 
-    final res = await _dio.post(
-      '/posts/',
-      data: payload,
-      options: Options(headers: _authHeaders()), // ⭐ THÊM DÒNG NÀY
-    );
+    try {
+      final res = await _dio.post(
+        '/posts/',
+        data: payload,
+        options: Options(
+          headers: _authHeaders(),
+          responseType: ResponseType.plain, 
+        ),
+      );
 
-    print('>>> [PostRemoteDS] response=${res.data}');
-
-    // ⭐ SỬA DÒNG NÀY: Ép kiểu an toàn
-    final responseData = res.data;
-    if (responseData is Map<String, dynamic>) {
-    // Kiểm tra nếu response có cấu trúc {success, message, post, ...}
-      if (responseData.containsKey('post') && 
-          responseData['post'] is Map<String, dynamic>) {
-        
-        print('>>> [PostRemoteDS] Found "post" key in response');
-        final postJson = responseData['post'] as Map<String, dynamic>;
-        
-        // ⭐ GỌI HELPER METHOD _parsePostFromResponse để parse đúng
-        return _parsePostFromResponse(responseData);
-        
+      print('>>> [PostRemoteDS] HTTP Status: ${res.statusCode}');
+      print('>>> [PostRemoteDS] Raw Response: ${res.data}');
+      dynamic parsedData;
+      
+      if (res.data is String) {
+        try {
+          parsedData = jsonDecode(res.data as String);
+        } catch (e) {
+          throw Exception('Invalid JSON response from server');
+        }
       } else {
-        // Fallback: giả sử response chính là post object
-        print('>>> [PostRemoteDS] No "post" key, assuming direct post object');
-        return _parsePostFromResponse(responseData);
+        parsedData = res.data;
       }
-    } else {
-      print('❌ Unexpected response type: ${responseData.runtimeType}');
-      throw Exception('Invalid response format from server');
+
+      if (parsedData is! Map<String, dynamic>) {
+        throw Exception('Invalid response format from server');
+      }
+
+
+      if (parsedData['success'] == false) {
+        final errorMessage = parsedData['error'] as String? ?? 
+                            parsedData['message'] as String? ?? 
+                            'Failed to create post';
+        throw Exception(errorMessage);
+      }
+      if (parsedData.containsKey('post') && 
+          parsedData['post'] is Map<String, dynamic>) {
+        
+        final postJson = parsedData['post'] as Map<String, dynamic>;
+        return PostModel.fromJson(postJson).toEntity();
+        
+      } else if (parsedData.containsKey('id')) {
+        // Direct post object
+        return PostModel.fromJson(parsedData).toEntity();
+      } else {
+        throw Exception('Unexpected response format: $parsedData');
+      }
+      
+    } on DioException catch (e) {
+
+      if (e.response?.data != null) {
+        if (e.response!.data is Map<String, dynamic>) {
+          final errorData = e.response!.data as Map<String, dynamic>;
+          final errorMessage = errorData['error'] as String? ?? 
+                              errorData['message'] as String? ?? 
+                              'Failed to create post';
+          throw Exception(errorMessage);
+        } else if (e.response!.data is String) {
+          try {
+            final parsed = jsonDecode(e.response!.data as String);
+            if (parsed is Map<String, dynamic>) {
+              final errorMessage = parsed['error'] as String? ?? 
+                                  parsed['message'] as String? ?? 
+                                  'Failed to create post';
+              throw Exception(errorMessage);
+            }
+          } catch (_) {
+            // Ignore parse error
+          }
+        }
+      }
+      
+      throw Exception(e.message ?? 'Network error occurred');
+    } catch (e) {
+      rethrow;
     }
   }
 
