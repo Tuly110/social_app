@@ -20,10 +20,10 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
 
   Map<String, String> _authHeaders() {
     final token = _supabase.auth.currentSession?.accessToken;
-    print('>>> [DS] current token = $token');
+    print('[DS] current token = $token');
 
     if (token == null) {
-      print('>>> [DS] ERROR: No Supabase session found!');
+      print('[DS] ERROR: No Supabase session found!');
       throw Exception('Not authenticated');
     }
 
@@ -37,10 +37,10 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
   @override
   Future<List<PostEntity>> getFeed({int page = 0, int limit = 20}) async {
     // page param giờ không dùng nữa, luôn load từ page=0 đến hết
-    print('>>> [DS] getFeed (FULL) called, limit=$limit');
+    print('[DS] getFeed (FULL) called, limit=$limit');
 
     final headers = _authHeaders();
-    print('>>> [DS] getFeed headers=$headers');
+    print('[DS] getFeed headers=$headers');
 
     final List<PostEntity> allPosts = [];
     int currentPage = 0;
@@ -48,7 +48,7 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
 
     try {
       while (hasNext) {
-        print('>>> [DS] fetching page=$currentPage, limit=$limit');
+        print('[DS] fetching page=$currentPage, limit=$limit');
 
         final response = await _dio.get(
           '/posts/',
@@ -59,8 +59,8 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
           options: Options(headers: headers),
         );
 
-        print('>>> [DS] GET /posts status=${response.statusCode}');
-        print('>>> [DS] GET /posts data=${response.data}');
+        print('[DS] GET /posts status=${response.statusCode}');
+        print('[DS] GET /posts data=${response.data}');
 
         final data = response.data;
 
@@ -100,15 +100,15 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
         currentPage++;
       }
 
-      print('>>> [DS] total posts loaded = ${allPosts.length}');
+      print('[DS] total posts loaded = ${allPosts.length}');
       return allPosts;
     } on DioException catch (e) {
-      print('>>> [DS] getFeed DioException status=${e.response?.statusCode}');
-      print('>>> [DS] getFeed response data=${e.response?.data}');
-      print('>>> [DS] getFeed message=${e.message}');
+      print('[DS] getFeed DioException status=${e.response?.statusCode}');
+      print('[DS] getFeed response data=${e.response?.data}');
+      print('[DS] getFeed message=${e.message}');
       rethrow;
     } catch (e, st) {
-      print('>>> [DS] getFeed OTHER ERROR: $e');
+      print('[DS] getFeed OTHER ERROR: $e');
       print(st);
       rethrow;
     }
@@ -135,19 +135,28 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
         options: Options(headers: _authHeaders()),
       );
 
-      print(
-          '>>> [PostRemoteDS] createPost status=${res.statusCode}, data=${res.data}');
-
-      // backend trả PostResponse dạng map
-      return PostModel.fromJson(res.data as Map<String, dynamic>).toEntity();
+      final responseData = res.data as Map<String, dynamic>;
+    
+      if (responseData.containsKey('daily_posts_remaining')) {
+        final remaining = responseData['daily_posts_remaining'] as int;
+        print('>>> [PostRemoteDS] Daily posts remaining: $remaining');
+        
+      }
+      
+      // ⭐ Parse post từ response
+      if (responseData.containsKey('post')) {
+        final postData = responseData['post'] as Map<String, dynamic>;
+        return PostModel.fromJson(postData).toEntity();
+      } else {
+        return PostModel.fromJson(responseData).toEntity();
+      }
     } on DioException catch (e) {
-      print(
-          '>>> [PostRemoteDS] DioException (createPost) status=${e.response?.statusCode}');
-      print('>>> [PostRemoteDS] DioException data=${e.response?.data}');
-      print('>>> [PostRemoteDS] DioException message=${e.message}');
+      print('[PostRemoteDS] DioException (createPost) status=${e.response?.statusCode}');
+      print('[PostRemoteDS] DioException data=${e.response?.data}');
+      print('[PostRemoteDS] DioException message=${e.message}');
       rethrow;
     } catch (e, st) {
-      print('>>> [PostRemoteDS] OTHER ERROR (createPost): $e');
+      print('[PostRemoteDS] OTHER ERROR (createPost): $e');
       print(st);
       rethrow;
     }
@@ -168,29 +177,29 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
       'visibility': visibility, // 'public' hoặc 'private'
     };
 
-    print('>>> [DS] sharePost postId=$postId payload=$payload');
+    print('[DS] sharePost postId=$postId payload=$payload');
     final res = await _dio.post(
       '/posts/$postId/share',
       data: payload,
       options: Options(headers: headers),
     );
 
-    print('>>> [DS] sharePost response=${res.data}');
+    print('[DS] sharePost response=${res.data}');
 
     return _parsePostFromResponse(res.data);
   }
 
   @override
   Future<PostEntity> toggleLike(String postId) async {
-    print('>>> [DS] toggleLike called with postId=$postId');
+    print('[DS] toggleLike called with postId=$postId');
 
     final response = await _dio.post(
       '/likes/toggle/$postId',
       options: Options(headers: _authHeaders()),
     );
 
-    print('>>> [DS] POST /likes/toggle status=${response.statusCode}');
-    print('>>> [DS] response.data=${response.data}');
+    print('[DS] POST /likes/toggle status=${response.statusCode}');
+    print('[DS] response.data=${response.data}');
 
     return _parsePostFromResponse(response.data);
   }
@@ -206,7 +215,7 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
     if (content != null) body['content'] = content;
     if (imageUrl != null) body['image_url'] = imageUrl;
 
-    print('>>> [DS] updatePost id=$postId body=$body');
+    print('[DS] updatePost id=$postId body=$body');
 
     try {
       final response = await _dio.put(
@@ -218,8 +227,8 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
         options: Options(headers: _authHeaders()),
       );
 
-      print('>>> [DS] PUT /posts/$postId status=${response.statusCode}');
-      print('>>> [DS] data=${response.data}');
+      print('[DS] PUT /posts/$postId status=${response.statusCode}');
+      print('[DS] data=${response.data}');
 
       if (response.statusCode != 200 && response.statusCode != 201) {
         throw Exception(
@@ -230,12 +239,12 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
       return _parsePostFromResponse(response.data);
     } on DioException catch (e) {
       print(
-          '>>> [DS] DioException (updatePost) status=${e.response?.statusCode}');
-      print('>>> [DS] DioException data=${e.response?.data}');
-      print('>>> [DS] DioException message=${e.message}');
+          '[DS] DioException (updatePost) status=${e.response?.statusCode}');
+      print('[DS] DioException data=${e.response?.data}');
+      print('[DS] DioException message=${e.message}');
       rethrow;
     } catch (e, st) {
-      print('>>> [DS] OTHER ERROR (updatePost): $e');
+      print('[DS] OTHER ERROR (updatePost): $e');
       print(st);
       rethrow;
     }
@@ -244,7 +253,7 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
   // 🔹 DELETE POST (DELETE /posts/{post_id})
   @override
   Future<void> deletePost(String postId) async {
-    print('>>> [DS] deletePost id=$postId');
+    print('[DS] deletePost id=$postId');
 
     try {
       final response = await _dio.delete(
@@ -252,8 +261,8 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
         options: Options(headers: _authHeaders()),
       );
 
-      print('>>> [DS] DELETE /posts/$postId status=${response.statusCode}');
-      print('>>> [DS] data=${response.data}');
+      print('[DS] DELETE /posts/$postId status=${response.statusCode}');
+      print('[DS] data=${response.data}');
 
       if (response.statusCode != 200 &&
           response.statusCode != 202 &&
@@ -264,13 +273,123 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
       }
     } on DioException catch (e) {
       print(
-          '>>> [DS] DioException (deletePost) status=${e.response?.statusCode}');
-      print('>>> [DS] DioException data=${e.response?.data}');
-      print('>>> [DS] DioException message=${e.message}');
+          '[DS] DioException (deletePost) status=${e.response?.statusCode}');
+      print('[DS] DioException data=${e.response?.data}');
+      print('[DS] DioException message=${e.message}');
       rethrow;
     } catch (e, st) {
-      print('>>> [DS] OTHER ERROR (deletePost): $e');
+      print('[DS] OTHER ERROR (deletePost): $e');
       print(st);
+      rethrow;
+    }
+  }
+
+   @override
+  Future<bool> getLikeStatus(String postId) async {
+    print('[DS] getLikeStatus called with postId=$postId');
+
+    try {
+      final response = await _dio.get(
+        '/likes/status/$postId',
+        options: Options(headers: _authHeaders()),
+      );
+
+      print('[DS] GET /likes/status status=${response.statusCode}');
+      print('[DS] response.data=${response.data}');
+
+      return response.data as bool;
+    } on DioException catch (e) {
+      print('[DS] getLikeStatus DioException status=${e.response?.statusCode}');
+      print('[DS] getLikeStatus response data=${e.response?.data}');
+      rethrow;
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>> getDailyLimits() async {
+    print('[DS] getDailyLimits called');
+
+    try {
+      final response = await _dio.get(
+        '/likes/daily-limits/me',
+        options: Options(headers: _authHeaders()),
+      );
+
+      print('[DS] GET /likes/daily-limits status=${response.statusCode}');
+      print('[DS] response.data=${response.data}');
+
+      return response.data as Map<String, dynamic>;
+    } on DioException catch (e) {
+      print('[DS] getDailyLimits DioException status=${e.response?.statusCode}');
+      print('[DS] getDailyLimits response data=${e.response?.data}');
+      rethrow;
+    }
+  }
+
+  @override
+  Future<int> getLikeCount(String postId) async {
+    print('[DS] getLikeCount called with postId=$postId');
+
+    try {
+      final response = await _dio.get(
+        '/likes/count/$postId',
+        options: Options(headers: _authHeaders()),
+      );
+
+      print('[DS] GET /likes/count status=${response.statusCode}');
+      print('[DS] response.data=${response.data}');
+
+      final data = response.data as Map<String, dynamic>;
+      return data['count'] as int;
+    } on DioException catch (e) {
+      print('[DS] getLikeCount DioException status=${e.response?.statusCode}');
+      print('[DS] getLikeCount response data=${e.response?.data}');
+      rethrow;
+    }
+  }
+
+  @override
+  Future<List<String>> getPostLikes(String postId) async {
+    print('[DS] getPostLikes called with postId=$postId');
+
+    try {
+      final response = await _dio.get(
+        '/likes/post/$postId',
+        options: Options(headers: _authHeaders()),
+      );
+
+      print('[DS] GET /likes/post status=${response.statusCode}');
+      print('[DS] response.data=${response.data}');
+
+      final data = response.data as Map<String, dynamic>;
+      final List<dynamic> users = data['users'] as List<dynamic>;
+      return users.map((user) => user['user_id'] as String).toList();
+    } on DioException catch (e) {
+      print('[DS] getPostLikes DioException status=${e.response?.statusCode}');
+      print('[DS] getPostLikes response data=${e.response?.data}');
+      rethrow;
+    }
+  }
+
+  @override
+  Future<List<String>> getUserLikes() async {
+    print('[DS] getUserLikes called');
+
+    try {
+      final response = await _dio.get(
+        '/likes/user/me/likes',
+        options: Options(headers: _authHeaders()),
+      );
+
+      print('[DS] GET /likes/user/me/likes status=${response.statusCode}');
+      print('[DS] response.data=${response.data}');
+
+      final data = response.data as Map<String, dynamic>;
+      final List<dynamic> posts = data['posts'] as List<dynamic>;
+      return posts.map((post) => post['post_id'] as String).toList();
+    } on DioException catch (e) {
+      print('[DS] getUserLikes DioException status=${e.response?.statusCode}');
+      print('[DS] getUserLikes response data=${e.response?.data}');
       rethrow;
     }
   }
@@ -289,7 +408,7 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
       throw Exception('Unexpected post response: ${raw.runtimeType}');
     }
 
-    print('>>> [DS] Parsed Post JSON = $json');
+    print('[DS] Parsed Post JSON = $json');
     return PostModel.fromJson(json).toEntity();
   }
 }

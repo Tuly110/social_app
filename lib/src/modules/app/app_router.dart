@@ -1,27 +1,28 @@
 // lib/src/modules/app/app_router.dart
 import 'package:auto_route/auto_route.dart';
-import 'package:injectable/injectable.dart';
 import 'package:flutter/material.dart';
+import 'package:injectable/injectable.dart';
+
 import '../auth/presentation/login/login_page.dart';
 import '../auth/presentation/reset_password/update_password_page.dart';
 import '../auth/presentation/signup/signup_page.dart';
+import '../block/presentation/pages/blocked_users_page.dart';
 import '../chat/presentation/chat_detail_page.dart';
 import '../chat/presentation/chats_page.dart';
+import '../home/presentation/comments/comments_page.dart';
 import '../home/presentation/home_page.dart';
+import '../newpost/domain/entities/post_entity.dart';
 import '../newpost/presentation/create_post_page.dart';
-import '../profile/presentation/edit_profile_page.dart';
+import '../newpost/presentation/edit_post_page.dart';
 import '../notice/presentation/notice_page.dart';
+import '../profile/presentation/edit_profile_page.dart';
+import '../profile/presentation/followers_page.dart';
+import '../profile/presentation/following_page.dart';
 import '../profile/presentation/profile_page.dart';
-import '../user_profile/presentation/pages/user_profile_page.dart';
 import '../search/presentation/search_page.dart';
 import '../setting/presentation/setting_page.dart';
 import '../splash_screen/presentation/splash_screen_page.dart';
-import '../newpost/presentation/edit_post_page.dart';
-import '../newpost/domain/entities/post_entity.dart';
-import '../profile/presentation/followers_page.dart';
-import '../profile/presentation/following_page.dart';
-import '../block/presentation/pages/blocked_users_page.dart';
-
+import '../user_profile/presentation/pages/user_profile_page.dart';
 import 'empty_shell_page.dart';
 
 part 'app_router.gr.dart';
@@ -47,6 +48,7 @@ class AppRouter extends _$AppRouter {
             AutoRoute(page: NoticeRoute.page, path: 'notice'),
             AutoRoute(page: ProfileRoute.page, path: 'profile'), 
             AutoRoute(page: CreatePostRoute.page, path: 'newpost'),
+            AutoRoute(page: CommentRoute.page, path: 'newpost'),
 
             AutoRoute(page: EditPostRoute.page, path: 'edit-post'),
             AutoRoute(page: FollowersRoute.page, path: 'followers'),

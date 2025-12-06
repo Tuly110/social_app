@@ -1,14 +1,19 @@
 // lib/src/modules/newpost/presentation/cubit/post_cubit.dart
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
+import 'package:social_app/src/modules/newpost/domain/usecase/share_post_usecase.dart';
 
 import '../../domain/entities/post_entity.dart';
 import '../../domain/usecase/create_post_usecase.dart';
+import '../../domain/usecase/delete_post_usecase.dart';
+import '../../domain/usecase/get_daily_limits_usecase.dart';
 import '../../domain/usecase/get_feed_usecase.dart';
+import '../../domain/usecase/get_like_count_usecase.dart';
+import '../../domain/usecase/get_like_status_usecase.dart';
+import '../../domain/usecase/get_post_likes_usecase.dart';
+import '../../domain/usecase/get_user_likes_usecase.dart';
 import '../../domain/usecase/toggle_like_usecase.dart';
 import '../../domain/usecase/update_post_usecase.dart';
-import '../../domain/usecase/delete_post_usecase.dart';
-import '../../domain/usecase/share_post_usecase.dart';
 
 part 'post_state.dart';
 
@@ -19,7 +24,12 @@ class PostCubit extends Cubit<PostState> {
   final ToggleLikeUseCase _toggleLikeUseCase;
   final UpdatePostUseCase _updatePostUseCase;
   final DeletePostUseCase _deletePostUseCase;
+  final GetLikeStatusUseCase _getLikeStatusUseCase;
+  final GetDailyLimitsUseCase _getDailyLimitsUseCase;
+  final GetLikeCountUseCase _getLikeCountUseCase;
+  final GetPostLikesUseCase _getPostLikesUseCase;
   final SharePostUseCase _sharePostUseCase;
+  final GetUserLikesUseCase _getUserLikesUseCase;
 
   PostCubit(
     this._getFeedUseCase,
@@ -27,27 +37,37 @@ class PostCubit extends Cubit<PostState> {
     this._toggleLikeUseCase,
     this._updatePostUseCase,
     this._deletePostUseCase,
+    this._getLikeStatusUseCase,
+    this._getDailyLimitsUseCase,
+    this._getLikeCountUseCase,
+    this._getPostLikesUseCase,
+    this._getUserLikesUseCase,
     this._sharePostUseCase,
   ) : super(const PostStateInitial());
 
-  /// load danh sách bài viết (feed)
-  Future<void> loadFeed({int page = 0, int limit = 20}) async {
-    if (isClosed) return; // 🔒 cubit đã dispose thì thôi
-
+  /// load danh sách bài viết
+  Future<void> loadFeed() async {
+    if (isClosed) { 
+      print('⚠️ PostCubit is closed, cannot load feed');
+      return;
+    }
+    
     emit(const PostStateLoading());
-
+    
     try {
-      final posts = await _getFeedUseCase(page: page, limit: limit);
-
-      if (isClosed) return; // tránh emit sau khi close
+      final posts = await _getFeedUseCase();
+      
+      if (isClosed) return; 
+      
       emit(PostStateLoaded(posts: posts));
     } catch (e) {
-      if (isClosed) return;
+      if (isClosed) return; 
+      
       emit(PostStateError(message: e.toString()));
     }
   }
 
-  /// tạo post mới (có thể kèm imageUrl, visibility đang default public)
+  /// tạo post mới (có thể kèm imageUrl)
   Future<bool> createPost(String content, {String? imageUrl}) async {
     final current = state;
     try {
@@ -83,8 +103,6 @@ class PostCubit extends Cubit<PostState> {
         imageUrl: imageUrl,
       );
 
-      if (isClosed) return false;
-
       if (current is PostStateLoaded) {
         final updatedList =
             current.posts.map((p) => p.id == updated.id ? updated : p).toList();
@@ -94,13 +112,12 @@ class PostCubit extends Cubit<PostState> {
       }
       return true;
     } catch (e) {
-      if (isClosed) return false;
       emit(PostStateError(message: e.toString()));
       return false;
     }
   }
 
-  /// helper: chỉ chỉnh text
+  /// helper: chỉ chỉnh text (nếu chỗ nào cũ còn gọi)
   Future<bool> editPostContent(String postId, String content) {
     return editPost(postId, content: content);
   }
@@ -111,15 +128,12 @@ class PostCubit extends Cubit<PostState> {
     try {
       await _deletePostUseCase(postId);
 
-      if (isClosed) return false;
-
       if (current is PostStateLoaded) {
         final updatedList = current.posts.where((p) => p.id != postId).toList();
         emit(PostStateLoaded(posts: updatedList));
       }
       return true;
     } catch (e) {
-      if (isClosed) return false;
       emit(PostStateError(message: e.toString()));
       return false;
     }
@@ -129,6 +143,7 @@ class PostCubit extends Cubit<PostState> {
   Future<void> toggleLike(String postId) async {
     final current = state;
     if (current is! PostStateLoaded) return;
+
     final post = current.posts.firstWhere((p) => p.id == postId);
 
     // Nếu hành động là LIKE (không phải Unlike)
@@ -149,6 +164,7 @@ class PostCubit extends Cubit<PostState> {
           ? post.likeCount - 1 
           : post.likeCount + 1,
     );
+
     final newList = current.posts.map((p) {
       return p.id == postId ? updatedLocalPost : p;
     }).toList();
@@ -163,7 +179,7 @@ class PostCubit extends Cubit<PostState> {
     try {
       await _toggleLikeUseCase(postId);
     } catch (e) {
-        print("toggle like API error: $e");
+      print("toggle like API error: $e");
     }
   }
 
@@ -213,28 +229,31 @@ class PostCubit extends Cubit<PostState> {
 
   Future<Map<String, dynamic>> getDailyLimits() async {
     try {
-      final PostEntity sharedPost = await _sharePostUseCase(
-        postId,
-        visibility: visibility,
-        content: content,
-      );
-
-      if (isClosed) return false;
-
-      if (current is PostStateLoaded) {
-        emit(PostStateLoaded(posts: [sharedPost, ...current.posts]));
-      } else {
-        emit(PostStateLoaded(posts: [sharedPost]));
-      }
-
-      return true;
+      return await _getDailyLimitsUseCase();
     } catch (e) {
-      if (isClosed) return false;
-      emit(PostStateError(message: e.toString()));
-      return false;
+      print('>>> [Cubit] getDailyLimits error: $e');
+      rethrow;
     }
   }
-}
+
+  Future<int> getLikeCount(String postId) async {
+    try {
+      return await _getLikeCountUseCase(postId);
+    } catch (e) {
+      print('>>> [Cubit] getLikeCount error: $e');
+      rethrow;
+    }
+  }
+
+  Future<List<String>> getPostLikes(String postId) async {
+    try {
+      return await _getPostLikesUseCase(postId);
+    } catch (e) {
+      print('>>> [Cubit] getPostLikes error: $e');
+      rethrow;
+    }
+  }
+
   Future<List<String>> getUserLikes() async {
     try {
       return await _getUserLikesUseCase();

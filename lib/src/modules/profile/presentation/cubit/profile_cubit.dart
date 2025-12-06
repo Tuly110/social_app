@@ -1,9 +1,9 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 
-import 'profile_state.dart';
 import '../../domain/usecases/get_my_profile_usecase.dart';
 import '../../domain/usecases/update_profile_usecase.dart';
+import 'profile_state.dart';
 
 @injectable
 class ProfileCubit extends Cubit<ProfileState> {
@@ -16,12 +16,17 @@ class ProfileCubit extends Cubit<ProfileState> {
   }) : super(const ProfileState.initial());
 
   Future<void> loadMyProfile(String token) async {
+    if (isClosed) return;
     emit(const ProfileState.loading());
     try {
       final profile = await getMyProfileUseCase(token);
-      emit(ProfileState.loaded(profile));
+      if (!isClosed) { 
+        emit(ProfileState.loaded(profile));
+      }
     } catch (e) {
-      emit(ProfileState.error(e.toString()));
+     if (!isClosed) {
+        emit(ProfileState.error(e.toString()));
+      }
     }
   }
 
