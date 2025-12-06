@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
+import 'package:social_app/src/modules/home/presentation/cubit/comment_state.dart';
 
 import '../../domain/entities/comment_entity.dart';
 import '../../domain/usecases/get_comments_usecase.dart';
@@ -7,7 +8,7 @@ import '../../domain/usecases/create_comment_usecase.dart';
 import '../../domain/usecases/update_comment_usecase.dart';
 import '../../domain/usecases/delete_comment_usecase.dart';
 
-part 'comment_state.dart';
+
 
 @injectable
 class CommentCubit extends Cubit<CommentState> {
@@ -33,18 +34,41 @@ class CommentCubit extends Cubit<CommentState> {
     }
   }
 
-  Future<void> createComment(String postId, String content, {String? parentId}) async {
-    final current = state;
+  Future<void> createComment(
+    String postId, 
+    String content, 
+    {String? parentId}
+  ) async {
+    final currentState = state;
+    
     try {
-      final newComment = await _createCommentUseCase(postId, content, parentId: parentId);
+      // 1. Gọi API tạo comment mới
+      final newComment = await _createCommentUseCase(
+        postId, 
+        content, 
+        parentId: parentId
+      );
 
-      if (current is CommentStateLoaded) {
-        emit(CommentStateLoaded(comments: [newComment, ...current.comments]));
-      } else {
-        emit(CommentStateLoaded(comments: [newComment]));
-      }
+      // 2. Load lại TOÀN BỘ comments từ server
+      final comments = await _getCommentsUseCase(postId);
+      
+      // 3. Emit state với message thành công
+      emit(
+        CommentState.loaded(
+          comments: comments,
+          message: 'Comment posted successfully!',
+        )
+      );
+      
     } catch (e) {
-      emit(CommentStateError(message: e.toString()));
+      // Nếu lỗi, giữ lại state cũ nếu có
+      if (currentState is CommentStateLoaded) {
+        emit(
+          currentState.copyWith(error: 'Failed to post comment: $e')
+        );
+      } else {
+        emit(CommentState.error(message: e.toString()));
+      }
     }
   }
 

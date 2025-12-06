@@ -1,11 +1,11 @@
 import 'dart:async';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:oktoast/oktoast.dart';
-import 'package:social_app/src/common/utils/app_environment.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'src/common/utils/getit_utils.dart';
@@ -21,6 +21,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+    try {
     // 1. Load env
     await dotenv.load(fileName: "env/.env.dev");
 

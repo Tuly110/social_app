@@ -38,6 +38,16 @@ abstract class _$AppRouter extends RootStackRouter {
         child: const ChatPage(),
       );
     },
+    CommentRoute.name: (routeData) {
+      final args = routeData.argsAs<CommentRouteArgs>();
+      return AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: CommentPage(
+          key: args.key,
+          post: args.post,
+        ),
+      );
+    },
     CreatePostRoute.name: (routeData) {
       return AutoRoutePage<dynamic>(
         routeData: routeData,
@@ -229,6 +239,44 @@ class ChatRoute extends PageRouteInfo<void> {
   static const String name = 'ChatRoute';
 
   static const PageInfo<void> page = PageInfo<void>(name);
+}
+
+/// generated route for
+/// [CommentPage]
+class CommentRoute extends PageRouteInfo<CommentRouteArgs> {
+  CommentRoute({
+    Key? key,
+    required PostEntity post,
+    List<PageRouteInfo>? children,
+  }) : super(
+          CommentRoute.name,
+          args: CommentRouteArgs(
+            key: key,
+            post: post,
+          ),
+          initialChildren: children,
+        );
+
+  static const String name = 'CommentRoute';
+
+  static const PageInfo<CommentRouteArgs> page =
+      PageInfo<CommentRouteArgs>(name);
+}
+
+class CommentRouteArgs {
+  const CommentRouteArgs({
+    this.key,
+    required this.post,
+  });
+
+  final Key? key;
+
+  final PostEntity post;
+
+  @override
+  String toString() {
+    return 'CommentRouteArgs{key: $key, post: $post}';
+  }
 }
 
 /// generated route for

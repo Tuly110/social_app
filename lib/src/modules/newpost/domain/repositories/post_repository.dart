@@ -19,6 +19,16 @@ abstract class PostRepository {
 
   Future<void> deletePost(String postId);
 
+  Future<bool> getLikeStatus(String postId);
+
+  Future<Map<String, dynamic>> getDailyLimits();
+
+  Future<int> getLikeCount(String postId);
+
+  Future<List<String>> getPostLikes(String postId);
+
+  Future<List<String>> getUserLikes();
+
   Future<PostEntity> sharePost(
     String postId, {
     required String visibility,

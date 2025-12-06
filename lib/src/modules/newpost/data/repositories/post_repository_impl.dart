@@ -64,4 +64,33 @@ class PostRepositoryImpl implements PostRepository {
       content: content,
     );
   }
+  
+  @override
+  Future<Map<String, dynamic>> getDailyLimits() {
+    return _remote.getDailyLimits();
+  }
+  
+  @override
+  Future<int> getLikeCount(String postId) {
+    // TODO: implement getLikeCount
+    throw UnimplementedError();
+  }
+  
+  @override
+  Future<bool> getLikeStatus(String postId) {
+    // TODO: implement getLikeStatus
+    throw UnimplementedError();
+  }
+  
+  @override
+  Future<List<String>> getPostLikes(String postId) {
+    // TODO: implement getPostLikes
+    throw UnimplementedError();
+  }
+  
+  @override
+  Future<List<String>> getUserLikes() {
+    // TODO: implement getUserLikes
+    throw UnimplementedError();
+  }
 }

@@ -11,6 +11,7 @@ import '../../../../common/utils/getit_utils.dart';
 import '../cubit/comment_cubit.dart';
 import '../../domain/entities/comment_entity.dart';
 import '../../../../core/error/failures.dart';
+import '../cubit/comment_state.dart';
 
 @RoutePage()
 class CommentPage extends StatefulWidget {

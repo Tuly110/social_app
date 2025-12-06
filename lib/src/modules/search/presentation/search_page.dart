@@ -108,7 +108,7 @@ class _SearchPageViewState extends State<_SearchPageView> with SingleTickerProvi
           // 3. Tác giả: Chuyển sang UserProfilePage (truyền userId)
           onAuthorPressed: (){
              context.router.push(UserProfileRoute(userId: post.authorId));
-          },
+          }, onSharePressed: () {  },
         );
       },
     );
@@ -172,7 +172,7 @@ class _SearchPageViewState extends State<_SearchPageView> with SingleTickerProvi
                     onMorePressed: (){},
                     onAuthorPressed: (){
                        context.router.push(UserProfileRoute(userId: post.authorId));
-                    },
+                    }, onSharePressed: () {  },
                   );
                 },
              ),
