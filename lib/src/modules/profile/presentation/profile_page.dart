@@ -2,20 +2,21 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' hide AuthState;
-
 import '../../../../generated/colors.gen.dart';
-import '../../../common/utils/getit_utils.dart';
 import '../../app/app_router.dart';
 import '../../auth/presentation/cubit/auth_cubit.dart';
 import '../../auth/presentation/cubit/auth_state.dart' as auth;
 import '../../newpost/presentation/cubit/post_cubit.dart';
-import 'component/user_gallery_grid.dart';
-import 'component/user_posts_tab.dart';
-import 'component/widget__placeholder.dart';
-import 'component/widget__section_title.dart';
+import '../../../common/utils/getit_utils.dart';
+import 'component/select_friends_page.dart';
+import 'component/widget__friend_avatar.dart';
 import 'component/widget__stats_card.dart';
+import 'component/widget__section_title.dart';
+import 'component/widget__placeholder.dart';
 import 'cubit/profile_cubit.dart';
-import 'cubit/profile_state.dart'; // 👈 Thêm import này
+import 'cubit/profile_state.dart';
+import 'component/user_posts_tab.dart';
+import 'component/user_gallery_grid.dart';
 
 @RoutePage()
 class ProfilePage extends StatefulWidget implements AutoRouteWrapper {
@@ -648,48 +649,42 @@ class _ProfilePageState extends State<ProfilePage>
       );
     }
   }
-
-  class TwoColumnStatsAndGallery extends StatelessWidget {
-    final String userId;
-    const TwoColumnStatsAndGallery({super.key, required this.userId});
-
-    @override
-    Widget build(BuildContext context) {
-      return LayoutBuilder(
-        builder: (context, c) {
-          final isNarrow = c.maxWidth < 360;
-          return Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(
-                width: isNarrow ? 96 : 110,
-                child: WidgetStatsCard(
-                  onPostsTap: () {
-                    final controller = DefaultTabController.of(context);
-                    controller?.animateTo(1);
-                  },
-                  onFollowingTap: () async {
-                    final changed = await context.router.push(
-                      FollowingRoute(userId: userId),
-                    );
-                    if (changed == true && context.mounted) {
-                      final token = Supabase
-                          .instance.client.auth.currentSession?.accessToken;
-                      if (token != null) {
-                        context.read<ProfileCubit>().loadMyProfile(token);
-                      }
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, c) {
+        final isNarrow = c.maxWidth < 360;
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              width: isNarrow ? 96 : 110,
+              child: WidgetStatsCard(
+                onPostsTap: () {
+                  final controller = DefaultTabController.of(context);
+                  controller?.animateTo(1);
+                },
+                onFollowingTap: () async {
+                  final changed = await context.router.push<bool>(
+                    FollowingRoute(userId: userId),
+                  );
+                  if (changed == true && context.mounted) {
+                    final token = Supabase
+                        .instance.client.auth.currentSession?.accessToken;
+                    if (token != null) {
+                      context.read<ProfileCubit>().loadMyProfile(token);
                     }
-                  },
-                  onFollowersTap: () async {
-                    final changed = await context.router.push(
-                      FollowersRoute(userId: userId),
-                    );
-                    if (changed == true && context.mounted) {
-                      final token = Supabase
-                          .instance.client.auth.currentSession?.accessToken;
-                      if (token != null) {
-                        context.read<ProfileCubit>().loadMyProfile(token);
-                      }
+                  }
+                },
+                onFollowersTap: () async {
+                  final changed = await context.router.push<bool>(
+                    FollowersRoute(userId: userId),
+                  );
+                  if (changed == true && context.mounted) {
+                    final token = Supabase
+                        .instance.client.auth.currentSession?.accessToken;
+                    if (token != null) {
+                      context.read<ProfileCubit>().loadMyProfile(token);
                     }
                   },
                 ),

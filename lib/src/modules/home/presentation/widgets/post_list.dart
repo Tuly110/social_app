@@ -2,14 +2,21 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:intl/intl.dart';
 
 import '../../../app/app_router.dart';
 import '../../../newpost/domain/entities/post_entity.dart';
 import '../../../newpost/presentation/cubit/post_cubit.dart';
 import '../../../../../generated/colors.gen.dart';
-import 'post_item.dart';
 
-import '../cubit/comment_cubit.dart';
+// 🔥 thêm
+import '../../../../common/utils/getit_utils.dart';
+import '../../../block/domain/usecase/block_user_usecase.dart';
+import '../../../block/domain/usecase/unblock_user_usecase.dart';
+import '../../../block/domain/usecase/is_blocked_usecase.dart';
+
+
+import 'post_item.dart';
 
 class PostList extends StatelessWidget {
   const PostList({super.key});
@@ -43,7 +50,6 @@ class PostList extends StatelessWidget {
           }
 
           final cubit = context.read<PostCubit>();
-          final commentCubit = context.read<CommentCubit>();
 
           return ListView.separated(
             itemCount: posts.length,
@@ -52,12 +58,24 @@ class PostList extends StatelessWidget {
             itemBuilder: (context, index) {
               final PostEntity post = posts[index];
 
-              // Xem có phải chủ bài viết không
+              // tìm post gốc nếu đây là bài share
+              PostEntity? originalPost;
+              if (post.type == 'shared' && post.originalPostId != null) {
+                try {
+                  originalPost = posts.firstWhere(
+                    (p) => p.id == post.originalPostId,
+                  );
+                } catch (_) {
+                  originalPost = null;
+                }
+              }
+
               final bool isOwner =
                   currentUserId != null && currentUserId == post.authorId;
 
               return PostItem(
                 post: post,
+                originalPost: originalPost,
                 onLikePressed: () {
                   cubit.toggleLike(post.id);
 
@@ -71,9 +89,11 @@ class PostList extends StatelessWidget {
                     return;
                   }
                 },
+
                 onCommentPressed: () {
-                  // 🔥 ĐIỀU HƯỚNG ĐƠN GIẢN - TEST TRƯỚC
-                    context.router.push(CommentRoute(post: post));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Comment coming soon')),
+                  );
                 },
                 onRepostPressed: () {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -81,7 +101,6 @@ class PostList extends StatelessWidget {
                   );
                 },
                 onMorePressed: () {
-                  // 🔥 3 chấm: mở bottom sheet
                   _showMoreBottomSheet(
                     context: context,
                     cubit: cubit,
@@ -89,8 +108,16 @@ class PostList extends StatelessWidget {
                     isOwner: isOwner,
                   );
                 },
+                onSharePressed: () {
+                  _onSharePost(
+                    context: context,
+                    cubit: cubit,
+                    post: post,
+                    currentUserId: currentUserId,
+                  );
+                },
 
-                /// 🔥 Khi bấm avatar / tên tác giả
+                // click avatar/tên người SHARE
                 onAuthorPressed: () {
                   if (currentUserId == null) {
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -102,17 +129,37 @@ class PostList extends StatelessWidget {
                   }
 
                   if (isOwner) {
-                    // 👉 Đây là bài của chính mình -> đi tới trang profile chính
-                    context.router.push(
-                      const ProfileRoute(), // nếu route tên khác thì đổi lại
-                    );
+                    context.router.push(const ProfileRoute());
                   } else {
-                    // 👉 Bài của người khác -> đi tới UserProfilePage (module user_profile)
                     context.router.push(
                       UserProfileRoute(userId: post.authorId),
                     );
                   }
                 },
+
+                // click avatar/tên trong CARD POST GỐC
+                onOriginalAuthorPressed: originalPost == null
+                    ? null
+                    : () {
+                        final uid =
+                            Supabase.instance.client.auth.currentUser?.id;
+                        if (uid == null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Please log in to view profiles'),
+                            ),
+                          );
+                          return;
+                        }
+
+                        if (uid == originalPost!.authorId) {
+                          context.router.push(const ProfileRoute());
+                        } else {
+                          context.router.push(
+                            UserProfileRoute(userId: originalPost!.authorId),
+                          );
+                        }
+                      },
               );
             },
           );
@@ -123,126 +170,363 @@ class PostList extends StatelessWidget {
     );
   }
 
-void _handleCommentPressed(BuildContext context, CommentCubit commentCubit, PostEntity post) {
-  _showCommentDialog(context, commentCubit, post);
-}
-
-void _showCommentDialog(BuildContext context, CommentCubit commentCubit, PostEntity post) {
-  final TextEditingController commentController = TextEditingController();
-  
-  showModalBottomSheet(
-    context: context,
-    isScrollControlled: true,
-    backgroundColor: ColorName.backgroundWhite,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-    ),
-    builder: (ctx) {
-      return Padding(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(ctx).viewInsets.bottom,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Header
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(color: Colors.grey.shade300),
-                ),
-              ),
-              child: Row(
-                children: [
-                  const Text(
-                    'Add Comment',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const Spacer(),
-                  IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () => Navigator.pop(ctx),
-                  ),
-                ],
-              ),
-            ),
-            
-            // Comment input
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: TextField(
-                controller: commentController,
-                maxLines: 3,
-                decoration: InputDecoration(
-                  hintText: 'Write your comment...',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-              ),
-            ),
-            
-            // Post button
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () async {
-                    final content = commentController.text.trim();
-                    if (content.isEmpty) return;
-                    
-                    try {
-                      await commentCubit.createComment(post.id, content);
-                      if (context.mounted) {
-                        Navigator.pop(context);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Comment posted!')),
-                        );
-                      }
-                    } catch (e) {
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Failed to post comment: $e')),
-                        );
-                      }
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: ColorName.primaryBlue,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                  ),
-                  child: const Text(
-                    'Post Comment',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
+  /// Xử lý share post: confirm + gọi Cubit
+  Future<void> _onSharePost({
+    required BuildContext context,
+    required PostCubit cubit,
+    required PostEntity post,
+    required String? currentUserId,
+  }) async {
+    if (currentUserId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please log in to share posts'),
         ),
       );
-    },
-  );
-}
+      return;
+    }
 
-  void _showMoreBottomSheet({
+    // mở bottom sheet: chọn public/private + nhập nội dung
+    final result = await _showShareBottomSheet(context, post);
+    if (result == null) return;
+
+    final String visibility = result['visibility'] as String;
+    String? content = result['content'] as String?;
+    content =
+        (content != null && content.trim().isNotEmpty) ? content.trim() : null;
+
+    final ok = await cubit.sharePost(
+      post.id,
+      visibility: visibility,
+      content: content,
+    );
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(ok ? 'Share post thành công' : 'Share post thất bại'),
+      ),
+    );
+  }
+
+  Future<Map<String, dynamic>?> _showShareBottomSheet(
+    BuildContext context,
+    PostEntity post,
+  ) {
+    return showModalBottomSheet<Map<String, dynamic>>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        final bottomInset = MediaQuery.of(ctx).viewInsets.bottom;
+        final theme = Theme.of(ctx);
+        final TextEditingController controller = TextEditingController();
+        String visibility = 'public'; // mặc định
+
+        return StatefulBuilder(
+          builder: (ctx, setState) {
+            return Padding(
+              padding: EdgeInsets.only(
+                left: 16,
+                right: 16,
+                bottom: bottomInset + 16,
+              ),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(28),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.18),
+                      blurRadius: 24,
+                      offset: const Offset(0, 14),
+                    ),
+                  ],
+                ),
+                padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 42,
+                        height: 4,
+                        margin: const EdgeInsets.only(bottom: 12),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[300],
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                      ),
+                    ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'Share post',
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.close),
+                          onPressed: () => Navigator.pop(ctx, null),
+                          splashRadius: 22,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 18,
+                          backgroundColor: Colors.grey.shade300,
+                          backgroundImage: (post.authorAvatarUrl != null &&
+                                  post.authorAvatarUrl!.isNotEmpty)
+                              ? NetworkImage(post.authorAvatarUrl!)
+                              : null,
+                          child: (post.authorAvatarUrl == null ||
+                                  post.authorAvatarUrl!.isEmpty)
+                              ? Text(
+                                  (post.authorName.isNotEmpty
+                                          ? post.authorName[0]
+                                          : '?')
+                                      .toUpperCase(),
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                )
+                              : null,
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                post.authorName,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Row(
+                                children: [
+                                  ChoiceChip(
+                                    label: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        const Icon(Icons.public,
+                                            size: 14, color: Colors.white),
+                                        const SizedBox(width: 4),
+                                        const Text('Public'),
+                                      ],
+                                    ),
+                                    selected: visibility == 'public',
+                                    labelStyle: TextStyle(
+                                      color: visibility == 'public'
+                                          ? Colors.white
+                                          : Colors.black87,
+                                    ),
+                                    selectedColor: Colors.deepPurple,
+                                    backgroundColor: Colors.grey[100],
+                                    onSelected: (_) =>
+                                        setState(() => visibility = 'public'),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  ChoiceChip(
+                                    label: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: const [
+                                        Icon(Icons.lock,
+                                            size: 14, color: Colors.black87),
+                                        SizedBox(width: 4),
+                                        Text('Private'),
+                                      ],
+                                    ),
+                                    selected: visibility == 'private',
+                                    selectedColor: Colors.deepPurple.shade50,
+                                    backgroundColor: Colors.grey[100],
+                                    labelStyle: TextStyle(
+                                      color: visibility == 'private'
+                                          ? Colors.deepPurple
+                                          : Colors.black87,
+                                    ),
+                                    onSelected: (_) =>
+                                        setState(() => visibility = 'private'),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 14),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.grey[50],
+                        borderRadius: BorderRadius.circular(18),
+                        border: Border.all(color: Colors.grey.shade300),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 8),
+                      child: TextField(
+                        controller: controller,
+                        maxLines: 4,
+                        decoration: const InputDecoration(
+                          isCollapsed: true,
+                          border: InputBorder.none,
+                          hintText: 'Viết gì đó về bài viết này...',
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.grey[100],
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 10),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          CircleAvatar(
+                            radius: 14,
+                            backgroundColor: Colors.grey.shade400,
+                            backgroundImage: (post.authorAvatarUrl != null &&
+                                    post.authorAvatarUrl!.isNotEmpty)
+                                ? NetworkImage(post.authorAvatarUrl!)
+                                : null,
+                            child: (post.authorAvatarUrl == null ||
+                                    post.authorAvatarUrl!.isEmpty)
+                                ? Text(
+                                    (post.authorName.isNotEmpty
+                                            ? post.authorName[0]
+                                            : '?')
+                                        .toUpperCase(),
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  )
+                                : null,
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  post.authorName,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                if (post.content.isNotEmpty)
+                                  Text(
+                                    post.content,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.black87,
+                                    ),
+                                  ),
+                                if (post.imageUrl != null &&
+                                    post.imageUrl!.isNotEmpty)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 6),
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(10),
+                                      child: Container(
+                                        height: 80,
+                                        color: Colors.grey[300],
+                                        child: Image.network(
+                                          post.imageUrl!,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(ctx, null),
+                          child: const Text('Cancel'),
+                        ),
+                        const SizedBox(width: 8),
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.deepPurple,
+                            foregroundColor: Colors.white,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(999),
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 28,
+                              vertical: 10,
+                            ),
+                          ),
+                          onPressed: () {
+                            Navigator.pop(ctx, {
+                              'visibility': visibility,
+                              'content': controller.text,
+                            });
+                          },
+                          child: const Text(
+                            'Share',
+                            style: TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  /// BOTTOM SHEET: MORE (edit/delete/block/...)
+  Future<void> _showMoreBottomSheet({
     required BuildContext context,
     required PostCubit cubit,
     required PostEntity post,
     required bool isOwner,
-  }) {
+  }) async {
+    bool isBlocked = false;
+    if (!isOwner) {
+      try {
+        final isBlockedUseCase = getIt<IsBlockedUseCase>();
+        isBlocked = await isBlockedUseCase(post.authorId);
+      } catch (e) {
+        // ignore
+      }
+    }
+
     showModalBottomSheet(
       context: context,
       backgroundColor: ColorName.softBg,
@@ -257,7 +541,7 @@ void _showCommentDialog(BuildContext context, CommentCubit commentCubit, PostEnt
               mainAxisSize: MainAxisSize.min,
               children: isOwner
                   ? _buildOwnerActions(ctx, cubit, post)
-                  : _buildOtherActions(ctx, post), // 👈 NHỚ TRUYỀN post VÀO
+                  : _buildOtherActions(ctx, post, isBlocked),
             ),
           ),
         );
@@ -335,19 +619,98 @@ void _showCommentDialog(BuildContext context, CommentCubit commentCubit, PostEnt
   List<Widget> _buildOtherActions(
     BuildContext context,
     PostEntity post,
+    bool isBlocked,
   ) {
     return [
       ListTile(
-        leading: const Icon(Icons.block),
-        title: const Text(
-          'Block this author',
-          style: TextStyle(fontWeight: FontWeight.w600),
+        leading: Icon(
+          isBlocked ? Icons.undo : Icons.block,
+          color: isBlocked ? Colors.blue : Colors.red,
         ),
-        onTap: () {
+        title: Text(
+          isBlocked ? 'Unblock this author' : 'Block this author',
+          style: const TextStyle(fontWeight: FontWeight.w600),
+        ),
+        onTap: () async {
           Navigator.pop(context);
+
+          final blockUseCase = getIt<BlockUserUseCase>();
+          final unblockUseCase = getIt<UnblockUserUseCase>();
+
+          bool? confirm;
+
+          if (isBlocked) {
+            // ✅ confirm UNBLOCK
+            confirm = await showDialog<bool>(
+              context: context,
+              builder: (ctx) => AlertDialog(
+                title: const Text('Unblock this author?'),
+                content: Text(
+                  'Do you want to unblock @${post.authorName}?',
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(ctx, false),
+                    child: const Text('Cancel'),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.pop(ctx, true),
+                    child: const Text('Unblock'),
+                  ),
+                ],
+              ),
+            );
+          } else {
+            // ✅ confirm BLOCK
+            confirm = await showDialog<bool>(
+              context: context,
+              builder: (ctx) => AlertDialog(
+                title: const Text('Block this author?'),
+                content: Text(
+                  'Do you really want to block @${post.authorName}?\n'
+                  'You will no longer see this user and their posts.',
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(ctx, false),
+                    child: const Text('Cancel'),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.pop(ctx, true),
+                    child: const Text('Block'),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          if (confirm != true) return;
+
+          bool ok;
+          if (isBlocked) {
+            ok = await unblockUseCase(post.authorId);
+          } else {
+            ok = await blockUseCase(post.authorId);
+          }
+
+          if (!context.mounted) return;
+
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Block author coming soon')),
+            SnackBar(
+              content: Text(
+                ok
+                    ? (isBlocked
+                        ? 'Đã bỏ chặn @${post.authorName}'
+                        : 'Đã chặn @${post.authorName}')
+                    : 'Thao tác thất bại, thử lại sau',
+              ),
+            ),
           );
+
+          // 🔥 reload feed để ẩn hiện lại post
+          if (ok) {
+            context.read<PostCubit>().loadFeed();
+          }
         },
       ),
       ListTile(

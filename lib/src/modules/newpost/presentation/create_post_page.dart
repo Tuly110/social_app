@@ -12,6 +12,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../generated/colors.gen.dart';
 import '../../../common/utils/getit_utils.dart';
 import '../../auth/presentation/cubit/auth_cubit.dart';
+import '../../auth/presentation/cubit/auth_state.dart';
 import '../domain/usecase/create_post_usecase.dart';
 import 'widgets/create_post_app_bar.dart';
 import 'widgets/post_action_bar.dart';
@@ -224,12 +225,20 @@ class _CreatePostPageState extends State<CreatePostPage> {
 
       if (!mounted) return;
 
+      // clear form
+      _postController.clear();
+      setState(() {
+        _selectedImage = null;
+      });
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Post created successfully!'),
           backgroundColor: Colors.green,
         ),
       );
+      context.router.pop(true);
+      // báo cho Home biết là vừa tạo post xong
       context.router.pop(true);
     } catch (e, st) {
     print('>>> [Create] ERROR TYPE: ${e.runtimeType}');

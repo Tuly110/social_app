@@ -2,6 +2,7 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -113,7 +114,6 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
     }
   }
 
-  
   @override
   Future<PostEntity> createPost(
     String content, {
@@ -126,84 +126,58 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
       'visibility': visibility,
     };
 
-    print('>>> [PostRemoteDS] payload=$payload');
+    print('>>> [PostRemoteDS] createPost payload=$payload');
 
     try {
       final res = await _dio.post(
         '/posts/',
         data: payload,
-        options: Options(
-          headers: _authHeaders(),
-          responseType: ResponseType.plain, 
-        ),
+        options: Options(headers: _authHeaders()),
       );
 
-      print('>>> [PostRemoteDS] HTTP Status: ${res.statusCode}');
-      print('>>> [PostRemoteDS] Raw Response: ${res.data}');
-      dynamic parsedData;
-      
-      if (res.data is String) {
-        try {
-          parsedData = jsonDecode(res.data as String);
-        } catch (e) {
-          throw Exception('Invalid JSON response from server');
-        }
-      } else {
-        parsedData = res.data;
-      }
+      print(
+          '>>> [PostRemoteDS] createPost status=${res.statusCode}, data=${res.data}');
 
-      if (parsedData is! Map<String, dynamic>) {
-        throw Exception('Invalid response format from server');
-      }
-
-
-      if (parsedData['success'] == false) {
-        final errorMessage = parsedData['error'] as String? ?? 
-                            parsedData['message'] as String? ?? 
-                            'Failed to create post';
-        throw Exception(errorMessage);
-      }
-      if (parsedData.containsKey('post') && 
-          parsedData['post'] is Map<String, dynamic>) {
-        
-        final postJson = parsedData['post'] as Map<String, dynamic>;
-        return PostModel.fromJson(postJson).toEntity();
-        
-      } else if (parsedData.containsKey('id')) {
-        // Direct post object
-        return PostModel.fromJson(parsedData).toEntity();
-      } else {
-        throw Exception('Unexpected response format: $parsedData');
-      }
-      
+      // backend trả PostResponse dạng map
+      return PostModel.fromJson(res.data as Map<String, dynamic>).toEntity();
     } on DioException catch (e) {
-
-      if (e.response?.data != null) {
-        if (e.response!.data is Map<String, dynamic>) {
-          final errorData = e.response!.data as Map<String, dynamic>;
-          final errorMessage = errorData['error'] as String? ?? 
-                              errorData['message'] as String? ?? 
-                              'Failed to create post';
-          throw Exception(errorMessage);
-        } else if (e.response!.data is String) {
-          try {
-            final parsed = jsonDecode(e.response!.data as String);
-            if (parsed is Map<String, dynamic>) {
-              final errorMessage = parsed['error'] as String? ?? 
-                                  parsed['message'] as String? ?? 
-                                  'Failed to create post';
-              throw Exception(errorMessage);
-            }
-          } catch (_) {
-            // Ignore parse error
-          }
-        }
-      }
-      
-      throw Exception(e.message ?? 'Network error occurred');
-    } catch (e) {
+      print(
+          '>>> [PostRemoteDS] DioException (createPost) status=${e.response?.statusCode}');
+      print('>>> [PostRemoteDS] DioException data=${e.response?.data}');
+      print('>>> [PostRemoteDS] DioException message=${e.message}');
+      rethrow;
+    } catch (e, st) {
+      print('>>> [PostRemoteDS] OTHER ERROR (createPost): $e');
+      print(st);
       rethrow;
     }
+  }
+
+  /// 🔹 SHARE POST (POST /posts/{post_id}/share)
+  /// Share đơn giản: không caption, visibility = public
+  @override
+  Future<PostEntity> sharePost(
+    String postId, {
+    required String visibility,
+    String? content,
+  }) async {
+    final headers = _authHeaders();
+
+    final payload = <String, dynamic>{
+      'content': content ?? '',
+      'visibility': visibility, // 'public' hoặc 'private'
+    };
+
+    print('>>> [DS] sharePost postId=$postId payload=$payload');
+    final res = await _dio.post(
+      '/posts/$postId/share',
+      data: payload,
+      options: Options(headers: headers),
+    );
+
+    print('>>> [DS] sharePost response=${res.data}');
+
+    return _parsePostFromResponse(res.data);
   }
 
   @override
@@ -297,116 +271,6 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
     } catch (e, st) {
       print('>>> [DS] OTHER ERROR (deletePost): $e');
       print(st);
-      rethrow;
-    }
-  }
-
-  @override
-  Future<bool> getLikeStatus(String postId) async {
-    print('>>> [DS] getLikeStatus called with postId=$postId');
-
-    try {
-      final response = await _dio.get(
-        '/likes/status/$postId',
-        options: Options(headers: _authHeaders()),
-      );
-
-      print('>>> [DS] GET /likes/status status=${response.statusCode}');
-      print('>>> [DS] response.data=${response.data}');
-
-      return response.data as bool;
-    } on DioException catch (e) {
-      print('>>> [DS] getLikeStatus DioException status=${e.response?.statusCode}');
-      print('>>> [DS] getLikeStatus response data=${e.response?.data}');
-      rethrow;
-    }
-  }
-
-  @override
-  Future<Map<String, dynamic>> getDailyLimits() async {
-    print('>>> [DS] getDailyLimits called');
-
-    try {
-      final response = await _dio.get(
-        '/likes/daily-limits/me',
-        options: Options(headers: _authHeaders()),
-      );
-
-      print('>>> [DS] GET /likes/daily-limits status=${response.statusCode}');
-      print('>>> [DS] response.data=${response.data}');
-
-      return response.data as Map<String, dynamic>;
-    } on DioException catch (e) {
-      print('>>> [DS] getDailyLimits DioException status=${e.response?.statusCode}');
-      print('>>> [DS] getDailyLimits response data=${e.response?.data}');
-      rethrow;
-    }
-  }
-
-  @override
-  Future<int> getLikeCount(String postId) async {
-    print('>>> [DS] getLikeCount called with postId=$postId');
-
-    try {
-      final response = await _dio.get(
-        '/likes/count/$postId',
-        options: Options(headers: _authHeaders()),
-      );
-
-      print('>>> [DS] GET /likes/count status=${response.statusCode}');
-      print('>>> [DS] response.data=${response.data}');
-
-      final data = response.data as Map<String, dynamic>;
-      return data['count'] as int;
-    } on DioException catch (e) {
-      print('>>> [DS] getLikeCount DioException status=${e.response?.statusCode}');
-      print('>>> [DS] getLikeCount response data=${e.response?.data}');
-      rethrow;
-    }
-  }
-
-  @override
-  Future<List<String>> getPostLikes(String postId) async {
-    print('>>> [DS] getPostLikes called with postId=$postId');
-
-    try {
-      final response = await _dio.get(
-        '/likes/post/$postId',
-        options: Options(headers: _authHeaders()),
-      );
-
-      print('>>> [DS] GET /likes/post status=${response.statusCode}');
-      print('>>> [DS] response.data=${response.data}');
-
-      final data = response.data as Map<String, dynamic>;
-      final List<dynamic> users = data['users'] as List<dynamic>;
-      return users.map((user) => user['user_id'] as String).toList();
-    } on DioException catch (e) {
-      print('>>> [DS] getPostLikes DioException status=${e.response?.statusCode}');
-      print('>>> [DS] getPostLikes response data=${e.response?.data}');
-      rethrow;
-    }
-  }
-
-  @override
-  Future<List<String>> getUserLikes() async {
-    print('>>> [DS] getUserLikes called');
-
-    try {
-      final response = await _dio.get(
-        '/likes/user/me/likes',
-        options: Options(headers: _authHeaders()),
-      );
-
-      print('>>> [DS] GET /likes/user/me/likes status=${response.statusCode}');
-      print('>>> [DS] response.data=${response.data}');
-
-      final data = response.data as Map<String, dynamic>;
-      final List<dynamic> posts = data['posts'] as List<dynamic>;
-      return posts.map((post) => post['post_id'] as String).toList();
-    } on DioException catch (e) {
-      print('>>> [DS] getUserLikes DioException status=${e.response?.statusCode}');
-      print('>>> [DS] getUserLikes response data=${e.response?.data}');
       rethrow;
     }
   }

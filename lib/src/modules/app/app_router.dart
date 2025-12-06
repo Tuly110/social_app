@@ -20,7 +20,7 @@ import '../newpost/presentation/edit_post_page.dart';
 import '../newpost/domain/entities/post_entity.dart';
 import '../profile/presentation/followers_page.dart';
 import '../profile/presentation/following_page.dart';
-import '../home/presentation/comments/comments_page.dart';
+import '../block/presentation/pages/blocked_users_page.dart';
 
 import 'empty_shell_page.dart';
 
@@ -52,6 +52,8 @@ class AppRouter extends _$AppRouter {
             AutoRoute(page: FollowersRoute.page, path: 'followers'),
             AutoRoute(page: FollowingRoute.page, path: 'following'),
             AutoRoute(page: EditProfileRoute.page, path: 'edit-profile'),
+            AutoRoute(page: SettingsRoute.page, path: 'setting'),
+            AutoRoute(page: BlockedUsersRoute.page, path: 'blocked-users'),
           ],
         ),
         
@@ -63,6 +65,5 @@ class AppRouter extends _$AppRouter {
         AutoRoute(page: UpdatePasswordRoute.page, path: '/updatepassword'),
         AutoRoute(page: SettingsRoute.page, path: '/setting'),
         AutoRoute(page: SearchRoute.page, path: '/search'),
-        AutoRoute(page: CommentRoute.page, path: '/comments'),
       ];
 }

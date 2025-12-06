@@ -6,22 +6,23 @@ import '../datasources/post_remote_datasource.dart';
 
 @LazySingleton(as: PostRepository)
 class PostRepositoryImpl implements PostRepository {
-  final PostRemoteDataSource remote;
+  final PostRemoteDataSource _remote;
 
-  PostRepositoryImpl(this.remote);
+  PostRepositoryImpl(this._remote);
 
   @override
-  Future<List<PostEntity>> getFeed({int page = 0, int limit = 10}) {
-    return remote.getFeed(page: page, limit: limit);
+  Future<List<PostEntity>> getFeed({int page = 0, int limit = 20}) {
+    // hiện tại remote đã hỗ trợ page/limit, bạn có thể dùng hoặc bỏ qua
+    return _remote.getFeed(page: page, limit: limit);
   }
 
   @override
   Future<PostEntity> createPost(
     String content, {
     String? imageUrl,
-    required String visibility,
+    String visibility = 'public',
   }) {
-    return remote.createPost(
+    return _remote.createPost(
       content,
       imageUrl: imageUrl,
       visibility: visibility,
@@ -30,16 +31,16 @@ class PostRepositoryImpl implements PostRepository {
 
   @override
   Future<PostEntity> toggleLike(String postId) {
-    return remote.toggleLike(postId);
+    return _remote.toggleLike(postId);
   }
 
   @override
   Future<PostEntity> updatePost(
     String postId, {
-    required String content,
+    String? content,
     String? imageUrl,
   }) {
-    return remote.updatePost(
+    return _remote.updatePost(
       postId,
       content: content,
       imageUrl: imageUrl,
@@ -48,31 +49,19 @@ class PostRepositoryImpl implements PostRepository {
 
   @override
   Future<void> deletePost(String postId) {
-    return remote.deletePost(postId);
+    return _remote.deletePost(postId);
   }
 
   @override
-  Future<bool> getLikeStatus(String postId) {
-    return remote.getLikeStatus(postId);
-  }
-
-  @override
-  Future<Map<String, dynamic>> getDailyLimits() {
-    return remote.getDailyLimits();
-  }
-
-  @override
-  Future<int> getLikeCount(String postId) {
-    return remote.getLikeCount(postId);
-  }
-
-  @override
-  Future<List<String>> getPostLikes(String postId) {
-    return remote.getPostLikes(postId);
-  }
-
-  @override
-  Future<List<String>> getUserLikes() {
-    return remote.getUserLikes();
+  Future<PostEntity> sharePost(
+    String postId, {
+    required String visibility,
+    String? content,
+  }) {
+    return _remote.sharePost(
+      postId,
+      visibility: visibility,
+      content: content,
+    );
   }
 }

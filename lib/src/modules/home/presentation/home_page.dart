@@ -8,9 +8,7 @@ import '../../../../../generated/colors.gen.dart';
 import '../../../common/utils/getit_utils.dart';
 import '../../app/app_router.dart';
 import '../../newpost/presentation/cubit/post_cubit.dart';
-import '../presentation/cubit/comment_cubit.dart';
 import 'widgets/post_list.dart';
-
 
 @RoutePage()
 class HomePage extends StatefulWidget implements AutoRouteWrapper {
@@ -19,15 +17,8 @@ class HomePage extends StatefulWidget implements AutoRouteWrapper {
   /// Bọc HomePage bằng BlocProvider để inject PostCubit
   @override
   Widget wrappedRoute(BuildContext context) {
-    return MultiBlocProvider( // ĐỔI THÀNH MultiBlocProvider
-      providers: [
-        BlocProvider<PostCubit>(
-          create: (_) => getIt<PostCubit>()..loadFeed(),
-        ),
-        BlocProvider<CommentCubit>( // THÊM COMMENT CUBIT
-          create: (_) => getIt<CommentCubit>(),
-        ),
-      ],
+    return BlocProvider<PostCubit>(
+      create: (_) => getIt<PostCubit>()..loadFeed(),
       child: this,
     );
   }

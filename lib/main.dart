@@ -1,76 +1,11 @@
-// import 'dart:async';
-
-// import 'package:firebase_core/firebase_core.dart';
-// import 'package:flutter/material.dart';
-// import 'package:flutter_dotenv/flutter_dotenv.dart';
-// import 'package:flutter_easyloading/flutter_easyloading.dart';
-// import 'package:oktoast/oktoast.dart';
-// import 'package:supabase_flutter/supabase_flutter.dart';
-
-// import 'src/common/utils/getit_utils.dart';
-// import 'src/core/data/remote/firebase/firebase_service.dart';
-// import 'src/modules/app/app_widget.dart';
-
-// Future<void> main() async {
-//   WidgetsFlutterBinding.ensureInitialized();
-
-//   try {
-//     // Load env
-//     await dotenv.load(fileName: "env/.env.dev");
-
-//     // init supabase
-//     await Firebase.initializeApp();
-//     // Config EasyLoading
-//     configLoading();
-
-//     // Init Supabase
-//     await Supabase.initialize(
-//       url: dotenv.env['SUPABASE_URL']!,
-//       anonKey: dotenv.env['SUPABASE_ANON_KEY']!,
-//     );
-
-//     await GetItUtils.setup();
-
-//     final firebaseService = getIt<FirebaseService>();
-//     await firebaseService.initialize();
-
-//     runApp(
-//       OKToast(
-//         child: const AppWidget(),
-//       ),
-//     );
-    
-//   } catch (e, stackTrace) {
-//     print('Stack trace: $stackTrace');
-//     // Không runApp gì cả, để app crash và show error trong log
-//     rethrow;
-//   }
-// }
-
-// void configLoading() {
-//   EasyLoading.instance
-//     ..displayDuration = const Duration(milliseconds: 2500)
-//     ..indicatorType = EasyLoadingIndicatorType.fadingCircle
-//     ..loadingStyle = EasyLoadingStyle.custom
-//     ..indicatorSize = 45.0
-//     ..radius = 10.0
-//     ..progressColor = Colors.white
-//     ..backgroundColor = Colors.black
-//     ..indicatorColor = Colors.white
-//     ..textColor = Colors.white
-//     ..userInteractions = false
-//     ..maskType = EasyLoadingMaskType.black
-//     ..dismissOnTap = true;
-// }
-
 import 'dart:async';
-
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:oktoast/oktoast.dart';
+import 'package:social_app/src/common/utils/app_environment.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'src/common/utils/getit_utils.dart';
@@ -86,8 +21,6 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  try {
     // 1. Load env
     await dotenv.load(fileName: "env/.env.dev");
 
