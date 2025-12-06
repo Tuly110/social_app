@@ -2,25 +2,31 @@
 
 import 'dart:async';
 
+import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../domain/entities/user_entity.dart';
 
 abstract class AuthRemoteDataSource{
+  
+
   Future<UserEntity> signIn({required String email, required String password});
   Future<UserEntity> signInWithGoogle();
   Future<UserEntity> signUp({required String email, required String password});
   Future<void> signOut();
   Future<void> resetPassword({required String email});
   Future<void> updatePassword({required String newPassword});
+  Future<void> changePassword({required String newPassword, required String currentPassword});
+  Future<void> deleteAccount(String token);
   Future<UserEntity> getUserInfo();
 }
 
 @LazySingleton(as: AuthRemoteDataSource)
 class AuthRemoteDatasourceImpl implements AuthRemoteDataSource{
+  final Dio dio;
   final SupabaseClient supabaseClient;
-  AuthRemoteDatasourceImpl(this.supabaseClient);
+  AuthRemoteDatasourceImpl(this.supabaseClient, this.dio);
 
   Future<UserEntity> mapUserandCreateProfile(User user, String email) async {
     final defaultUsername = email.split('@')[0];
@@ -231,30 +237,81 @@ class AuthRemoteDatasourceImpl implements AuthRemoteDataSource{
   }
   
   @override
-Future<UserEntity> getUserInfo() async {
-  // BỎ CHECK NULL HOÀN TOÀN - giả định đã có session
-  final currentUser = supabaseClient.auth.currentUser!;
-  final session = supabaseClient.auth.currentSession; 
-  
-  final profile = await supabaseClient
-    .from('profiles')
-    .select()
-    .eq('id', currentUser.id)
-    .maybeSingle();
+  Future<UserEntity> getUserInfo() async {
+    final currentUser = supabaseClient.auth.currentUser!;
+    final session = supabaseClient.auth.currentSession; 
+    
+    final profile = await supabaseClient
+      .from('profiles')
+      .select()
+      .eq('id', currentUser.id)
+      .maybeSingle();
 
-  if (profile == null) {
-    return await mapUserandCreateProfile(currentUser, currentUser.email ?? '');
+    if (profile == null) {
+      return await mapUserandCreateProfile(currentUser, currentUser.email ?? '');
+    }
+
+    return UserEntity(
+      id: currentUser.id,
+      email: currentUser.email ?? 'Unknown',
+      username: profile['username'] ?? currentUser.email?.split('@')[0] ?? 'Unknown',
+      avatarUrl: profile['avatar_url'],
+      isEmailVerified: currentUser.emailConfirmedAt != null,
+      accessToken: session?.accessToken, // Thêm token
+      refreshToken: session?.refreshToken, // Thêm token
+    );
   }
 
-  return UserEntity(
-    id: currentUser.id,
-    email: currentUser.email ?? 'Unknown',
-    username: profile['username'] ?? currentUser.email?.split('@')[0] ?? 'Unknown',
-    avatarUrl: profile['avatar_url'],
-    isEmailVerified: currentUser.emailConfirmedAt != null,
-    accessToken: session?.accessToken, // Thêm token
-    refreshToken: session?.refreshToken, // Thêm token
-  );
+  @override
+  Future<void> changePassword({required String newPassword, required String currentPassword}) async {
+    try{
+      // verify current pasword
+      final currentUser = supabaseClient.auth.currentUser;
+      if(currentUser == null){
+        throw Exception("User not authenticateed");
+      }
+
+      // sign in with current pasword
+      await supabaseClient.auth.signInWithPassword(
+        email: currentUser.email!,
+        password: currentPassword,
+      );
+
+      // update new pasword
+      await supabaseClient.auth.updateUser(
+        UserAttributes(password: newPassword)
+      );
+
+
+    }on AuthException catch (e) {
+      if (e.message.contains('Invalid login credentials')) {
+        throw Exception('Current password is incorrect');
+      }
+      rethrow;
+    } catch (e) {
+      throw Exception('Failed to change password: ${e.toString()}');
+    }
+  }
+  
+  @override
+  Future<void> deleteAccount(String token) async {
+    try {
+      await dio.delete(
+        '/account/delete',
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+          },
+        ),
+      );
+      
+    } on DioException catch (e) {
+      final errorMessage = e.response?.data?['detail'] ?? 'Failed to delete account';
+      throw Exception(errorMessage);
+    } catch (e) {
+      throw Exception('Failed to delete account: $e');
+    }
+  }
+  
 }
 
-}

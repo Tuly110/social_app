@@ -33,19 +33,22 @@ class AppRouter extends _$AppRouter {
   List<AutoRouteObserver> get observers => [
         AutoRouteObserver(),
       ];
+  
   @override
   List<AutoRoute> get routes => [
         AutoRoute(page: SplashScreenRoute.page, path: '/', initial: true),
+        
         AutoRoute(
           page: EmptyShellRoute.page,
           path: '/app',
           children: [
             AutoRoute(page: HomeRoute.page, path: 'home', initial: true),
-            AutoRoute(page: CreatePostRoute.page, path: 'newpost'),
-            AutoRoute(page: EditPostRoute.page, path: 'edit-post'),
             AutoRoute(page: ChatRoute.page, path: 'chat'),
             AutoRoute(page: NoticeRoute.page, path: 'notice'),
-            AutoRoute(page: ProfileRoute.page, path: 'profile'),
+            AutoRoute(page: ProfileRoute.page, path: 'profile'), 
+            AutoRoute(page: CreatePostRoute.page, path: 'newpost'),
+
+            AutoRoute(page: EditPostRoute.page, path: 'edit-post'),
             AutoRoute(page: FollowersRoute.page, path: 'followers'),
             AutoRoute(page: FollowingRoute.page, path: 'following'),
             AutoRoute(page: EditProfileRoute.page, path: 'edit-profile'),
@@ -53,6 +56,8 @@ class AppRouter extends _$AppRouter {
             AutoRoute(page: BlockedUsersRoute.page, path: 'blocked-users'),
           ],
         ),
+        
+        // Các routes bên ngoài
         AutoRoute(page: LoginRoute.page, path: '/login'),
         AutoRoute(page: SignupRoute.page, path: '/signup'),
         AutoRoute(page: UserProfileRoute.page, path: '/user/:username'),

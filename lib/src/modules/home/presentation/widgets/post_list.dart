@@ -76,7 +76,20 @@ class PostList extends StatelessWidget {
               return PostItem(
                 post: post,
                 originalPost: originalPost,
-                onLikePressed: () => cubit.toggleLike(post.id),
+                onLikePressed: () {
+                  cubit.toggleLike(post.id);
+
+                  if (state is PostStateLikeLimitReached) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('You reached like limits to day (5 times)!'),
+                        duration: Duration(seconds: 2),
+                      ),
+                    );
+                    return;
+                  }
+                },
+
                 onCommentPressed: () {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Comment coming soon')),

@@ -2,6 +2,9 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:injectable/injectable.dart';
+import 'package:social_app/src/core/data/remote/firebase/firebase_service.dart';
+import 'package:social_app/src/modules/auth/domain/usecases/change_password_usecase.dart';
+import 'package:social_app/src/modules/auth/domain/usecases/delete_account_usecase.dart';
 import 'package:social_app/src/modules/auth/domain/usecases/reset_password_usecase.dart';
 import 'package:social_app/src/modules/auth/domain/usecases/sign_in_withGG_usecase.dart';
 import 'package:social_app/src/modules/auth/domain/usecases/update_password_usecase.dart';
@@ -21,9 +24,12 @@ class AuthCubit extends Cubit<AuthState> {
   final SignupUsecase _signupUsecase;
   final ResetPasswordUsecase _resetPasswordUsecase;
   final UpdatePasswordUsecase _updatePasswordUsecase;
+  final ChangePasswordUsecase _changePasswordUsecase;
+  final DeleteAccountUsecase _deleteAccountUsecase;
   final GetUserUsecase _getUserUsecase;
   final SupabaseClient supabaseClient;
   StreamSubscription? _authSubscription;
+  final FirebaseService _firebaseService;
   
 
   AuthCubit({
@@ -33,16 +39,22 @@ class AuthCubit extends Cubit<AuthState> {
     required SignupUsecase signupUsecase,
     required ResetPasswordUsecase resetPasswordUsecase,
     required UpdatePasswordUsecase updatePasswordUsecase,
+    required ChangePasswordUsecase changePasswordUsecase,
+    required DeleteAccountUsecase deleteAccountUsecase,
     required GetUserUsecase getUserUsecase,
     required SupabaseClient supabaseClient,
+    required FirebaseService firebaseService,
   }) :  _signinUsecase = signinUsecase,
         _signInWithggUsecase = signInWithggUsecase,  
         _signupUsecase = signupUsecase,
         _signOutUsecase = signOutUsecase,
         _resetPasswordUsecase = resetPasswordUsecase,
         _updatePasswordUsecase =  updatePasswordUsecase,
+        _changePasswordUsecase = changePasswordUsecase,
+        _deleteAccountUsecase = deleteAccountUsecase,
         _getUserUsecase = getUserUsecase,
         supabaseClient = supabaseClient,
+        _firebaseService = firebaseService,
         super(const AuthState.loading()) 
         {
             _authSubscription = supabaseClient.auth.onAuthStateChange.listen((response) async{
@@ -60,12 +72,15 @@ class AuthCubit extends Cubit<AuthState> {
               print('✅ AUTH STATE CHANGE - User authenticated: ${user.id}');
               emit(AuthState.authenticated(user.id)); 
               
-              // Thêm delay nhỏ để đảm bảo session ready
+              // delay nhỏ để đảm bảo session ready
               await Future.delayed(const Duration(milliseconds: 500));
               
               if (!isClosed) {
                 getUserInfo();
+                
               }
+                // Save FCM token khi user được xác thực (bao gồm cả OAuth)
+                await _firebaseService.saveTokenOnLogin();
             } else {
               emit(const AuthState.unauthenticated());
             }
@@ -171,6 +186,8 @@ class AuthCubit extends Cubit<AuthState> {
         (user) {
           emit(AuthState.authenticated(user.id));
           getUserInfo();
+           // Save FCM token when successfull login
+          _firebaseService.saveTokenOnLogin();
         },
         );
     }
@@ -192,7 +209,6 @@ class AuthCubit extends Cubit<AuthState> {
             ));
           },
           (user){
-              // ✅ CHỈ emit loading hoặc waiting, KHÔNG emit authenticated
               // AuthStateChange listener sẽ tự xử lý khi OAuth hoàn tất
               emit(const AuthState.loading());
               print('🔄 Google OAuth initiated - waiting for callback...');
@@ -247,6 +263,8 @@ class AuthCubit extends Cubit<AuthState> {
 
     Future<void> signOut() async {
         emit(const AuthState.loading());
+        // delete fcm token before logout
+        await _firebaseService.deleteTokenOnLogout();
         
         final result = await _signOutUsecase.call();
         
@@ -342,7 +360,55 @@ class AuthCubit extends Cubit<AuthState> {
       }
     }
 
-      
+    Future<void> changePassword({
+      required String currentPassword,
+      required String newPassword,
+    }) async{
+        emit(AuthState.loading());
+        try {
+          final result = await _changePasswordUsecase.call(newPassword: newPassword,currentPassword: currentPassword);
+          result.fold(
+            (failure) {
+
+              String errorMessage = failure.message;
+
+              if (failure.message.toLowerCase().contains('invalid login') ||
+                  failure.message.toLowerCase().contains('incorrect')) {
+                errorMessage = 'Current password is incorrect';
+              } else if (failure.message.toLowerCase().contains('weak')) {
+                errorMessage = 'New password is too weak';
+              }
+              
+              emit(AuthState.failure(errorMessage));
+            },
+            (_) {
+              emit(const AuthState.changePassword());
+            },
+          );
+      }catch(e){
+          emit(AuthState.failure(e.toString()));
+        }
+    }
+
+    Future<void> deleteAccount() async {
+      emit(AuthState.loading());
+      try {
+        // delete token before delete account
+        await _firebaseService.deleteTokenOnLogout();
+        final result = await _deleteAccountUsecase.call();
+        
+        result.fold(
+          (failure) {
+            emit(AuthState.failure(failure.message));
+          },
+          (_) {
+            emit(const AuthState.deleteAccount());
+          },
+        );
+      } catch (e) {
+        emit(AuthState.failure(e.toString()));
+      }
+    }
 
     @override
     Future<void> close() {

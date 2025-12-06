@@ -7,8 +7,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../generated/colors.gen.dart';
-import 'cubit/profile_cubit.dart';
 import '../../../common/utils/getit_utils.dart';
+import 'cubit/profile_cubit.dart';
 
 @RoutePage()
 class EditProfilePage extends StatefulWidget implements AutoRouteWrapper {
@@ -117,21 +117,13 @@ class _EditProfilePageState extends State<EditProfilePage> {
           );
 
       if (mounted) {
-        final updatedUsername =
-            username.isEmpty ? widget.initialUsername : username;
-        final updatedBio = bio.isEmpty ? null : bio;
-
-        // 👇 Trả FULL thông tin mới về cho ProfilePage
-        context.router.pop<Map<String, dynamic>>({
-          'username': updatedUsername,
-          'bio': updatedBio,
-          'avatarUrl': avatarUrl,
-        });
+        // Pop mà không trả về gì cả
+        context.router.pop();
       }
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Cập nhật thất bại: $e')),
+        SnackBar(content: Text('Failed to updated: $e')),
       );
     } finally {
       if (mounted) {

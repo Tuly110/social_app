@@ -63,9 +63,7 @@ class UserPostsTab extends StatelessWidget {
                 post: post,
                 onLikePressed: () => cubit.toggleLike(post.id),
                 onCommentPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Comment coming soon')),
-                  );
+                  context.router.push(CommentRoute(post: post));
                 },
                 onRepostPressed: () {
                   ScaffoldMessenger.of(context).showSnackBar(

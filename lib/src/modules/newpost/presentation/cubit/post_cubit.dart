@@ -129,19 +129,41 @@ class PostCubit extends Cubit<PostState> {
   Future<void> toggleLike(String postId) async {
     final current = state;
     if (current is! PostStateLoaded) return;
+    final post = current.posts.firstWhere((p) => p.id == postId);
 
+    // Nếu hành động là LIKE (không phải Unlike)
+    final bool isTryingToLike = !post.isLiked;
+
+    // Kiểm tra giới hạn like
+    if (isTryingToLike) {
+      final allowed = await _canLike();
+      if (!allowed) {
+        emit(PostStateLikeLimitReached());
+        return;
+      }
+    }
+
+    final updatedLocalPost = post.copyWith(
+      isLiked: !post.isLiked,
+      likeCount: post.isLiked 
+          ? post.likeCount - 1 
+          : post.likeCount + 1,
+    );
+    final newList = current.posts.map((p) {
+      return p.id == postId ? updatedLocalPost : p;
+    }).toList();
+
+    if (isTryingToLike && !await _canLike()) {
+      emit(PostStateLikeLimitReached());
+      return;
+    }
+
+
+    // Gọi backend
     try {
-      final updatedPost = await _toggleLikeUseCase(postId);
-      if (isClosed) return;
-
-      final updatedList = current.posts
-          .map((p) => p.id == updatedPost.id ? updatedPost : p)
-          .toList();
-
-      emit(PostStateLoaded(posts: updatedList));
+      await _toggleLikeUseCase(postId);
     } catch (e) {
-      if (isClosed) return;
-      emit(PostStateError(message: e.toString()));
+        print("toggle like API error: $e");
     }
   }
 
@@ -174,4 +196,52 @@ class PostCubit extends Cubit<PostState> {
       return false;
     }
   }
+
+  Future<bool> _canLike() async {
+    try {
+      final limits = await _getDailyLimitsUseCase(); 
+      final used = limits['likesUsed'] ?? 0;
+      final limit = limits['likeLimit'] ?? 5;
+
+      return used < limit;
+    } catch (e) {
+      print('Error checking like limit $e');
+      return true; // an toàn: vẫn cho like nếu backend gặp lỗi
+    }
+  }
+
+
+  Future<Map<String, dynamic>> getDailyLimits() async {
+    try {
+      final PostEntity sharedPost = await _sharePostUseCase(
+        postId,
+        visibility: visibility,
+        content: content,
+      );
+
+      if (isClosed) return false;
+
+      if (current is PostStateLoaded) {
+        emit(PostStateLoaded(posts: [sharedPost, ...current.posts]));
+      } else {
+        emit(PostStateLoaded(posts: [sharedPost]));
+      }
+
+      return true;
+    } catch (e) {
+      if (isClosed) return false;
+      emit(PostStateError(message: e.toString()));
+      return false;
+    }
+  }
+}
+  Future<List<String>> getUserLikes() async {
+    try {
+      return await _getUserLikesUseCase();
+    } catch (e) {
+      print('>>> [Cubit] getUserLikes error: $e');
+      rethrow;
+    }
+  }
+
 }
