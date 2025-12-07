@@ -72,7 +72,7 @@ class _EmptyShellPageState extends State<EmptyShellPage> {
   }
 
   Future<void> _openCreatePostFromShell() async {
-    final created = await context.pushRoute<bool>(const CreatePostRoute());
+    final created = await context.pushRoute(const CreatePostRoute());
     if (created == true && mounted) {
       await context.read<PostCubit>().loadFeed();
     }

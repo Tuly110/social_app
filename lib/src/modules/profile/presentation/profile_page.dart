@@ -17,7 +17,6 @@ import 'component/widget__placeholder.dart';
 import 'component/widget__section_title.dart';
 import 'component/widget__stats_card.dart';
 import 'cubit/profile_cubit.dart';
-import 'profile_update_result.dart';
 
 @RoutePage()
 class ProfilePage extends StatefulWidget implements AutoRouteWrapper {
@@ -693,10 +692,10 @@ class _TwoColumnStatsAndGallery extends StatelessWidget {
               child: WidgetStatsCard(
                 onPostsTap: () {
                   final controller = DefaultTabController.of(context);
-                  controller?.animateTo(1);
+                  controller.animateTo(1);
                 },
                 onFollowingTap: () async {
-                  final changed = await context.router.push<bool>(
+                  final changed = await context.router.push(
                     FollowingRoute(userId: userId),
                   );
                   if (changed == true && context.mounted) {
@@ -708,7 +707,7 @@ class _TwoColumnStatsAndGallery extends StatelessWidget {
                   }
                 },
                 onFollowersTap: () async {
-                  final changed = await context.router.push<bool>(
+                  final changed = await context.router.push(
                     FollowersRoute(userId: userId),
                   );
                   if (changed == true && context.mounted) {
