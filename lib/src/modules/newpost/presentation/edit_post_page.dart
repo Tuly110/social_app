@@ -4,24 +4,29 @@ import 'dart:io';
 
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../generated/colors.gen.dart';
-import '../../../common/utils/getit_utils.dart';
 import '../domain/entities/post_entity.dart';
-import '../domain/usecase/update_post_usecase.dart';
 import 'widgets/create_post_app_bar.dart';
 import 'widgets/post_content_field.dart';
+import 'cubit/post_cubit.dart';
 
 @RoutePage()
-class EditPostPage extends StatefulWidget {
+class EditPostPage extends StatefulWidget implements AutoRouteWrapper {
   final PostEntity post;
 
   const EditPostPage({
     super.key,
     required this.post,
   });
+
+  @override
+  Widget wrappedRoute(BuildContext context) {
+    return this;
+  }
 
   @override
   State<EditPostPage> createState() => _EditPostPageState();
@@ -35,9 +40,8 @@ class _EditPostPageState extends State<EditPostPage> {
   int _characterCount = 0;
   bool _isSubmitting = false;
 
-  // dùng tạm giống CreatePostPage
+  // dùng tạm cho UI (PostContentField)
   bool _isPublic = true;
-  bool _isFriend = true;
 
   // xử lý image
   final ImagePicker _picker = ImagePicker();
@@ -69,7 +73,7 @@ class _EditPostPageState extends State<EditPostPage> {
     if (picked != null) {
       setState(() {
         _newSelectedImage = picked;
-        _removeOldImage = false; // đã chọn ảnh mới thì không “remove” nữa
+        _removeOldImage = false; // chọn ảnh mới ⇒ không “remove” nữa
       });
     }
   }
@@ -116,7 +120,8 @@ class _EditPostPageState extends State<EditPostPage> {
 
     if (newContent.isEmpty && !_removeOldImage && _newSelectedImage == null) {
       _showErrorDialog(
-          'Please write something or keep/add a photo before saving.');
+        'Please write something or keep/add a photo before saving.',
+      );
       return;
     }
 
@@ -139,32 +144,33 @@ class _EditPostPageState extends State<EditPostPage> {
         // 2. user muốn bỏ ảnh → gửi null
         finalImageUrl = null;
       } else {
-        // 3. giữ ảnh cũ như backend đang có
+        // 3. giữ ảnh cũ
         finalImageUrl = widget.post.imageUrl;
       }
 
-      // Gọi usecase trực tiếp, KHÔNG dùng PostCubit nữa
-      final updateUseCase = getIt<UpdatePostUseCase>();
-
-      final updatedPost = await updateUseCase(
+      // 🔥 DÙNG PostCubit, không gọi usecase trực tiếp
+      final postCubit = context.read<PostCubit>();
+      final ok = await postCubit.editPost(
         widget.post.id,
         content: newContent,
         imageUrl: finalImageUrl,
       );
 
-      print('>>> [Edit] Updated post = ${updatedPost.id}');
-
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Post updated successfully!'),
-          backgroundColor: Colors.green,
-        ),
-      );
+      if (ok) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Post updated successfully!'),
+            backgroundColor: Colors.green,
+          ),
+        );
 
-      // pop(true) để Home có thể reload nếu muốn
-      context.router.pop(true);
+        // Cubit đã emit state mới → Home/PostList tự rebuild
+        context.router.pop(true);
+      } else {
+        _showErrorDialog('Failed to update post. Please try again.');
+      }
     } catch (e, st) {
       print('>>> [Edit] ERROR: $e');
       print(st);
@@ -221,7 +227,7 @@ class _EditPostPageState extends State<EditPostPage> {
                     focusNode: _focusNode,
                     currentUsername: widget.post.authorName,
                     isPublic: _isPublic,
-                    onPrivacyChanged: () {},
+                    onPrivacyChanged: () {}, // tạm chưa cho đổi privacy
                     characterCount: _characterCount,
                     maxCharacters: _maxCharacters,
                   ),
@@ -259,8 +265,8 @@ class _EditPostPageState extends State<EditPostPage> {
                         label: const Text('Change photo'),
                       ),
                       const SizedBox(width: 8),
-                      if (widget.post.imageUrl != null &&
-                              widget.post.imageUrl!.isNotEmpty ||
+                      if ((widget.post.imageUrl != null &&
+                              widget.post.imageUrl!.isNotEmpty) ||
                           _newSelectedImage != null)
                         TextButton.icon(
                           onPressed: _isSubmitting ? null : _removeImage,

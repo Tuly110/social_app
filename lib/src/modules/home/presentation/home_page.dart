@@ -1,3 +1,5 @@
+// lib/src/modules/home/presentation/home_page.dart
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -5,7 +7,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../../generated/colors.gen.dart';
-import '../../../common/utils/getit_utils.dart';
 import '../../app/app_router.dart';
 import '../../newpost/presentation/cubit/post_cubit.dart';
 import 'widgets/post_list.dart';
@@ -14,13 +15,11 @@ import 'widgets/post_list.dart';
 class HomePage extends StatefulWidget implements AutoRouteWrapper {
   const HomePage({super.key});
 
-  /// Bọc HomePage bằng BlocProvider để inject PostCubit
+  /// ⚠️ QUAN TRỌNG: KHÔNG BỌC BẰNG BlocProvider NỮA
+  /// Vì PostCubit đã được cung cấp ở EmptyShellPage
   @override
   Widget wrappedRoute(BuildContext context) {
-    return BlocProvider<PostCubit>(
-      create: (_) => getIt<PostCubit>()..loadFeed(),
-      child: this,
-    );
+    return this; // chỉ return chính nó
   }
 
   @override
@@ -59,8 +58,13 @@ class _HomePageState extends State<HomePage>
         });
       }
     } catch (_) {
-      // không cần thông báo lỗi
+      // ignore
     }
+  }
+
+  Future<void> _openCreatePost() async {
+    // Không cần await kết quả nữa, CreatePostPage tự bơm post vào Cubit
+    await context.router.push(const CreatePostRoute());
   }
 
   @override
@@ -123,11 +127,8 @@ class _HomePageState extends State<HomePage>
                   },
                 ),
                 IconButton(
-                  icon: const FaIcon(
-                    FontAwesomeIcons.bell,
-                    color: Colors.black,
-                    size: 20,
-                  ),
+                  icon: const FaIcon(FontAwesomeIcons.bell),
+                  color: Colors.black,
                   onPressed: () {
                     context.router.navigate(const NoticeRoute());
                   },
@@ -135,8 +136,7 @@ class _HomePageState extends State<HomePage>
                 const SizedBox(width: 8),
                 GestureDetector(
                   onTap: () async {
-                    final changed =
-                        await context.router.push( ProfileRoute());
+                    final changed = await context.router.push(ProfileRoute());
 
                     if (changed == true) {
                       _loadMyAvatar();
@@ -192,14 +192,29 @@ class _HomePageState extends State<HomePage>
           ),
         ),
       ),
-
-      /// Body
       body: TabBarView(
         controller: _tabController,
-        children: const [
-          PostList(),
-          PostList(), // sau này bạn tách feed Following riêng
+        children: [
+          // For You = tất cả bài
+          RefreshIndicator(
+            onRefresh: () => context.read<PostCubit>().loadFeed(),
+            child: const PostList(),
+          ),
+
+          // Following = chỉ bài của người mình follow
+          RefreshIndicator(
+            onRefresh: () => context.read<PostCubit>().loadFeed(),
+            child: const PostList(
+              onlyFollowing:
+                  true, // 👈 đặt ở PostList, không phải RefreshIndicator
+            ),
+          ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: ColorName.mint,
+        onPressed: _openCreatePost,
+        child: const Icon(Icons.edit, color: Colors.white),
       ),
     );
   }

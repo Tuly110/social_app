@@ -2,28 +2,85 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:intl/intl.dart';
 
 import '../../../app/app_router.dart';
 import '../../../newpost/domain/entities/post_entity.dart';
 import '../../../newpost/presentation/cubit/post_cubit.dart';
 import '../../../../../generated/colors.gen.dart';
 
-// 🔥 thêm
 import '../../../../common/utils/getit_utils.dart';
 import '../../../block/domain/usecase/block_user_usecase.dart';
 import '../../../block/domain/usecase/unblock_user_usecase.dart';
 import '../../../block/domain/usecase/is_blocked_usecase.dart';
-
-
 import 'post_item.dart';
 
-class PostList extends StatelessWidget {
-  const PostList({super.key});
+class PostList extends StatefulWidget {
+  /// false = For You (tất cả bài), true = chỉ bài của người mình follow
+  final bool onlyFollowing;
+
+  const PostList({
+    super.key,
+    this.onlyFollowing = false,
+  });
+
+  @override
+  State<PostList> createState() => _PostListState();
+}
+
+class _PostListState extends State<PostList> {
+  Set<String> _followingIds = {};
+  bool _loadingFollowing = false;
+  String? _followingError;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.onlyFollowing) {
+      _loadFollowing();
+    }
+  }
+
+  /// Lấy danh sách user mà current user đang follow
+  Future<void> _loadFollowing() async {
+    final client = Supabase.instance.client;
+    final user = client.auth.currentUser;
+    if (user == null) return;
+
+    setState(() {
+      _loadingFollowing = true;
+      _followingError = null;
+    });
+
+    try {
+      // ⚠️ dùng tên bảng/column quen thuộc: follows(follower_id, following_id)
+      final data = await client
+          .from('follows')
+          .select('following_id')
+          .eq('follower_id', user.id);
+
+      final ids = <String>{};
+      for (final row in data as List<dynamic>) {
+        final map = row as Map<String, dynamic>;
+        final id = map['following_id'];
+        if (id is String) {
+          ids.add(id);
+        }
+      }
+
+      setState(() {
+        _followingIds = ids;
+        _loadingFollowing = false;
+      });
+    } catch (e) {
+      setState(() {
+        _loadingFollowing = false;
+        _followingError = e.toString();
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    // Lấy id user hiện tại từ Supabase
     final currentUserId = Supabase.instance.client.auth.currentUser?.id;
 
     return BlocBuilder<PostCubit, PostState>(
@@ -42,11 +99,38 @@ class PostList extends StatelessWidget {
         }
 
         if (state is PostStateLoaded) {
-          final posts = state.posts;
-          if (posts.isEmpty) {
-            return const Center(
-              child: Text('No posts yet. Be the first to post!'),
-            );
+          final loadedState = state;
+          var posts = loadedState.posts;
+
+          // 🔥 MODE FOLLOWING: chỉ lấy post của người mình follow
+          if (widget.onlyFollowing) {
+            if (_loadingFollowing) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            if (_followingError != null) {
+              return Center(
+                child: Text(
+                  'Failed to load following:\n$_followingError',
+                  textAlign: TextAlign.center,
+                ),
+              );
+            }
+
+            if (_followingIds.isEmpty) {
+              return const Center(
+                child: Text('You are not following anyone yet.'),
+              );
+            }
+
+            posts =
+                posts.where((p) => _followingIds.contains(p.authorId)).toList();
+
+            if (posts.isEmpty) {
+              return const Center(
+                child: Text('No posts from people you follow yet.'),
+              );
+            }
           }
 
           final cubit = context.read<PostCubit>();
@@ -62,7 +146,7 @@ class PostList extends StatelessWidget {
               PostEntity? originalPost;
               if (post.type == 'shared' && post.originalPostId != null) {
                 try {
-                  originalPost = posts.firstWhere(
+                  originalPost = loadedState.posts.firstWhere(
                     (p) => p.id == post.originalPostId,
                   );
                 } catch (_) {
@@ -76,17 +160,20 @@ class PostList extends StatelessWidget {
               return PostItem(
                 post: post,
                 originalPost: originalPost,
-                onLikePressed: () {
-                  cubit.toggleLike(post.id);
 
-                  if (state is PostStateLikeLimitReached) {
+                onLikePressed: () async {
+                  await cubit.toggleLike(post.id);
+
+                  // check state hiện tại của cubit xem có chạm limit like chưa
+                  if (cubit.state is PostStateLikeLimitReached) {
+                    if (!context.mounted) return;
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                        content: Text('You reached like limits to day (5 times)!'),
+                        content:
+                            Text('You reached like limits to day (5 times)!'),
                         duration: Duration(seconds: 2),
                       ),
                     );
-                    return;
                   }
                 },
 
@@ -170,7 +257,7 @@ class PostList extends StatelessWidget {
     );
   }
 
-  /// Xử lý share post: confirm + gọi Cubit
+  /// SHARE POST
   Future<void> _onSharePost({
     required BuildContext context,
     required PostCubit cubit,
@@ -186,7 +273,6 @@ class PostList extends StatelessWidget {
       return;
     }
 
-    // mở bottom sheet: chọn public/private + nhập nội dung
     final result = await _showShareBottomSheet(context, post);
     if (result == null) return;
 
@@ -319,11 +405,11 @@ class PostList extends StatelessWidget {
                                   ChoiceChip(
                                     label: Row(
                                       mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        const Icon(Icons.public,
+                                      children: const [
+                                        Icon(Icons.public,
                                             size: 14, color: Colors.white),
-                                        const SizedBox(width: 4),
-                                        const Text('Public'),
+                                        SizedBox(width: 4),
+                                        Text('Public'),
                                       ],
                                     ),
                                     selected: visibility == 'public',
@@ -510,7 +596,7 @@ class PostList extends StatelessWidget {
     );
   }
 
-  /// BOTTOM SHEET: MORE (edit/delete/block/...)
+  /// MORE / BLOCK
   Future<void> _showMoreBottomSheet({
     required BuildContext context,
     required PostCubit cubit,
@@ -522,9 +608,7 @@ class PostList extends StatelessWidget {
       try {
         final isBlockedUseCase = getIt<IsBlockedUseCase>();
         isBlocked = await isBlockedUseCase(post.authorId);
-      } catch (e) {
-        // ignore
-      }
+      } catch (_) {}
     }
 
     showModalBottomSheet(
@@ -564,11 +648,8 @@ class PostList extends StatelessWidget {
         onTap: () async {
           Navigator.pop(context);
 
-          final result = await context.router.push(EditPostRoute(post: post));
-
-          if (result == true && context.mounted) {
-            context.read<PostCubit>().loadFeed();
-          }
+          await context.router.push(EditPostRoute(post: post));
+          // EditPostPage gọi cubit.editPost → state tự update, không cần reload
         },
       ),
       ListTile(
@@ -619,6 +700,7 @@ class PostList extends StatelessWidget {
   List<Widget> _buildOtherActions(
     BuildContext context,
     PostEntity post,
+    
     bool isBlocked,
   ) {
     return [
@@ -640,14 +722,11 @@ class PostList extends StatelessWidget {
           bool? confirm;
 
           if (isBlocked) {
-            // ✅ confirm UNBLOCK
             confirm = await showDialog<bool>(
               context: context,
               builder: (ctx) => AlertDialog(
                 title: const Text('Unblock this author?'),
-                content: Text(
-                  'Do you want to unblock @${post.authorName}?',
-                ),
+                content: Text('Do you want to unblock @${post.authorName}?'),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.pop(ctx, false),
@@ -661,7 +740,6 @@ class PostList extends StatelessWidget {
               ),
             );
           } else {
-            // ✅ confirm BLOCK
             confirm = await showDialog<bool>(
               context: context,
               builder: (ctx) => AlertDialog(
@@ -707,7 +785,6 @@ class PostList extends StatelessWidget {
             ),
           );
 
-          // 🔥 reload feed để ẩn hiện lại post
           if (ok) {
             context.read<PostCubit>().loadFeed();
           }

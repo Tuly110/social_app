@@ -9,7 +9,9 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../generated/colors.gen.dart';
 import '../../../common/utils/getit_utils.dart';
 import 'cubit/profile_cubit.dart';
+import 'profile_update_result.dart';
 
+@RoutePage()
 @RoutePage()
 class EditProfilePage extends StatefulWidget implements AutoRouteWrapper {
   const EditProfilePage({
@@ -25,10 +27,8 @@ class EditProfilePage extends StatefulWidget implements AutoRouteWrapper {
 
   @override
   Widget wrappedRoute(BuildContext context) {
-    return BlocProvider<ProfileCubit>(
-      create: (_) => getIt<ProfileCubit>(),
-      child: this,
-    );
+    // ❗ Không bọc BlocProvider nữa
+    return this;
   }
 
   @override
@@ -42,9 +42,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
   final _picker = ImagePicker();
   XFile? _pickedImage;
   bool _isSaving = false;
-
-  // TODO: thay bằng token thật
-  final String _dummyToken = 'YOUR_ACCESS_TOKEN';
 
   @override
   void initState() {
@@ -100,6 +97,17 @@ class _EditProfilePageState extends State<EditProfilePage> {
     });
 
     try {
+      final client = Supabase.instance.client;
+      final currentUser = client.auth.currentUser;
+
+      if (currentUser == null) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Bạn chưa đăng nhập')),
+        );
+        return;
+      }
+
       String? avatarUrl = widget.initialAvatarUrl;
 
       if (_pickedImage != null) {
@@ -109,21 +117,33 @@ class _EditProfilePageState extends State<EditProfilePage> {
       final username = _usernameController.text.trim();
       final bio = _bioController.text.trim();
 
-      await context.read<ProfileCubit>().updateProfile(
-            token: _dummyToken,
-            username: username.isEmpty ? null : username,
-            bio: bio.isEmpty ? null : bio,
-            avatarUrl: avatarUrl,
-          );
+      // 🔥 Build data update cho bảng profiles
+      final updateData = <String, dynamic>{};
 
-      if (mounted) {
-        // Pop mà không trả về gì cả
-        context.router.pop();
+      if (username.isNotEmpty) {
+        updateData['username'] = username;
       }
+      // Nếu bạn muốn cho phép xoá bio: dùng luôn bio, kể cả rỗng
+      updateData['bio'] = bio;
+      updateData['avatar_url'] = avatarUrl;
+
+      // 🔥 Update trực tiếp Supabase
+      await client.from('profiles').update(updateData).eq('id', currentUser.id);
+
+      if (!mounted) return;
+
+      // ✅ Trả về dữ liệu mới cho ProfilePage
+      context.router.pop(
+        ProfileUpdateResult(
+          username: username.isNotEmpty ? username : null,
+          bio: bio,
+          avatarUrl: avatarUrl,
+        ),
+      );
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to updated: $e')),
+        SnackBar(content: Text('Failed to update: $e')),
       );
     } finally {
       if (mounted) {

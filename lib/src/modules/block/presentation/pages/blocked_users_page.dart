@@ -1,6 +1,8 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../newpost/presentation/cubit/post_cubit.dart';
 
 import '../../../../../generated/colors.gen.dart';
 import '../../../../common/utils/getit_utils.dart';
@@ -82,6 +84,9 @@ class _BlockedUsersPageState extends State<BlockedUsersPage> {
         setState(() {
           _items.removeWhere((e) => e.userId == user.userId);
         });
+
+        // 🔥 reload lại feed / profile list ngay sau khi unblock
+        context.read<PostCubit>().loadFeed();
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Unblocked @${user.username}')),
