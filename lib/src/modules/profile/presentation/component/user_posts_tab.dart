@@ -14,13 +14,28 @@ import '../../../block/domain/usecase/block_user_usecase.dart';
 import '../../../block/domain/usecase/unblock_user_usecase.dart';
 import '../../../block/domain/usecase/is_blocked_usecase.dart';
 
-class UserPostsTab extends StatelessWidget {
+class UserPostsTab extends StatefulWidget {
   final String userId;
 
   const UserPostsTab({
     super.key,
     required this.userId,
   });
+
+  @override
+  State<UserPostsTab> createState() => _UserPostsTabState();
+}
+
+class _UserPostsTabState extends State<UserPostsTab> {
+  @override
+  void initState() {
+    super.initState();
+    
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      context.read<PostCubit>().loadFeed(page: 0, limit: 100, append: false);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,34 +57,54 @@ class UserPostsTab extends StatelessWidget {
         }
 
         if (state is PostStateLoaded) {
-          // lọc post theo userId được truyền vào
-          final posts = state.posts.where((p) => p.authorId == userId).toList();
+          
+          final allPosts = state.posts;
 
-          if (posts.isEmpty) {
+          
+          final userPosts =
+              allPosts.where((p) => p.authorId == widget.userId).toList();
+
+          if (userPosts.isEmpty) {
             return const Center(child: Text('No posts yet'));
           }
 
           final cubit = context.read<PostCubit>();
 
           return ListView.separated(
-            itemCount: posts.length,
+            itemCount: userPosts.length,
             separatorBuilder: (_, __) =>
                 const Divider(height: 1, color: ColorName.borderLight),
             itemBuilder: (context, index) {
-              final post = posts[index];
+              final post = userPosts[index];
               final isOwner = currentUserId == post.authorId;
+
+              PostEntity? originalPost;
+              if (post.type == 'shared' && post.originalPostId != null) {
+                try {
+                  originalPost = allPosts.firstWhere(
+                    (p) => p.id == post.originalPostId,
+                  );
+                } catch (_) {
+                  originalPost = null;
+                }
+              }
 
               return PostItem(
                 post: post,
+                originalPost: originalPost,
+
                 onLikePressed: () => cubit.toggleLike(post.id),
+
                 onCommentPressed: () {
                   context.router.push(CommentRoute(post: post));
                 },
+
                 onRepostPressed: () {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Repost coming soon')),
                   );
                 },
+
                 onMorePressed: () => _showMoreBottomSheet(
                   context: context,
                   cubit: cubit,
@@ -77,7 +112,6 @@ class UserPostsTab extends StatelessWidget {
                   isOwner: isOwner,
                 ),
 
-                // 👉 giống Home: share với UI đẹp
                 onSharePressed: () {
                   _onSharePost(
                     context: context,
@@ -87,7 +121,7 @@ class UserPostsTab extends StatelessWidget {
                   );
                 },
 
-                // click avatar / tên
+                // click avatar / tên của người SHARE
                 onAuthorPressed: () {
                   if (currentUserId == null) {
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -106,6 +140,30 @@ class UserPostsTab extends StatelessWidget {
                     );
                   }
                 },
+
+                // click avatar / tên trong CARD BÀI GỐC (nếu có)
+                onOriginalAuthorPressed: originalPost == null
+                    ? null
+                    : () {
+                        final uid =
+                            Supabase.instance.client.auth.currentUser?.id;
+                        if (uid == null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Please log in to view profiles'),
+                            ),
+                          );
+                          return;
+                        }
+
+                        if (uid == originalPost!.authorId) {
+                          context.router.push(const ProfileRoute());
+                        } else {
+                          context.router.push(
+                            UserProfileRoute(userId: originalPost!.authorId),
+                          );
+                        }
+                      },
               );
             },
           );
@@ -581,7 +639,6 @@ class UserPostsTab extends StatelessWidget {
           bool? confirm;
 
           if (isBlocked) {
-            // ✅ confirm UNBLOCK
             confirm = await showDialog<bool>(
               context: context,
               builder: (ctx) => AlertDialog(
@@ -600,7 +657,6 @@ class UserPostsTab extends StatelessWidget {
               ),
             );
           } else {
-            // ✅ confirm BLOCK
             confirm = await showDialog<bool>(
               context: context,
               builder: (ctx) => AlertDialog(
@@ -646,7 +702,6 @@ class UserPostsTab extends StatelessWidget {
             ),
           );
 
-          // 🔥 reload feed chung để tab này update
           if (ok) {
             context.read<PostCubit>().loadFeed();
           }

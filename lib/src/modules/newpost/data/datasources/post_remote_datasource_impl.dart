@@ -10,7 +10,6 @@ import '../../domain/entities/post_entity.dart';
 import '../models/post_model.dart';
 import 'post_remote_datasource.dart';
 
-
 @LazySingleton(as: PostRemoteDataSource)
 class PostRemoteDataSourceImpl implements PostRemoteDataSource {
   final Dio _dio;
@@ -136,13 +135,12 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
       );
 
       final responseData = res.data as Map<String, dynamic>;
-    
+
       if (responseData.containsKey('daily_posts_remaining')) {
         final remaining = responseData['daily_posts_remaining'] as int;
         print('>>> [PostRemoteDS] Daily posts remaining: $remaining');
-        
       }
-      
+
       // ⭐ Parse post từ response
       if (responseData.containsKey('post')) {
         final postData = responseData['post'] as Map<String, dynamic>;
@@ -151,7 +149,8 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
         return PostModel.fromJson(responseData).toEntity();
       }
     } on DioException catch (e) {
-      print('[PostRemoteDS] DioException (createPost) status=${e.response?.statusCode}');
+      print(
+          '[PostRemoteDS] DioException (createPost) status=${e.response?.statusCode}');
       print('[PostRemoteDS] DioException data=${e.response?.data}');
       print('[PostRemoteDS] DioException message=${e.message}');
       rethrow;
@@ -238,8 +237,7 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
 
       return _parsePostFromResponse(response.data);
     } on DioException catch (e) {
-      print(
-          '[DS] DioException (updatePost) status=${e.response?.statusCode}');
+      print('[DS] DioException (updatePost) status=${e.response?.statusCode}');
       print('[DS] DioException data=${e.response?.data}');
       print('[DS] DioException message=${e.message}');
       rethrow;
@@ -272,8 +270,7 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
         );
       }
     } on DioException catch (e) {
-      print(
-          '[DS] DioException (deletePost) status=${e.response?.statusCode}');
+      print('[DS] DioException (deletePost) status=${e.response?.statusCode}');
       print('[DS] DioException data=${e.response?.data}');
       print('[DS] DioException message=${e.message}');
       rethrow;
@@ -284,7 +281,7 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
     }
   }
 
-   @override
+  @override
   Future<bool> getLikeStatus(String postId) async {
     print('[DS] getLikeStatus called with postId=$postId');
 
@@ -320,7 +317,8 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
 
       return response.data as Map<String, dynamic>;
     } on DioException catch (e) {
-      print('[DS] getDailyLimits DioException status=${e.response?.statusCode}');
+      print(
+          '[DS] getDailyLimits DioException status=${e.response?.statusCode}');
       print('[DS] getDailyLimits response data=${e.response?.data}');
       rethrow;
     }

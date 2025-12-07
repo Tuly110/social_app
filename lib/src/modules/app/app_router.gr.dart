@@ -58,10 +58,11 @@ abstract class _$AppRouter extends RootStackRouter {
       final args = routeData.argsAs<EditPostRouteArgs>();
       return AutoRoutePage<dynamic>(
         routeData: routeData,
-        child: EditPostPage(
+        child: WrappedRoute(
+            child: EditPostPage(
           key: args.key,
           post: args.post,
-        ),
+        )),
       );
     },
     EditProfileRoute.name: (routeData) {

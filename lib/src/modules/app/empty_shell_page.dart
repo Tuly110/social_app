@@ -1,3 +1,5 @@
+// lib/src/modules/app/empty_shell_page.dart
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -14,7 +16,7 @@ class EmptyShellPage extends StatefulWidget implements AutoRouteWrapper {
   @override
   Widget wrappedRoute(BuildContext context) {
     return BlocProvider<PostCubit>(
-      create: (_) => getIt<PostCubit>()..loadFeed(),
+      create: (_) => getIt<PostCubit>()..loadFeed(limit: 100),
       child: this,
     );
   }
@@ -29,7 +31,6 @@ class _EmptyShellPageState extends State<EmptyShellPage> {
   @override
   void initState() {
     super.initState();
-    // Cập nhật index sau khi build xong
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _updateCurrentIndexFromRoute();
     });
@@ -46,7 +47,7 @@ class _EmptyShellPageState extends State<EmptyShellPage> {
     );
   }
 
-  void _onNavItemTapped(int index) {
+  Future<void> _onNavItemTapped(int index) async {
     setState(() {
       _currentIndex = index;
     });
@@ -59,7 +60,7 @@ class _EmptyShellPageState extends State<EmptyShellPage> {
         context.navigateTo(const ChatRoute());
         break;
       case 2: // Create Post
-        context.pushRoute(const CreatePostRoute());
+        await _openCreatePostFromShell();
         break;
       case 3: // Notice
         context.navigateTo(const NoticeRoute());
@@ -70,14 +71,21 @@ class _EmptyShellPageState extends State<EmptyShellPage> {
     }
   }
 
+  Future<void> _openCreatePostFromShell() async {
+    final created = await context.pushRoute<bool>(const CreatePostRoute());
+    if (created == true && mounted) {
+      await context.read<PostCubit>().loadFeed();
+    }
+  }
+
   void _updateCurrentIndexFromRoute() {
     if (!mounted) return;
-    
+
     final currentPath = context.routeData.path;
-    
+
     int newIndex = 0; // Default Home
-    if (currentPath.contains('home') || 
-        currentPath == '/app' || 
+    if (currentPath.contains('home') ||
+        currentPath == '/app' ||
         currentPath.isEmpty) {
       newIndex = 0;
     } else if (currentPath.contains('chat')) {
@@ -89,7 +97,7 @@ class _EmptyShellPageState extends State<EmptyShellPage> {
     } else if (currentPath.contains('profile')) {
       newIndex = 4;
     }
-    
+
     if (_currentIndex != newIndex) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {

@@ -50,7 +50,7 @@ abstract class ApiModule {
         talker: talker,
         settings: TalkerDioLoggerSettings(
           responsePen: AnsiPen()..blue(),
-          printResponseData: true,
+          printResponseData: false,
           printRequestData: true,
           printRequestHeaders: true,
         ),

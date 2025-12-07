@@ -46,23 +46,30 @@ class PostCubit extends Cubit<PostState> {
   ) : super(const PostStateInitial());
 
   /// load danh sách bài viết
-  Future<void> loadFeed() async {
-    if (isClosed) { 
+  Future<void> loadFeed(
+      {int page = 0, int limit = 20, bool append = false}) async {
+    if (isClosed) {
       print('⚠️ PostCubit is closed, cannot load feed');
       return;
     }
-    
-    emit(const PostStateLoading());
-    
+
+    if (!append) {
+      emit(const PostStateLoading());
+    }
+
     try {
-      final posts = await _getFeedUseCase();
-      
-      if (isClosed) return; 
-      
-      emit(PostStateLoaded(posts: posts));
+      final posts = await _getFeedUseCase(page: page, limit: limit);
+
+      if (isClosed) return;
+
+      if (append && state is PostStateLoaded) {
+        final current = (state as PostStateLoaded).posts;
+        emit(PostStateLoaded(posts: [...current, ...posts]));
+      } else {
+        emit(PostStateLoaded(posts: posts));
+      }
     } catch (e) {
-      if (isClosed) return; 
-      
+      if (isClosed) return;
       emit(PostStateError(message: e.toString()));
     }
   }
@@ -103,6 +110,8 @@ class PostCubit extends Cubit<PostState> {
         imageUrl: imageUrl,
       );
 
+      if (isClosed) return false;
+
       if (current is PostStateLoaded) {
         final updatedList =
             current.posts.map((p) => p.id == updated.id ? updated : p).toList();
@@ -112,6 +121,7 @@ class PostCubit extends Cubit<PostState> {
       }
       return true;
     } catch (e) {
+      if (isClosed) return false;
       emit(PostStateError(message: e.toString()));
       return false;
     }
@@ -160,9 +170,7 @@ class PostCubit extends Cubit<PostState> {
 
     final updatedLocalPost = post.copyWith(
       isLiked: !post.isLiked,
-      likeCount: post.isLiked 
-          ? post.likeCount - 1 
-          : post.likeCount + 1,
+      likeCount: post.isLiked ? post.likeCount - 1 : post.likeCount + 1,
     );
 
     final newList = current.posts.map((p) {
@@ -173,7 +181,6 @@ class PostCubit extends Cubit<PostState> {
       emit(PostStateLikeLimitReached());
       return;
     }
-
 
     // Gọi backend
     try {
@@ -215,7 +222,7 @@ class PostCubit extends Cubit<PostState> {
 
   Future<bool> _canLike() async {
     try {
-      final limits = await _getDailyLimitsUseCase(); 
+      final limits = await _getDailyLimitsUseCase();
       final used = limits['likesUsed'] ?? 0;
       final limit = limits['likeLimit'] ?? 5;
 
@@ -225,7 +232,6 @@ class PostCubit extends Cubit<PostState> {
       return true; // an toàn: vẫn cho like nếu backend gặp lỗi
     }
   }
-
 
   Future<Map<String, dynamic>> getDailyLimits() async {
     try {
@@ -263,4 +269,12 @@ class PostCubit extends Cubit<PostState> {
     }
   }
 
+  void addPostOnTop(PostEntity post) {
+    final current = state;
+    if (current is PostStateLoaded) {
+      emit(PostStateLoaded(posts: [post, ...current.posts]));
+    } else {
+      emit(PostStateLoaded(posts: [post]));
+    }
+  }
 }
