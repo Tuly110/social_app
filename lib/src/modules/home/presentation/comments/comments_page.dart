@@ -1189,13 +1189,10 @@ class _CommentPageState extends State<CommentPage> {
                                   ? Colors.white
                                   : ColorName.grey500,
                             ),
-                            onPressed: () {
-                              if (_commentCubit.canComment() == false) {
-                                _commentController.text.trim().isNotEmpty
-                                    ? _postComment
-                                    : null;
-                              }
-                              else {
+                            onPressed: () async {
+                              if (await _commentCubit.canComment() == false) {
+                                _postComment();
+                              } else {
                                 setState(() {
                                   _showDailyLimitError = true;
                                 });
