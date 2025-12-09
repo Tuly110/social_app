@@ -29,4 +29,10 @@ class CommentRepositoryImpl implements CommentRepository {
   Future<void> deleteComment(String commentId) {
     return remote.deleteComment(commentId);
   }
+
+  @override
+  Future<Map<String, dynamic>> getDailyLimits() {
+    return remote.getDailyLimits();
+  }
+
 }

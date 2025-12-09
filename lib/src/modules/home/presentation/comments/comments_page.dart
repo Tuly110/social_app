@@ -79,7 +79,6 @@ class _CommentPageState extends State<CommentPage> {
         if (_expandedCommentId == _replyingTo!.id) {
           await _loadCommentReplies(_replyingTo!.id);
         }
-
       } else {
         await _commentCubit.createComment(widget.post.id, content);
       }
@@ -489,7 +488,7 @@ class _CommentPageState extends State<CommentPage> {
               size: 18,
               color: ColorName.textBlack,
             ),
-            onPressed: () => context.router.pop(),
+            onPressed: () => context.router.pop(true),
           ),
           title: Text(
             'Comments',
@@ -521,7 +520,7 @@ class _CommentPageState extends State<CommentPage> {
                           repliesMap[comment.id] = comment.replies;
                         }
                       }
-                      
+
                       // Chỉ update nếu có thay đổi
                       if (_commentReplies.length != repliesMap.length) {
                         setState(() {
@@ -998,69 +997,69 @@ class _CommentPageState extends State<CommentPage> {
                         const SizedBox(width: 20),
 
                         //COMMENT COUNT ICON
-                          if (hasReplies)
-                            GestureDetector(
-                              onTap: () => _toggleCommentReplies(comment.id),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
+                        if (hasReplies)
+                          GestureDetector(
+                            onTap: () => _toggleCommentReplies(comment.id),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: isExpanded
+                                    ? ColorName.mint.withOpacity(0.1)
+                                    : Colors.transparent,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
                                   color: isExpanded
-                                      ? ColorName.mint.withOpacity(0.1)
-                                      : Colors.transparent,
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(
+                                      ? ColorName.mint
+                                      : ColorName.greyE5e7eb,
+                                  width: 1,
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    isExpanded
+                                        ? FontAwesomeIcons.comments
+                                        : FontAwesomeIcons.comment,
+                                    size: 11,
                                     color: isExpanded
                                         ? ColorName.mint
-                                        : ColorName.greyE5e7eb,
-                                    width: 1,
+                                        : ColorName.grey600,
                                   ),
-                                ),
-                                child: Row(
-                                  children: [
-                                    Icon(
-                                      isExpanded
-                                          ? FontAwesomeIcons.comments
-                                          : FontAwesomeIcons.comment,
-                                      size: 11,
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    '${comment.replyCount}',
+                                    style: TextStyle(
+                                      fontSize: 11,
                                       color: isExpanded
                                           ? ColorName.mint
                                           : ColorName.grey600,
+                                      fontWeight: FontWeight.w600,
                                     ),
+                                  ),
+                                  if (isExpanded) ...[
                                     const SizedBox(width: 4),
-                                    Text(
-                                      '${comment.replyCount}',
-                                      style: TextStyle(
-                                        fontSize: 11,
-                                        color: isExpanded
-                                            ? ColorName.mint
-                                            : ColorName.grey600,
-                                        fontWeight: FontWeight.w600,
-                                      ),
+                                    Icon(
+                                      _loadingReplies[comment.id] == true
+                                          ? FontAwesomeIcons.spinner
+                                          : FontAwesomeIcons.chevronUp,
+                                      size: 10,
+                                      color: ColorName.mint,
                                     ),
-                                    if (isExpanded) ...[
-                                      const SizedBox(width: 4),
-                                      Icon(
-                                        _loadingReplies[comment.id] == true
-                                            ? FontAwesomeIcons.spinner
-                                            : FontAwesomeIcons.chevronUp,
-                                        size: 10,
-                                        color: ColorName.mint,
-                                      ),
-                                    ],
                                   ],
-                                ),
+                                ],
                               ),
                             ),
-                        ],
-                      ),
-                    ],
-                  ),
+                          ),
+                      ],
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
+          ),
 
           //  HIỂN THỊ REPLIES NẾU ĐANG MỞ
           if (isExpanded && comment.replies.isNotEmpty) ...[
@@ -1190,9 +1189,18 @@ class _CommentPageState extends State<CommentPage> {
                                   ? Colors.white
                                   : ColorName.grey500,
                             ),
-                            onPressed: _commentController.text.trim().isNotEmpty
-                                ? _postComment
-                                : null,
+                            onPressed: () {
+                              if (_commentCubit.canComment() == false) {
+                                _commentController.text.trim().isNotEmpty
+                                    ? _postComment
+                                    : null;
+                              }
+                              else {
+                                setState(() {
+                                  _showDailyLimitError = true;
+                                });
+                              }
+                            },
                             padding: const EdgeInsets.all(8),
                             constraints: const BoxConstraints(),
                           ),

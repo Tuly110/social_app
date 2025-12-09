@@ -5,4 +5,5 @@ abstract class CommentRemoteDataSource {
   Future<CommentEntity> createComment(String postId, String content, {String? parentId});
   Future<CommentEntity> updateComment(String commentId, String content);
   Future<void> deleteComment(String commentId);
+  Future<Map<String, dynamic>> getDailyLimits();
 }

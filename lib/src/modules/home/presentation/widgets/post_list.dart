@@ -18,10 +18,7 @@ class PostList extends StatefulWidget {
   /// false = For You (tất cả bài), true = chỉ bài của người mình follow
   final bool onlyFollowing;
 
-  const PostList({
-    super.key,
-    this.onlyFollowing = false,
-  });
+  const PostList({super.key, this.onlyFollowing = false});
 
   @override
   State<PostList> createState() => _PostListState();
@@ -123,8 +120,9 @@ class _PostListState extends State<PostList> {
               );
             }
 
-            posts =
-                posts.where((p) => _followingIds.contains(p.authorId)).toList();
+            posts = posts
+                .where((p) => _followingIds.contains(p.authorId))
+                .toList();
 
             if (posts.isEmpty) {
               return const Center(
@@ -164,23 +162,44 @@ class _PostListState extends State<PostList> {
                 onLikePressed: () async {
                   await cubit.toggleLike(post.id);
 
-                  // check state hiện tại của cubit xem có chạm limit like chưa
-                  if (cubit.state is PostStateLikeLimitReached) {
+                  final likelimited = await cubit.canLike();
+                  if (likelimited == true) {
                     if (!context.mounted) return;
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content:
-                            Text('You reached like limits to day (5 times)!'),
-                        duration: Duration(seconds: 2),
+                      SnackBar(
+                        behavior: SnackBarBehavior.floating,
+                        backgroundColor: Colors.amber.shade700,
+                        elevation: 6,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        content: Row(
+                          children: const [
+                            Icon(Icons.warning_amber_rounded, color: Colors.white),
+                            SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                'You have reached today\'s like limit (5 times)!',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ),
+                          ],
+                        ),
+                        duration: const Duration(seconds: 2),
                       ),
                     );
+
                   }
                 },
 
-                onCommentPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Comment coming soon')),
+                onCommentPressed: () async {
+                  final updated = await context.router.push(
+                    CommentRoute(post: post),
                   );
+
+                  if (updated == true) {
+                    context.read<PostCubit>().loadFeed(); // reload lại bài viết
+                  }
                 },
                 onRepostPressed: () {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -266,9 +285,7 @@ class _PostListState extends State<PostList> {
   }) async {
     if (currentUserId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please log in to share posts'),
-        ),
+        const SnackBar(content: Text('Please log in to share posts')),
       );
       return;
     }
@@ -278,8 +295,9 @@ class _PostListState extends State<PostList> {
 
     final String visibility = result['visibility'] as String;
     String? content = result['content'] as String?;
-    content =
-        (content != null && content.trim().isNotEmpty) ? content.trim() : null;
+    content = (content != null && content.trim().isNotEmpty)
+        ? content.trim()
+        : null;
 
     final ok = await cubit.sharePost(
       post.id,
@@ -367,11 +385,13 @@ class _PostListState extends State<PostList> {
                         CircleAvatar(
                           radius: 18,
                           backgroundColor: Colors.grey.shade300,
-                          backgroundImage: (post.authorAvatarUrl != null &&
+                          backgroundImage:
+                              (post.authorAvatarUrl != null &&
                                   post.authorAvatarUrl!.isNotEmpty)
                               ? NetworkImage(post.authorAvatarUrl!)
                               : null,
-                          child: (post.authorAvatarUrl == null ||
+                          child:
+                              (post.authorAvatarUrl == null ||
                                   post.authorAvatarUrl!.isEmpty)
                               ? Text(
                                   (post.authorName.isNotEmpty
@@ -406,8 +426,11 @@ class _PostListState extends State<PostList> {
                                     label: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: const [
-                                        Icon(Icons.public,
-                                            size: 14, color: Colors.white),
+                                        Icon(
+                                          Icons.public,
+                                          size: 14,
+                                          color: Colors.white,
+                                        ),
                                         SizedBox(width: 4),
                                         Text('Public'),
                                       ],
@@ -428,8 +451,11 @@ class _PostListState extends State<PostList> {
                                     label: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: const [
-                                        Icon(Icons.lock,
-                                            size: 14, color: Colors.black87),
+                                        Icon(
+                                          Icons.lock,
+                                          size: 14,
+                                          color: Colors.black87,
+                                        ),
                                         SizedBox(width: 4),
                                         Text('Private'),
                                       ],
@@ -460,14 +486,16 @@ class _PostListState extends State<PostList> {
                         border: Border.all(color: Colors.grey.shade300),
                       ),
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 8),
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
                       child: TextField(
                         controller: controller,
                         maxLines: 4,
                         decoration: const InputDecoration(
                           isCollapsed: true,
                           border: InputBorder.none,
-                          hintText: 'Viết gì đó về bài viết này...',
+                          hintText: 'Write something...',
                         ),
                       ),
                     ),
@@ -478,18 +506,22 @@ class _PostListState extends State<PostList> {
                         borderRadius: BorderRadius.circular(16),
                       ),
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 10),
+                        horizontal: 12,
+                        vertical: 10,
+                      ),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           CircleAvatar(
                             radius: 14,
                             backgroundColor: Colors.grey.shade400,
-                            backgroundImage: (post.authorAvatarUrl != null &&
+                            backgroundImage:
+                                (post.authorAvatarUrl != null &&
                                     post.authorAvatarUrl!.isNotEmpty)
                                 ? NetworkImage(post.authorAvatarUrl!)
                                 : null,
-                            child: (post.authorAvatarUrl == null ||
+                            child:
+                                (post.authorAvatarUrl == null ||
                                     post.authorAvatarUrl!.isEmpty)
                                 ? Text(
                                     (post.authorName.isNotEmpty
@@ -656,10 +688,7 @@ class _PostListState extends State<PostList> {
         leading: const Icon(Icons.delete_outline, color: Colors.red),
         title: const Text(
           'Delete post',
-          style: TextStyle(
-            fontWeight: FontWeight.w600,
-            color: Colors.red,
-          ),
+          style: TextStyle(fontWeight: FontWeight.w600, color: Colors.red),
         ),
         onTap: () async {
           Navigator.pop(context);
@@ -700,7 +729,7 @@ class _PostListState extends State<PostList> {
   List<Widget> _buildOtherActions(
     BuildContext context,
     PostEntity post,
-    
+
     bool isBlocked,
   ) {
     return [
@@ -778,8 +807,8 @@ class _PostListState extends State<PostList> {
               content: Text(
                 ok
                     ? (isBlocked
-                        ? 'Đã bỏ chặn @${post.authorName}'
-                        : 'Đã chặn @${post.authorName}')
+                          ? 'Đã bỏ chặn @${post.authorName}'
+                          : 'Đã chặn @${post.authorName}')
                     : 'Thao tác thất bại, thử lại sau',
               ),
             ),

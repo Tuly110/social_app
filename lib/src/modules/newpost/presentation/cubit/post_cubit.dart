@@ -151,44 +151,36 @@ class PostCubit extends Cubit<PostState> {
 
   /// toggle like 1 post
   Future<void> toggleLike(String postId) async {
-    final current = state;
-    if (current is! PostStateLoaded) return;
+    if (state is! PostStateLoaded) return;
 
-    final post = current.posts.firstWhere((p) => p.id == postId);
+    final loaded = state as PostStateLoaded;
+    final posts = [...loaded.posts];
 
-    // Nếu hành động là LIKE (không phải Unlike)
-    final bool isTryingToLike = !post.isLiked;
+    final index = posts.indexWhere((p) => p.id == postId);
+    if (index == -1) return;
 
-    // Kiểm tra giới hạn like
-    if (isTryingToLike) {
-      final allowed = await _canLike();
-      if (!allowed) {
-        emit(PostStateLikeLimitReached());
-        return;
-      }
-    }
+    // lấy post hiện tại
+    final oldPost = posts[index];
 
-    final updatedLocalPost = post.copyWith(
-      isLiked: !post.isLiked,
-      likeCount: post.isLiked ? post.likeCount - 1 : post.likeCount + 1,
+    final newPost = oldPost.copyWith(
+      isLiked: !oldPost.isLiked,
+      likeCount: oldPost.isLiked
+          ? oldPost.likeCount - 1
+          : oldPost.likeCount + 1,
     );
+    posts[index] = newPost;
+    emit(PostStateLoaded(posts: posts));
 
-    final newList = current.posts.map((p) {
-      return p.id == postId ? updatedLocalPost : p;
-    }).toList();
-
-    if (isTryingToLike && !await _canLike()) {
-      emit(PostStateLikeLimitReached());
-      return;
-    }
-
-    // Gọi backend
     try {
       await _toggleLikeUseCase(postId);
     } catch (e) {
-      print("toggle like API error: $e");
+      // rollback nếu fail
+      posts[index] = oldPost;
+      emit(PostStateLoaded(posts: posts));
     }
   }
+
+
 
   /// share 1 post với visibility (public/private) + content kèm theo
   Future<bool> sharePost(
@@ -220,13 +212,13 @@ class PostCubit extends Cubit<PostState> {
     }
   }
 
-  Future<bool> _canLike() async {
+  Future<bool> canLike() async {
     try {
       final limits = await _getDailyLimitsUseCase();
-      final used = limits['likesUsed'] ?? 0;
-      final limit = limits['likeLimit'] ?? 5;
+      final used = limits['likes_used'];
+      // final limit = limits['likeLimit'] ?? 5;
 
-      return used < limit;
+      return used == 5;
     } catch (e) {
       print('Error checking like limit $e');
       return true; // an toàn: vẫn cho like nếu backend gặp lỗi
