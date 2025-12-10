@@ -71,6 +71,11 @@ class PostRepositoryImpl implements PostRepository {
   }
   
   @override
+  Future<PostEntity> getPostById(String postId) {
+    return _remote.getPostById(postId);
+  }
+
+  @override
   Future<int> getLikeCount(String postId) {
     // TODO: implement getLikeCount
     throw UnimplementedError();

@@ -1,18 +1,19 @@
-import 'package:flutter/material.dart';
-import '../model/notice_model.dart';
-import 'widget__notice_tile.dart';
+// import 'package:flutter/material.dart';
+// import '../../domain/entities/notice_entity.dart';
+// import 'widget__notice_tile.dart';
 
-class WidgetNoticeList extends StatelessWidget {
-  final List<NoticeItem> items;
-  const WidgetNoticeList({super.key, required this.items});
+// class WidgetNoticeList extends StatelessWidget {
+//   final List<NotificationEntity> notifications;
 
-  @override
-  Widget build(BuildContext context) {
-    return ListView.separated(
-      padding: const EdgeInsets.all(16),
-      itemCount: items.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 12),
-      itemBuilder: (context, i) => WidgetNoticeTile(item: items[i]),
-    );
-  }
-}
+//   const WidgetNoticeList({Key? key, required this.notifications}) : super(key: key);
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return ListView.builder(
+//       itemCount: notifications.length,
+//       itemBuilder: (context, index) {
+//         return WidgetNoticeTile(notification: notifications[index]);
+//       },
+//     );
+//   }
+// }

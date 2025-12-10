@@ -14,6 +14,7 @@ import '../../domain/usecase/get_post_likes_usecase.dart';
 import '../../domain/usecase/get_user_likes_usecase.dart';
 import '../../domain/usecase/toggle_like_usecase.dart';
 import '../../domain/usecase/update_post_usecase.dart';
+import '../../domain/usecase/get_post_by_id_usecase.dart';
 
 part 'post_state.dart';
 
@@ -30,6 +31,7 @@ class PostCubit extends Cubit<PostState> {
   final GetPostLikesUseCase _getPostLikesUseCase;
   final SharePostUseCase _sharePostUseCase;
   final GetUserLikesUseCase _getUserLikesUseCase;
+  final GetPostByIdUseCase _getPostByIdUseCase;
 
   PostCubit(
     this._getFeedUseCase,
@@ -43,11 +45,15 @@ class PostCubit extends Cubit<PostState> {
     this._getPostLikesUseCase,
     this._getUserLikesUseCase,
     this._sharePostUseCase,
+    this._getPostByIdUseCase,
   ) : super(const PostStateInitial());
 
   /// load danh sách bài viết
-  Future<void> loadFeed(
-      {int page = 0, int limit = 20, bool append = false}) async {
+  Future<void> loadFeed({
+    int page = 0,
+    int limit = 20,
+    bool append = false,
+  }) async {
     if (isClosed) {
       print('⚠️ PostCubit is closed, cannot load feed');
       return;
@@ -78,8 +84,10 @@ class PostCubit extends Cubit<PostState> {
   Future<bool> createPost(String content, {String? imageUrl}) async {
     final current = state;
     try {
-      final PostEntity newPost =
-          await _createPostUseCase(content, imageUrl: imageUrl);
+      final PostEntity newPost = await _createPostUseCase(
+        content,
+        imageUrl: imageUrl,
+      );
 
       if (isClosed) return false;
 
@@ -113,8 +121,9 @@ class PostCubit extends Cubit<PostState> {
       if (isClosed) return false;
 
       if (current is PostStateLoaded) {
-        final updatedList =
-            current.posts.map((p) => p.id == updated.id ? updated : p).toList();
+        final updatedList = current.posts
+            .map((p) => p.id == updated.id ? updated : p)
+            .toList();
         emit(PostStateLoaded(posts: updatedList));
       } else {
         emit(PostStateLoaded(posts: [updated]));
@@ -180,8 +189,6 @@ class PostCubit extends Cubit<PostState> {
     }
   }
 
-
-
   /// share 1 post với visibility (public/private) + content kèm theo
   Future<bool> sharePost(
     String postId, {
@@ -231,6 +238,17 @@ class PostCubit extends Cubit<PostState> {
     } catch (e) {
       print('>>> [Cubit] getDailyLimits error: $e');
       rethrow;
+    }
+  }
+
+  /// Lấy 1 post theo postId (dùng khi mở từ notification)
+  Future<PostEntity?> getPostById(String postId) async {
+    try {
+      final post = await _getPostByIdUseCase(postId);
+      return post;
+    } catch (e) {
+      print("❌ getPostById error: $e");
+      return null;
     }
   }
 

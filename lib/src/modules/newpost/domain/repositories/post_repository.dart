@@ -34,4 +34,6 @@ abstract class PostRepository {
     required String visibility,
     String? content,
   });
+
+  Future<PostEntity> getPostById(String postId);
 }

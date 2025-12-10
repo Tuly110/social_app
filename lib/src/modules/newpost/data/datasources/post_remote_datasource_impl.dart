@@ -325,6 +325,21 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
   }
 
   @override
+  Future<PostEntity> getPostById(String postId) async {
+    try {
+      final response = await _dio.get(
+        '/posts/$postId',
+        options: Options(headers: _authHeaders()),
+      );
+
+      return _parsePostFromResponse(response.data);
+    } on DioException catch (_) {
+      rethrow;
+    }
+  }
+
+
+  @override
   Future<int> getLikeCount(String postId) async {
     print('[DS] getLikeCount called with postId=$postId');
 
