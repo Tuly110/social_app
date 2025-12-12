@@ -1,104 +1,124 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:dio/dio.dart'; 
 import 'package:flutter/material.dart';
-
-// đổi theo package thật:
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../../generated/colors.gen.dart';
-import 'component/widget__notice_activity_tab.dart';
-import 'component/widget__notice_app_bar.dart';
-import 'component/widget__notice_list.dart';
-import 'model/notice_model.dart';
+import '../../../common/utils/getit_utils.dart';
+import '../../app/app_router.dart';
+
+import '../../newpost/presentation/cubit/post_cubit.dart';
+import '../data/datasources/notice_remote_datasource.dart';
+import '../data/repositories/notice_repository_impl.dart';
+import '../domain/usecases/notice_usecases.dart';
+
+import 'cubit/notice_cubit.dart';
+import 'cubit/notice_state.dart';
+import 'component/widget__notice_tile.dart';
 
 @RoutePage()
 class NoticePage extends StatelessWidget {
-  const NoticePage({super.key});
+  const NoticePage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (context) {
+        final dio = getIt<Dio>(); 
 
-    return DefaultTabController(
-      length: 3, // Activity, All, Mention
+        final dataSource = NoticeRemoteDataSourceImpl(dio);
+
+        final repository = NoticeRepositoryImpl(dataSource);
+
+        return NoticeCubit(
+          getNotificationsUseCase: GetNotificationsUseCase(repository),
+          getUnreadCountUseCase: GetUnreadCountUseCase(repository),
+          markAsReadUseCase: MarkAsReadUseCase(repository),
+          markAllAsReadUseCase: MarkAllAsReadUseCase(repository),
+          deleteNotificationUseCase: DeleteNotificationUseCase(repository),
+        )..fetchNotifications();
+      },
       child: Scaffold(
-        backgroundColor: ColorName.softBg,
-        appBar: const WidgetNoticeAppBar(),
-        body: Column(
-          children: const [
-            _NoticeTabs(),
-            Expanded(child: _NoticeTabViews()),
+        appBar: AppBar(
+          leading: IconButton(
+            icon: Icon(
+              FontAwesomeIcons.chevronLeft,
+              size: 18,
+              color: ColorName.textBlack,
+            ),
+            onPressed: () => context.router.pop(true),
+          ),
+          title: const Text('Notification', style: TextStyle(fontWeight: FontWeight.bold)),
+          centerTitle: false,
+          actions: [
+            BlocBuilder<NoticeCubit, NoticeState>(
+              builder: (context, state) {
+                return IconButton(
+                  icon: const Icon(Icons.done_all),
+                  onPressed: () => context.read<NoticeCubit>().markAllRead(),
+                  tooltip: "Mark all as read",
+                );
+              },
+            )
           ],
         ),
-      ),
-    );
-  }
-}
+        body: BlocBuilder<NoticeCubit, NoticeState>(
+          builder: (context, state) {
+            if (state is NoticeLoading) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (state is NoticeError) {
+              return Center(child: Text("Lỗi: ${state.message}"));
+            } else if (state is NoticeLoaded) {
+              if (state.notices.isEmpty) {
+                return const Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.notifications_off_outlined, size: 60, color: ColorName.grey),
+                      SizedBox(height: 16),
+                      Text("No notifications", style: TextStyle(color: ColorName.grey)),
+                    ],
+                  ),
+                );
+              }
 
-class _NoticeTabs extends StatelessWidget {
-  const _NoticeTabs();
+              return RefreshIndicator(
+                onRefresh: () => context.read<NoticeCubit>().fetchNotifications(),
+                child: ListView.separated(
+                  itemCount: state.notices.length,
+                  separatorBuilder: (_, __) => const Divider(height: 1, indent: 70),
+                  itemBuilder: (context, index) {
+                    final notice = state.notices[index];
+                    return NoticeTile(
+                      notice: notice,
+                      onMarkRead: () {
+                        context.read<NoticeCubit>().markAsRead(notice.id);
+                      },
+                      onDelete: () {
+                        context.read<NoticeCubit>().deleteNotification(notice.id);
+                      },
+                      onTap: () async {
+                        if (notice.type == 'follow' && notice.fromUserId != null) {
+                          context.router.push(UserProfileRoute(userId: notice.fromUserId!));
+                        } else if (notice.postId != null) {
+                            final post = await context.read<PostCubit>().getPostById(notice.postId!);
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: ColorName.white,
-      child: const TabBar(
-        isScrollable: true,
-        labelColor: ColorName.black,
-        unselectedLabelColor: ColorName.black54,
-        indicatorColor: ColorName.black,
-        indicatorWeight: 2,
-        indicatorSize: TabBarIndicatorSize.label,
-        padding: EdgeInsets.symmetric(horizontal: 16),
-        tabs: [
-          Tab(text: 'Activity'),
-          Tab(text: 'All'),
-          Tab(text: 'Mention'),
-        ],
+                            context.router.push(CommentRoute(post: post!));
+                        }
+                        
+                        if (!notice.isRead) {
+                          context.read<NoticeCubit>().markAsRead(notice.id);
+                        }
+                      },
+                    );
+                  },
+                ),
+              );
+            }
+            return const SizedBox();
+          },
+        ),
       ),
-    );
-  }
-}
-
-class _NoticeTabViews extends StatelessWidget {
-  const _NoticeTabViews();
-
-  @override
-  Widget build(BuildContext context) {
-    final noticesAll = <NoticeItem>[
-      NoticeItem(
-        title: 'User 1',
-        message: 'liked your post',
-        time: '10:02',
-        unread: true,
-        avatarUrl: 'https://i.pravatar.cc/80?img=1',
-      ),
-      NoticeItem(
-        title: 'User 2',
-        message: 'commented: "Nice work!"',
-        time: '09:47',
-        avatarUrl: 'https://i.pravatar.cc/80?img=2',
-      ),
-      NoticeItem(
-        title: 'System',
-        message: 'Your password was changed',
-        time: 'Yesterday',
-        icon: Icons.shield_outlined,
-      ),
-    ];
-
-    final noticesMention = <NoticeItem>[
-      NoticeItem(
-        title: 'Minh Man',
-        message: 'mentioned you in a post',
-        time: '3m ago',
-        avatarUrl: 'https://i.pravatar.cc/80?img=3',
-        unread: true,
-      ),
-    ];
-
-    return TabBarView(
-      children: [
-        const WidgetNoticeActivityTab(),
-        SafeArea(child: WidgetNoticeList(items: noticesAll)),
-        SafeArea(child: WidgetNoticeList(items: noticesMention)),
-      ],
     );
   }
 }

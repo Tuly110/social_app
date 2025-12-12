@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:social_app/src/common/utils/getit_utils.dart';
 import 'package:social_app/src/modules/app/app_router.dart'; // Import Router để dùng các Route (UserProfileRoute, CommentRoute)
+import 'package:social_app/src/modules/home/presentation/home_page.dart';
 import 'package:social_app/src/modules/home/presentation/widgets/post_item.dart';
 import 'package:social_app/src/modules/search/domain/entities/search_result.dart';
 import 'package:social_app/src/modules/search/presentation/cubit/search_cubit.dart';
@@ -60,7 +61,7 @@ class _SearchPageViewState extends State<_SearchPageView> with SingleTickerProvi
       appBar: SearchAppBar(
         controller: _searchController,
         tabController: _tabController,
-        onBackPressed: () => context.router.back(),
+        onBackPressed: () => context.router.navigate(HomeRoute()),
         onChanged: (query) => context.read<SearchCubit>().onSearchChanged(query),
       ),
       body: BlocBuilder<SearchCubit, SearchState>(

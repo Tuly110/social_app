@@ -218,4 +218,27 @@ class CommentRemoteDataSourceImpl implements CommentRemoteDataSource {
       throw Exception('Failed to delete comment: $errorMessage');
     }
   }
+
+  @override
+  Future<Map<String, dynamic>> getDailyLimits() async {
+    print('[DS] getDailyLimits called');
+
+    try {
+      final response = await _dio.get(
+        '/likes/daily-limits/me',
+        options: Options(headers: _authHeaders()),
+      );
+
+      print('[DS] GET /likes/daily-limits status=${response.statusCode}');
+      print('[DS] response.data=${response.data}');
+
+      return response.data as Map<String, dynamic>;
+    } on DioException catch (e) {
+      print(
+          '[DS] getDailyLimits DioException status=${e.response?.statusCode}');
+      print('[DS] getDailyLimits response data=${e.response?.data}');
+      rethrow;
+    }
+  }
+
 }

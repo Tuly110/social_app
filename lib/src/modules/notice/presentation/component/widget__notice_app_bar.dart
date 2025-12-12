@@ -1,6 +1,5 @@
-import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-
+import 'package:auto_route/auto_route.dart';
 import '../../../../../generated/colors.gen.dart';
 
 class WidgetNoticeAppBar extends StatelessWidget
@@ -23,9 +22,22 @@ class WidgetNoticeAppBar extends StatelessWidget
             r.pop();
             return;
           }
-          
-          r.navigateNamed('/app/home');
-        
+
+          final parent = r.parent();
+          if (parent != null && parent.canPop()) {
+            parent.pop();
+            return;
+          }
+
+          try {
+            final tabs = AutoTabsRouter.of(context);
+            tabs.setActiveIndex(0);
+            return;
+          } catch (_) {}
+
+          final root = r.root;
+          root.popUntilRoot();
+          root.replaceNamed('/');
         },
         tooltip: 'Back',
       ),

@@ -14,6 +14,7 @@ import '../../domain/usecase/get_post_likes_usecase.dart';
 import '../../domain/usecase/get_user_likes_usecase.dart';
 import '../../domain/usecase/toggle_like_usecase.dart';
 import '../../domain/usecase/update_post_usecase.dart';
+import '../../domain/usecase/get_post_by_id_usecase.dart';
 
 part 'post_state.dart';
 
@@ -30,6 +31,7 @@ class PostCubit extends Cubit<PostState> {
   final GetPostLikesUseCase _getPostLikesUseCase;
   final SharePostUseCase _sharePostUseCase;
   final GetUserLikesUseCase _getUserLikesUseCase;
+  final GetPostByIdUseCase _getPostByIdUseCase;
 
   PostCubit(
     this._getFeedUseCase,
@@ -43,11 +45,15 @@ class PostCubit extends Cubit<PostState> {
     this._getPostLikesUseCase,
     this._getUserLikesUseCase,
     this._sharePostUseCase,
+    this._getPostByIdUseCase,
   ) : super(const PostStateInitial());
 
   /// load danh sách bài viết
-  Future<void> loadFeed(
-      {int page = 0, int limit = 20, bool append = false}) async {
+  Future<void> loadFeed({
+    int page = 0,
+    int limit = 20,
+    bool append = false,
+  }) async {
     if (isClosed) {
       print('⚠️ PostCubit is closed, cannot load feed');
       return;
@@ -78,8 +84,10 @@ class PostCubit extends Cubit<PostState> {
   Future<bool> createPost(String content, {String? imageUrl}) async {
     final current = state;
     try {
-      final PostEntity newPost =
-          await _createPostUseCase(content, imageUrl: imageUrl);
+      final PostEntity newPost = await _createPostUseCase(
+        content,
+        imageUrl: imageUrl,
+      );
 
       if (isClosed) return false;
 
@@ -113,8 +121,9 @@ class PostCubit extends Cubit<PostState> {
       if (isClosed) return false;
 
       if (current is PostStateLoaded) {
-        final updatedList =
-            current.posts.map((p) => p.id == updated.id ? updated : p).toList();
+        final updatedList = current.posts
+            .map((p) => p.id == updated.id ? updated : p)
+            .toList();
         emit(PostStateLoaded(posts: updatedList));
       } else {
         emit(PostStateLoaded(posts: [updated]));
@@ -151,42 +160,32 @@ class PostCubit extends Cubit<PostState> {
 
   /// toggle like 1 post
   Future<void> toggleLike(String postId) async {
-    final current = state;
-    if (current is! PostStateLoaded) return;
+    if (state is! PostStateLoaded) return;
 
-    final post = current.posts.firstWhere((p) => p.id == postId);
+    final loaded = state as PostStateLoaded;
+    final posts = [...loaded.posts];
 
-    // Nếu hành động là LIKE (không phải Unlike)
-    final bool isTryingToLike = !post.isLiked;
+    final index = posts.indexWhere((p) => p.id == postId);
+    if (index == -1) return;
 
-    // Kiểm tra giới hạn like
-    if (isTryingToLike) {
-      final allowed = await _canLike();
-      if (!allowed) {
-        emit(PostStateLikeLimitReached());
-        return;
-      }
-    }
+    // lấy post hiện tại
+    final oldPost = posts[index];
 
-    final updatedLocalPost = post.copyWith(
-      isLiked: !post.isLiked,
-      likeCount: post.isLiked ? post.likeCount - 1 : post.likeCount + 1,
+    final newPost = oldPost.copyWith(
+      isLiked: !oldPost.isLiked,
+      likeCount: oldPost.isLiked
+          ? oldPost.likeCount - 1
+          : oldPost.likeCount + 1,
     );
+    posts[index] = newPost;
+    emit(PostStateLoaded(posts: posts));
 
-    final newList = current.posts.map((p) {
-      return p.id == postId ? updatedLocalPost : p;
-    }).toList();
-
-    if (isTryingToLike && !await _canLike()) {
-      emit(PostStateLikeLimitReached());
-      return;
-    }
-
-    // Gọi backend
     try {
       await _toggleLikeUseCase(postId);
     } catch (e) {
-      print("toggle like API error: $e");
+      // rollback nếu fail
+      posts[index] = oldPost;
+      emit(PostStateLoaded(posts: posts));
     }
   }
 
@@ -220,13 +219,13 @@ class PostCubit extends Cubit<PostState> {
     }
   }
 
-  Future<bool> _canLike() async {
+  Future<bool> canLike() async {
     try {
       final limits = await _getDailyLimitsUseCase();
-      final used = limits['likesUsed'] ?? 0;
-      final limit = limits['likeLimit'] ?? 5;
+      final used = limits['likes_used'];
+      // final limit = limits['likeLimit'] ?? 5;
 
-      return used < limit;
+      return used == 5;
     } catch (e) {
       print('Error checking like limit $e');
       return true; // an toàn: vẫn cho like nếu backend gặp lỗi
@@ -239,6 +238,17 @@ class PostCubit extends Cubit<PostState> {
     } catch (e) {
       print('>>> [Cubit] getDailyLimits error: $e');
       rethrow;
+    }
+  }
+
+  /// Lấy 1 post theo postId (dùng khi mở từ notification)
+  Future<PostEntity?> getPostById(String postId) async {
+    try {
+      final post = await _getPostByIdUseCase(postId);
+      return post;
+    } catch (e) {
+      print("❌ getPostById error: $e");
+      return null;
     }
   }
 

@@ -29,6 +29,7 @@ abstract class PostRemoteDataSource {
 
   Future<List<String>> getUserLikes();
 
+  Future<PostEntity> getPostById(String postId);
 
   Future<PostEntity> sharePost(
     String postId, {

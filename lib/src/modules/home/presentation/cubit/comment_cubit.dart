@@ -7,6 +7,7 @@ import '../../domain/usecases/get_comments_usecase.dart';
 import '../../domain/usecases/create_comment_usecase.dart';
 import '../../domain/usecases/update_comment_usecase.dart';
 import '../../domain/usecases/delete_comment_usecase.dart';
+import '../../domain/usecases/get_daily_limits_usecase.dart';
 
 
 
@@ -16,12 +17,14 @@ class CommentCubit extends Cubit<CommentState> {
   final CreateCommentUseCase _createCommentUseCase;
   final UpdateCommentUseCase _updateCommentUseCase;
   final DeleteCommentUseCase _deleteCommentUseCase;
+  final GetDailyLimitsUseCase _getDailyLimitsUseCase;
 
   CommentCubit(
     this._getCommentsUseCase,
     this._createCommentUseCase,
     this._updateCommentUseCase,
     this._deleteCommentUseCase,
+    this._getDailyLimitsUseCase,
   ) : super(const CommentStateInitial());
 
   Future<void> loadComments(String postId) async {
@@ -101,6 +104,28 @@ class CommentCubit extends Cubit<CommentState> {
       emit(CommentStateLoaded(comments: updatedList));
     } catch (e) {
       emit(CommentStateError(message: e.toString()));
+    }
   }
-}
+
+  Future<bool> canComment() async {
+    try {
+      final limits = await _getDailyLimitsUseCase();
+      final limit = limits['comments_remaining'];
+
+      return limit == 0;
+    } catch (e) {
+      print('Error checking like limit $e');
+      return true; 
+    }
+  }
+
+  Future<Map<String, dynamic>> getDailyLimits() async {
+    try {
+      return await _getDailyLimitsUseCase();
+    } catch (e) {
+      print('>>> [Cubit] getDailyLimits error: $e');
+      rethrow;
+    }
+  }
+
 }
