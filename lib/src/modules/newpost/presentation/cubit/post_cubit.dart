@@ -1,6 +1,7 @@
 // lib/src/modules/newpost/presentation/cubit/post_cubit.dart
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
+import 'package:social_app/src/modules/newpost/domain/usecase/get_recommended_feed_usecase.dart';
 import 'package:social_app/src/modules/newpost/domain/usecase/share_post_usecase.dart';
 
 import '../../domain/entities/post_entity.dart';
@@ -10,17 +11,25 @@ import '../../domain/usecase/get_daily_limits_usecase.dart';
 import '../../domain/usecase/get_feed_usecase.dart';
 import '../../domain/usecase/get_like_count_usecase.dart';
 import '../../domain/usecase/get_like_status_usecase.dart';
+import '../../domain/usecase/get_post_by_id_usecase.dart';
 import '../../domain/usecase/get_post_likes_usecase.dart';
 import '../../domain/usecase/get_user_likes_usecase.dart';
 import '../../domain/usecase/toggle_like_usecase.dart';
 import '../../domain/usecase/update_post_usecase.dart';
-import '../../domain/usecase/get_post_by_id_usecase.dart';
 
 part 'post_state.dart';
+
+
+enum FeedMode {
+  latest,       // mới nhất
+  following,    // following
+  recommended,  // For You)
+}
 
 @injectable
 class PostCubit extends Cubit<PostState> {
   final GetFeedUseCase _getFeedUseCase;
+  final GetRecommendedFeedUseCase _getRecommendedFeedUseCase;
   final CreatePostUseCase _createPostUseCase;
   final ToggleLikeUseCase _toggleLikeUseCase;
   final UpdatePostUseCase _updatePostUseCase;
@@ -32,9 +41,12 @@ class PostCubit extends Cubit<PostState> {
   final SharePostUseCase _sharePostUseCase;
   final GetUserLikesUseCase _getUserLikesUseCase;
   final GetPostByIdUseCase _getPostByIdUseCase;
+  FeedMode _currentFeedMode = FeedMode.latest; // Mặc định
+  bool _onlyFollowing = false; // Following
 
   PostCubit(
     this._getFeedUseCase,
+    this._getRecommendedFeedUseCase,
     this._createPostUseCase,
     this._toggleLikeUseCase,
     this._updatePostUseCase,
@@ -53,18 +65,38 @@ class PostCubit extends Cubit<PostState> {
     int page = 0,
     int limit = 20,
     bool append = false,
+    FeedMode mode = FeedMode.latest,
+    bool onlyFollowing = false,
   }) async {
     if (isClosed) {
       print('⚠️ PostCubit is closed, cannot load feed');
       return;
     }
 
+     _currentFeedMode = mode;
+    _onlyFollowing = onlyFollowing;
+
     if (!append) {
       emit(const PostStateLoading());
     }
 
-    try {
-      final posts = await _getFeedUseCase(page: page, limit: limit);
+     try {
+      List<PostEntity> posts;
+      
+      switch (mode) {
+        case FeedMode.recommended:
+          posts = await _getRecommendedFeedUseCase(limit: limit);
+          break;
+          
+        case FeedMode.following:
+          posts = await _getFeedUseCase(page: page, limit: limit);
+          break;
+          
+        case FeedMode.latest:
+        default:
+          posts = await _getFeedUseCase(page: page, limit: limit);
+          break;
+      }
 
       if (isClosed) return;
 

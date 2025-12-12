@@ -1,4 +1,5 @@
 import 'package:injectable/injectable.dart';
+import 'package:social_app/src/modules/newpost/data/datasources/recommendation_remote_datasource_impl.dart';
 
 import '../../domain/entities/post_entity.dart';
 import '../../domain/repositories/post_repository.dart';
@@ -7,13 +8,25 @@ import '../datasources/post_remote_datasource.dart';
 @LazySingleton(as: PostRepository)
 class PostRepositoryImpl implements PostRepository {
   final PostRemoteDataSource _remote;
+  final RecommendationRemoteDatasourceImpl recommendationRemoteDatasourceImpl;
 
-  PostRepositoryImpl(this._remote);
+  PostRepositoryImpl(this._remote, this.recommendationRemoteDatasourceImpl);
 
   @override
   Future<List<PostEntity>> getFeed({int page = 0, int limit = 20}) {
     // hiện tại remote đã hỗ trợ page/limit, bạn có thể dùng hoặc bỏ qua
     return _remote.getFeed(page: page, limit: limit);
+  }
+
+  @override
+  Future<List<PostEntity>> getRecommendedFeed({
+    required String userId,
+    int limit = 20,
+  }) {
+    return recommendationRemoteDatasourceImpl.getRecommendedFeed(
+      userId: userId,
+      limit: limit,
+    );
   }
 
   @override
@@ -98,4 +111,5 @@ class PostRepositoryImpl implements PostRepository {
     // TODO: implement getUserLikes
     throw UnimplementedError();
   }
+
 }

@@ -3,15 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../../../generated/colors.gen.dart';
+import '../../../../common/utils/getit_utils.dart';
 import '../../../app/app_router.dart';
+import '../../../block/domain/usecase/block_user_usecase.dart';
+import '../../../block/domain/usecase/is_blocked_usecase.dart';
+import '../../../block/domain/usecase/unblock_user_usecase.dart';
 import '../../../newpost/domain/entities/post_entity.dart';
 import '../../../newpost/presentation/cubit/post_cubit.dart';
-import '../../../../../generated/colors.gen.dart';
-
-import '../../../../common/utils/getit_utils.dart';
-import '../../../block/domain/usecase/block_user_usecase.dart';
-import '../../../block/domain/usecase/unblock_user_usecase.dart';
-import '../../../block/domain/usecase/is_blocked_usecase.dart';
 import 'post_item.dart';
 
 class PostList extends StatefulWidget {
@@ -47,13 +46,17 @@ class _PostListState extends State<PostList> {
       _loadingFollowing = true;
       _followingError = null;
     });
-
+    if (!mounted) return;
+    setState(() {
+      _loadingFollowing = true;
+      _followingError = null;
+    });
     try {
-      // ⚠️ dùng tên bảng/column quen thuộc: follows(follower_id, following_id)
       final data = await client
           .from('follows')
           .select('following_id')
           .eq('follower_id', user.id);
+      if (!mounted) return;
 
       final ids = <String>{};
       for (final row in data as List<dynamic>) {
@@ -63,12 +66,13 @@ class _PostListState extends State<PostList> {
           ids.add(id);
         }
       }
-
+      if (!mounted) return;
       setState(() {
         _followingIds = ids;
         _loadingFollowing = false;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _loadingFollowing = false;
         _followingError = e.toString();
@@ -833,5 +837,9 @@ class _PostListState extends State<PostList> {
         },
       ),
     ];
+  }
+  @override
+  void dispose() {
+    super.dispose();
   }
 }
