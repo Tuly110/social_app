@@ -3,6 +3,11 @@ import '../entities/post_entity.dart';
 abstract class PostRepository {
   Future<List<PostEntity>> getFeed({int page, int limit});
 
+  Future<List<PostEntity>> getRecommendedFeed({
+    required String userId,
+    int limit = 20,
+  });
+
   Future<PostEntity> createPost(
     String content, {
     String? imageUrl,
