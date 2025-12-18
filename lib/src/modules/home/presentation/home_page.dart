@@ -17,7 +17,7 @@ class HomePage extends StatefulWidget implements AutoRouteWrapper {
 
   @override
   Widget wrappedRoute(BuildContext context) {
-    return this; 
+    return this;
   }
 
   @override
@@ -37,10 +37,10 @@ class _HomePageState extends State<HomePage>
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
     _loadMyAvatar();
-    
+
     // THÊM: Lắng nghe sự kiện chuyển tab
     _tabController.addListener(_onTabChanged);
-    
+
     // THÊM: Load feed ban đầu cho tab đầu tiên
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadFeedForCurrentTab();
@@ -57,7 +57,7 @@ class _HomePageState extends State<HomePage>
   // THÊM: Load feed tương ứng với tab hiện tại
   Future<void> _loadFeedForCurrentTab() async {
     final cubit = context.read<PostCubit>();
-    
+
     if (_tabController.index == 0) {
       // TAB 1: FOR YOU (Recommendations)
       _currentFeedMode = FeedMode.recommended;
@@ -67,7 +67,8 @@ class _HomePageState extends State<HomePage>
       );
     } else {
       // TAB 2: FOLLOWING (Latest posts from followed users)
-      _currentFeedMode = FeedMode.latest; // Hoặc FeedMode.following nếu bạn đã implement
+      _currentFeedMode =
+          FeedMode.latest; // Hoặc FeedMode.following nếu bạn đã implement
       await cubit.loadFeed(
         mode: FeedMode.latest,
         onlyFollowing: true,
@@ -168,6 +169,16 @@ class _HomePageState extends State<HomePage>
                     context.router.navigate(const NoticeRoute());
                   },
                 ),
+                IconButton(
+                  icon: const Icon(
+                    Icons.smart_toy_outlined,
+                    color: Colors.black,
+                    size: 22,
+                  ),
+                  onPressed: () {
+                    context.router.push(const ChatbotRoute());
+                  },
+                ),
                 const SizedBox(width: 8),
                 GestureDetector(
                   onTap: () async {
@@ -236,20 +247,23 @@ class _HomePageState extends State<HomePage>
               return RefreshIndicator(
                 onRefresh: () async {
                   await context.read<PostCubit>().loadFeed(
-                    mode: FeedMode.recommended,
-                    onlyFollowing: false,
-                  );
+                        mode: FeedMode.recommended,
+                        onlyFollowing: false,
+                      );
                 },
                 child: Builder(
                   builder: (context) {
                     // XỬ LÝ STATE TRỰC TIẾP Ở ĐÂY CHO "FOR YOU" TAB
                     return switch (state) {
-                      PostStateInitial() => const Center(child: CircularProgressIndicator()),
-                      PostStateLoading() => const Center(child: CircularProgressIndicator()),
-                      PostStateError(:final message) => Center(child: Text(message)),
-                      PostStateLoaded(:final posts) => 
-                          // DÙNG PostList HIỆN TẠI NHƯNG VỚI CUSTOM EMPTY STATE
-                          posts.isEmpty 
+                      PostStateInitial() =>
+                        const Center(child: CircularProgressIndicator()),
+                      PostStateLoading() =>
+                        const Center(child: CircularProgressIndicator()),
+                      PostStateError(:final message) =>
+                        Center(child: Text(message)),
+                      PostStateLoaded(:final posts) =>
+                        // DÙNG PostList HIỆN TẠI NHƯNG VỚI CUSTOM EMPTY STATE
+                        posts.isEmpty
                             ? _buildEmptyRecommendations()
                             : PostList(
                                 onlyFollowing: false,
@@ -270,23 +284,26 @@ class _HomePageState extends State<HomePage>
               return RefreshIndicator(
                 onRefresh: () async {
                   await context.read<PostCubit>().loadFeed(
-                    mode: FeedMode.latest,
-                    onlyFollowing: true,
-                  );
+                        mode: FeedMode.latest,
+                        onlyFollowing: true,
+                      );
                 },
                 child: Builder(
                   builder: (context) {
                     // XỬ LÝ STATE TRỰC TIẾP CHO "FOLLOWING" TAB
                     return switch (state) {
-                      PostStateInitial() => const Center(child: CircularProgressIndicator()),
-                      PostStateLoading() => const Center(child: CircularProgressIndicator()),
-                      PostStateError(:final message) => Center(child: Text(message)),
-                      PostStateLoaded(:final posts) => 
-                          // PostList sẽ tự filter onlyFollowing = true
-                          PostList(
-                            onlyFollowing: true,
-                            key: ValueKey('following-${posts.length}'),
-                          ),
+                      PostStateInitial() =>
+                        const Center(child: CircularProgressIndicator()),
+                      PostStateLoading() =>
+                        const Center(child: CircularProgressIndicator()),
+                      PostStateError(:final message) =>
+                        Center(child: Text(message)),
+                      PostStateLoaded(:final posts) =>
+                        // PostList sẽ tự filter onlyFollowing = true
+                        PostList(
+                          onlyFollowing: true,
+                          key: ValueKey('following-${posts.length}'),
+                        ),
                       _ => const Center(child: Text('Unknown state')),
                     };
                   },
@@ -340,9 +357,10 @@ class _HomePageState extends State<HomePage>
                 // CHUYỂN SANG TAB LATEST (tất cả bài)
                 _tabController.animateTo(0); // Vẫn ở tab For You
                 context.read<PostCubit>().loadFeed(
-                  mode: FeedMode.latest, // Load bài mới nhất thay vì recommendations
-                  onlyFollowing: false,
-                );
+                      mode: FeedMode
+                          .latest, // Load bài mới nhất thay vì recommendations
+                      onlyFollowing: false,
+                    );
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: ColorName.mint,
