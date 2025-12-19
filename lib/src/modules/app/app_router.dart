@@ -23,6 +23,8 @@ import '../search/presentation/search_page.dart';
 import '../setting/presentation/setting_page.dart';
 import '../splash_screen/presentation/splash_screen_page.dart';
 import '../user_profile/presentation/pages/user_profile_page.dart';
+import '../chatbot/chatbot_page.dart';
+
 import 'empty_shell_page.dart';
 
 part 'app_router.gr.dart';
@@ -34,11 +36,11 @@ class AppRouter extends _$AppRouter {
   List<AutoRouteObserver> get observers => [
         AutoRouteObserver(),
       ];
-  
+
   @override
   List<AutoRoute> get routes => [
         AutoRoute(page: SplashScreenRoute.page, path: '/', initial: true),
-        
+
         AutoRoute(
           page: EmptyShellRoute.page,
           path: '/app',
@@ -46,19 +48,19 @@ class AppRouter extends _$AppRouter {
             AutoRoute(page: HomeRoute.page, path: 'home', initial: true),
             AutoRoute(page: ChatRoute.page, path: 'chat'),
             AutoRoute(page: NoticeRoute.page, path: 'notice'),
-            AutoRoute(page: ProfileRoute.page, path: 'profile'), 
+            AutoRoute(page: ProfileRoute.page, path: 'profile'),
             AutoRoute(page: CreatePostRoute.page, path: 'newpost'),
             AutoRoute(page: CommentRoute.page, path: 'newpost'),
-
             AutoRoute(page: EditPostRoute.page, path: 'edit-post'),
             AutoRoute(page: FollowersRoute.page, path: 'followers'),
             AutoRoute(page: FollowingRoute.page, path: 'following'),
             AutoRoute(page: EditProfileRoute.page, path: 'edit-profile'),
             AutoRoute(page: SettingsRoute.page, path: 'setting'),
             AutoRoute(page: BlockedUsersRoute.page, path: 'blocked-users'),
+            AutoRoute(page: ChatbotRoute.page, path: 'chatbot'),
           ],
         ),
-        
+
         // Các routes bên ngoài
         AutoRoute(page: LoginRoute.page, path: '/login'),
         AutoRoute(page: SignupRoute.page, path: '/signup'),
