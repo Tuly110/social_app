@@ -6,6 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../domain/entities/post_entity.dart';
 import '../models/post_model.dart';
 import 'post_remote_datasource.dart';
+import 'dart:convert';
 
 @LazySingleton(as: PostRemoteDataSource)
 class PostRemoteDataSourceImpl implements PostRemoteDataSource {
@@ -110,6 +111,28 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
     }
   }
 
+  String _extractServerMessage(dynamic data) {
+    if (data == null) return '';
+
+    if (data is Map) {
+      final detail = data['detail'] ?? data['message'] ?? data['error'];
+      if (detail == null) return data.toString();
+      return detail.toString(); // detail có thể String/List/Map đều ok
+    }
+
+    return data.toString(); // plain text
+  }
+
+  bool _isDailyLimitMessage(String msg) {
+    final m = msg.toLowerCase();
+    return m.contains('daily') ||
+        m.contains('limit') ||
+        m.contains('1 post per day') ||
+        m.contains('daily_post_limit') ||
+        m.contains('hết lượt') ||
+        m.contains('giới hạn');
+  }
+
   @override
   Future<PostEntity> createPost(
     String content, {
@@ -124,38 +147,52 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
 
     print('>>> [PostRemoteDS] createPost payload=$payload');
 
-    try {
-      final res = await _dio.post(
-        '/posts/',
-        data: payload,
-        options: Options(headers: _authHeaders()),
-      );
+    // ✅ không để Dio ném exception theo status nữa
+    final res = await _dio.post(
+      '/posts/',
+      data: payload,
+      options: Options(
+        headers: _authHeaders(),
+        validateStatus: (_) => true,
+        receiveDataWhenStatusError: true,
+      ),
+    );
 
-      final responseData = res.data as Map<String, dynamic>;
+    final status = res.statusCode ?? 0;
+    final msg = _extractServerMessage(res.data);
 
-      if (responseData.containsKey('daily_posts_remaining')) {
-        final remaining = responseData['daily_posts_remaining'] as int;
-        print('>>> [PostRemoteDS] Daily posts remaining: $remaining');
-      }
+    print('>>> [PostRemoteDS] createPost status=$status');
+    print('>>> [PostRemoteDS] createPost dataType=${res.data.runtimeType}');
+    print('>>> [PostRemoteDS] createPost serverMsg=$msg');
 
-      // ⭐ Parse post từ response
-      if (responseData.containsKey('post')) {
-        final postData = responseData['post'] as Map<String, dynamic>;
-        return PostModel.fromJson(postData).toEntity();
-      } else {
-        return PostModel.fromJson(responseData).toEntity();
-      }
-    } on DioException catch (e) {
-      print(
-          '[PostRemoteDS] DioException (createPost) status=${e.response?.statusCode}');
-      print('[PostRemoteDS] DioException data=${e.response?.data}');
-      print('[PostRemoteDS] DioException message=${e.message}');
-      rethrow;
-    } catch (e, st) {
-      print('[PostRemoteDS] OTHER ERROR (createPost): $e');
-      print(st);
-      rethrow;
+    // ✅ daily limit mapping (tùy backend bạn trả 429/403/409…)
+    if (status == 429 || _isDailyLimitMessage(msg)) {
+      throw Exception('DAILY_POST_LIMIT');
     }
+
+    // ✅ các lỗi khác
+    if (status < 200 || status >= 300) {
+      throw Exception(msg.isNotEmpty ? msg : 'CREATE_POST_FAILED');
+    }
+
+    // ✅ parse success: hỗ trợ cả {post: {...}} hoặc {...}
+    final data = res.data;
+
+    if (data is Map<String, dynamic>) {
+      if (data['daily_posts_remaining'] != null) {
+        print(
+            '>>> [PostRemoteDS] Daily posts remaining: ${data['daily_posts_remaining']}');
+      }
+
+      if (data['post'] is Map<String, dynamic>) {
+        return PostModel.fromJson(data['post'] as Map<String, dynamic>)
+            .toEntity();
+      }
+
+      return PostModel.fromJson(data).toEntity();
+    }
+
+    throw Exception('Unexpected createPost response: ${data.runtimeType}');
   }
 
   /// 🔹 SHARE POST (POST /posts/{post_id}/share)
@@ -334,7 +371,6 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
       rethrow;
     }
   }
-
 
   @override
   Future<int> getLikeCount(String postId) async {
