@@ -148,7 +148,7 @@ class _ChatbotViewState extends State<_ChatbotView> {
                     maxLines: 5,
                     decoration: const InputDecoration(
                       hintText:
-                          'Mô tả ngắn về bài đăng (ví dụ: đi chơi cuối tuần với bạn bè, quán cà phê chill...)',
+                          'Brief description of the post (e.g., weekend outing with friends, chill cafe...)',
                       border: OutlineInputBorder(),
                     ),
                   ),
@@ -158,7 +158,7 @@ class _ChatbotViewState extends State<_ChatbotView> {
                     children: [
                       TextButton(
                         onPressed: () => Navigator.of(ctx).pop(),
-                        child: const Text('Hủy'),
+                        child: const Text('Cancel'),
                       ),
                       const SizedBox(width: 8),
                       ElevatedButton(
@@ -170,7 +170,7 @@ class _ChatbotViewState extends State<_ChatbotView> {
                             Navigator.of(ctx).pop(text);
                           }
                         },
-                        child: const Text('Gợi ý caption'),
+                        child: const Text('Suggest caption'),
                       ),
                     ],
                   ),
@@ -185,9 +185,9 @@ class _ChatbotViewState extends State<_ChatbotView> {
     if (desc == null || desc.trim().isEmpty) return;
 
     final prompt =
-        'Hãy giúp tôi viết 1 caption ngắn cho bài đăng mạng xã hội City_Life '
-        'với mô tả: "$desc". '
-        'Chỉ trả về đúng nội dung caption, không giải thích thêm.';
+        'Please help me write a short caption for the City_Life social media post. '
+        'with description: "$desc". '
+        'Only return the caption text, no explanation.';
 
     context.read<ChatbotCubit>().sendMessage(prompt);
   }
@@ -226,7 +226,7 @@ class _ChatbotViewState extends State<_ChatbotView> {
                         ),
                       ),
                       const Text(
-                        'AI viết caption + đăng luôn',
+                        'AI write caption + Post for me',
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w600,
@@ -239,7 +239,7 @@ class _ChatbotViewState extends State<_ChatbotView> {
                         maxLines: 5,
                         decoration: const InputDecoration(
                           hintText:
-                              'Mô tả ngắn về bài đăng (ví dụ: đi chơi cuối tuần với bạn bè, kỷ niệm, tốt nghiệp...)',
+                              'Brief description of the post (e.g., weekend outing with friends, anniversary, graduation...)',
                           border: OutlineInputBorder(),
                         ),
                       ),
@@ -247,7 +247,7 @@ class _ChatbotViewState extends State<_ChatbotView> {
                       Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          'Chế độ hiển thị',
+                          'Visibility',
                           style: TextStyle(
                             fontSize: 14,
                             color: Colors.grey[700],
@@ -283,7 +283,7 @@ class _ChatbotViewState extends State<_ChatbotView> {
                       Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          'Ảnh đính kèm (tuỳ chọn)',
+                          'Image attachment (optional)',
                           style: TextStyle(
                             fontSize: 14,
                             color: Colors.grey[700],
@@ -306,12 +306,12 @@ class _ChatbotViewState extends State<_ChatbotView> {
                               });
                             },
                             icon: const Icon(Icons.image),
-                            label: const Text('Chọn ảnh'),
+                            label: const Text('Select a photo'),
                           ),
                           const SizedBox(width: 12),
                           if (selectedImage != null)
                             const Text(
-                              'Đã chọn 1 ảnh',
+                              '1 image selected',
                               style: TextStyle(fontSize: 12),
                             ),
                         ],
@@ -332,7 +332,7 @@ class _ChatbotViewState extends State<_ChatbotView> {
                                 ScaffoldMessenger.of(ctx).showSnackBar(
                                   const SnackBar(
                                       content: Text(
-                                          'Bạn chưa nhập mô tả để AI viết caption.')),
+                                          'You haven\'t entered a description for the AI to write the caption.')),
                                 );
                                 return;
                               }
@@ -344,7 +344,7 @@ class _ChatbotViewState extends State<_ChatbotView> {
                                 ),
                               );
                             },
-                            child: const Text('AI đăng giúp tôi'),
+                            child: const Text('AI, please post this for me.'),
                           ),
                         ],
                       ),
@@ -408,7 +408,7 @@ class _ChatbotViewState extends State<_ChatbotView> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-            content: Text('Bạn cần đăng nhập để sử dụng tính năng này.')),
+            content: Text('You need to log in to use this feature.')),
       );
       return;
     }
@@ -456,16 +456,16 @@ class _ChatbotViewState extends State<_ChatbotView> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('AI đã đăng bài cho bạn!'),
+          content: Text('The AI ​​has posted the article for you!'),
           backgroundColor: Colors.green,
         ),
       );
 
       if (caption != null && caption.trim().isNotEmpty) {
         cubit.addSystemMessage(
-            '✅ Mình vừa đăng giúp bạn với caption:\n"$caption"');
+            '✅ I just posted it for a friend with the caption.:\n"$caption"');
       } else {
-        cubit.addSystemMessage('✅ Mình vừa đăng giúp bạn một bài mới.');
+        cubit.addSystemMessage('✅ I just posted it for a friend.');
       }
     } catch (e) {
       final msg = _dioDetail(e);
@@ -479,7 +479,7 @@ class _ChatbotViewState extends State<_ChatbotView> {
         ),
       );
 
-      cubit.addSystemMessage('❌ Không thể đăng bài: $msg');
+      cubit.addSystemMessage('❌ Cannot post: $msg');
     }
   }
 
@@ -518,7 +518,7 @@ class _ChatbotViewState extends State<_ChatbotView> {
                         ),
                       ),
                       const Text(
-                        'AI viết caption + hẹn giờ đăng',
+                        'AI writes captions and schedules posts.',
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w600,
@@ -531,7 +531,7 @@ class _ChatbotViewState extends State<_ChatbotView> {
                         maxLines: 5,
                         decoration: const InputDecoration(
                           hintText:
-                              'Mô tả ngắn về bài đăng (ví dụ: đi chơi cuối tuần, kỷ niệm...)',
+                              'Short description of the post (e.g., weekend trip, celebration...)',
                           border: OutlineInputBorder(),
                         ),
                       ),
@@ -539,7 +539,7 @@ class _ChatbotViewState extends State<_ChatbotView> {
                       Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          'Chế độ hiển thị',
+                          'Visibility mode',
                           style: TextStyle(
                             fontSize: 14,
                             color: Colors.grey[700],
@@ -575,7 +575,7 @@ class _ChatbotViewState extends State<_ChatbotView> {
                       Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          'Ảnh đính kèm (tuỳ chọn)',
+                          'Image attachment (optional)',
                           style: TextStyle(
                             fontSize: 14,
                             color: Colors.grey[700],
@@ -598,12 +598,12 @@ class _ChatbotViewState extends State<_ChatbotView> {
                               });
                             },
                             icon: const Icon(Icons.image),
-                            label: const Text('Chọn ảnh'),
+                            label: const Text('Select image'),
                           ),
                           const SizedBox(width: 12),
                           if (selectedImage != null)
                             const Text(
-                              'Đã chọn 1 ảnh',
+                              '1 image selected',
                               style: TextStyle(fontSize: 12),
                             ),
                         ],
@@ -612,7 +612,7 @@ class _ChatbotViewState extends State<_ChatbotView> {
                       Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          'Thời gian đăng',
+                          'Post time',
                           style: TextStyle(
                             fontSize: 14,
                             color: Colors.grey[700],
@@ -631,7 +631,7 @@ class _ChatbotViewState extends State<_ChatbotView> {
                                       '${scheduledAt!.year} '
                                       '${scheduledAt!.hour.toString().padLeft(2, '0')}:'
                                       '${scheduledAt!.minute.toString().padLeft(2, '0')}'
-                                  : 'Chưa chọn thời gian',
+                                  : 'No time selected',
                             ),
                           ),
                           TextButton(
@@ -667,7 +667,7 @@ class _ChatbotViewState extends State<_ChatbotView> {
                                 scheduledAt = dt;
                               });
                             },
-                            child: const Text('Chọn thời gian'),
+                            child: const Text('Choose time'),
                           ),
                         ],
                       ),
@@ -677,7 +677,7 @@ class _ChatbotViewState extends State<_ChatbotView> {
                         children: [
                           TextButton(
                             onPressed: () => Navigator.of(ctx).pop(),
-                            child: const Text('Hủy'),
+                            child: const Text('Cancel'),
                           ),
                           const SizedBox(width: 8),
                           ElevatedButton(
@@ -696,7 +696,7 @@ class _ChatbotViewState extends State<_ChatbotView> {
                                 );
                               }
                             },
-                            child: const Text('Hẹn giờ đăng'),
+                            child: const Text('Schedule post'),
                           ),
                         ],
                       ),
@@ -733,7 +733,7 @@ class _ChatbotViewState extends State<_ChatbotView> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-            content: Text('Bạn cần đăng nhập để sử dụng tính năng này.')),
+            content: Text('You need to log in to use this feature.')),
       );
       return;
     }
@@ -771,16 +771,16 @@ class _ChatbotViewState extends State<_ChatbotView> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('✅ Đã hẹn giờ đăng bài với AI'),
+          content: Text('✅ Scheduled post with AI'),
           backgroundColor: Colors.green,
         ),
       );
 
       cubit.addSystemMessage(
-        '✅ Mình đã hẹn giờ đăng bài.\n'
-        '🕒 Thời gian (local): ${scheduledAt.toLocal()}\n'
-        '🌍 Thời gian (UTC): $scheduledUtc\n'
-        '📝 Mô tả: "$description"',
+        '✅ I\'ve scheduled the post.\n'
+        '🕒 Local time: ${scheduledAt.toLocal()}\n'
+        '🌍 UTC time: $scheduledUtc\n'
+        '📝 Description: "$description"',
       );
     } catch (e) {
       final msg = _dioDetail(e);
@@ -791,7 +791,7 @@ class _ChatbotViewState extends State<_ChatbotView> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(msg), backgroundColor: Colors.red),
       );
-      cubit.addSystemMessage('❌ Không thể hẹn giờ đăng: $msg');
+      cubit.addSystemMessage('❌ Cannot schedule post: $msg');
     }
   }
 
@@ -826,10 +826,10 @@ class _ChatbotViewState extends State<_ChatbotView> {
                       child: Padding(
                         padding: EdgeInsets.all(16.0),
                         child: Text(
-                          'Xin chào 👋\n'
-                          'Mình là CityLife Assistant.\n'
-                          'Bạn có thể chọn một trong các option phía trên\n'
-                          'hoặc chat trực tiếp với mình nhé!',
+                          'Hello 👋\n'
+                          'I am CityLife Assistant.\n'
+                          'You can choose one of the options above\n'
+                          'or chat directly with me!',
                           textAlign: TextAlign.center,
                         ),
                       ),
@@ -856,7 +856,7 @@ class _ChatbotViewState extends State<_ChatbotView> {
                               borderRadius: BorderRadius.circular(16),
                             ),
                             child: const Text(
-                              'CityLife Assistant đang trả lời...',
+                              'CityLife Assistant is responding...',
                             ),
                           ),
                         );
@@ -944,7 +944,7 @@ class _ChatbotViewState extends State<_ChatbotView> {
                         maxLines: 5,
                         textInputAction: TextInputAction.newline,
                         decoration: const InputDecoration(
-                          hintText: 'Hỏi CityLife Assistant...',
+                          hintText: 'Ask CityLife Assistant...',
                           border: InputBorder.none,
                         ),
                         onSubmitted: (_) => _onSend(),
@@ -1026,31 +1026,31 @@ class _QuickActions extends StatelessWidget {
           children: [
             _QuickActionChip(
               icon: Icons.group,
-              label: 'Followers của tôi',
+              label: 'My Followers ',
               onTap: onOpenFollowers,
             ),
             const SizedBox(width: 8),
             _QuickActionChip(
               icon: Icons.post_add,
-              label: 'Đăng bài mới',
+              label: 'Create new post',
               onTap: onOpenCreatePost,
             ),
             const SizedBox(width: 8),
             _QuickActionChip(
               icon: Icons.lightbulb_outline,
-              label: 'AI viết caption',
+              label: 'AI write caption',
               onTap: onOpenAiCaption,
             ),
             const SizedBox(width: 8),
             _QuickActionChip(
               icon: Icons.auto_awesome,
-              label: 'AI viết + đăng luôn',
+              label: 'AI write + post now',
               onTap: onOpenAiCaptionAndPost,
             ),
             const SizedBox(width: 8),
             _QuickActionChip(
               icon: Icons.schedule,
-              label: 'AI viết + hẹn giờ',
+              label: 'AI write + schedule',
               onTap: onOpenAiSchedulePost,
             ),
           ],

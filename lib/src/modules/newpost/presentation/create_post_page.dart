@@ -3,22 +3,21 @@
 import 'dart:io';
 
 import 'package:auto_route/auto_route.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gap/gap.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:dio/dio.dart';
 
 import '../../../../generated/colors.gen.dart';
 import '../../../common/utils/getit_utils.dart';
 import '../../auth/presentation/cubit/auth_cubit.dart';
-import '../../auth/presentation/cubit/auth_state.dart';
 import '../domain/usecase/create_post_usecase.dart';
+import 'cubit/post_cubit.dart';
 import 'widgets/create_post_app_bar.dart';
 import 'widgets/post_action_bar.dart';
 import 'widgets/post_content_field.dart';
-import 'cubit/post_cubit.dart';
 
 /// 2 chế độ hiển thị bài viết
 enum PostVisibility { public, private }
@@ -125,10 +124,13 @@ class _CreatePostPageState extends State<CreatePostPage> {
       final publicUrl =
           client.storage.from('post-images').getPublicUrl(filePath);
 
+      // ignore: avoid_print
       print('>>> [Create] Upload image success: $publicUrl');
       return publicUrl;
     } catch (e, st) {
+      // ignore: avoid_print
       print('>>> [Create] Upload image ERROR: $e');
+      // ignore: avoid_print
       print(st);
       return null;
     }
@@ -186,104 +188,74 @@ class _CreatePostPageState extends State<CreatePostPage> {
     }
   }
 
-  Future<void> _createPost() async {
-    final content = _postController.text.trim();
-    print(
-        '[Create] _createPost content="$content", visibility=${_visibility.backendValue}');
+  // ====== DAILY LIMIT DETECTOR (mạnh hơn check string đơn giản) ======
 
-    if (content.isEmpty && _selectedImage == null) {
-      _showErrorDialog(
-        'Please write something or add a photo before posting.',
-      );
-      return;
-    }
-
-    if (_characterCount > _maxCharacters) {
-      _showErrorDialog(
-        'Post exceeds the character limit of $_maxCharacters.',
-      );
-      return;
-    }
-
-    setState(() => _isSubmitting = true);
-
-    try {
-      String? imageUrl;
-
-      // nếu có ảnh thì upload trước
-      if (_selectedImage != null) {
-        imageUrl = await _uploadPostImage(_selectedImage!);
-      }
-
-      // gọi usecase trực tiếp qua getIt
-      final createUseCase = getIt<CreatePostUseCase>();
-
-      // createUseCase trả về PostEntity
-      final newPost = await createUseCase(
-        content,
-        imageUrl: imageUrl,
-        visibility: _visibility.backendValue, // 'public' | 'private'
-      );
-
-      print('>>> [Create] New post id=${newPost.id}');
-
-      if (!mounted) return;
-
-      // 🔥 ĐẨY POST MỚI VÀO PostCubit DÙ MỞ TỪ ĐÂU ĐI NỮA
-      try {
-        final postCubit = context.read<PostCubit>();
-        if (!postCubit.isClosed) {
-          postCubit.addPostOnTop(newPost);
-        }
-      } catch (e) {
-        // nếu không tìm được PostCubit thì thôi, vẫn không crash
-        print('>>> [Create] Không tìm thấy PostCubit trong context: $e');
-      }
-
-      // clear form
-      _postController.clear();
-      setState(() {
-        _selectedImage = null;
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Post created successfully!'),
-          backgroundColor: Colors.green,
-        ),
-      );
-
-      // ✅ chỉ cần pop() là đủ, không cần pop(true) nữa
-      context.router.pop();
-    } catch (e, st) {
-      print('>>> [Create] ERROR TYPE: ${e.runtimeType}');
-      print('>>> [Create] ERROR TO STRING: "${e.toString()}"');
-      print('>>> [Create] ERROR STACK: $st');
-
-      final errorStr = e.toString();
-      if (!mounted) return;
-
-      String errorMessage = 'Failed to create post. Please try again.';
-      bool isDailyLimitError = false;
-
-      if (errorStr.contains('Daily posts limit exceeded') ||
-          errorStr.contains('daily post limit') ||
-          errorStr.contains('limit exceeded') ||
-          errorStr.contains('daily limit')) {
-        isDailyLimitError = true;
-      }
-
-      if (isDailyLimitError) {
-        _showDailyLimitDialog();
-      } else {
-        _showErrorDialog(errorMessage);
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isSubmitting = false);
-      }
-    }
+  bool _containsAny(String? text, List<String> keys) {
+    if (text == null || text.isEmpty) return false;
+    final t = text.toLowerCase();
+    return keys.any((k) => t.contains(k.toLowerCase()));
   }
+
+  bool _isDailyPostLimitError(Object e) {
+    final parts = <String>[];
+
+    if (e is PostgrestException) {
+      parts.addAll([
+        e.message.toString(),
+        (e.details ?? '').toString(),
+        (e.hint ?? '').toString(),
+        (e.code ?? '').toString(),
+      ]);
+    }
+
+    if (e is DioException) {
+      parts.add((e.message ?? '').toString());
+      final data = e.response?.data;
+      if (data != null) parts.add(data.toString());
+    }
+
+    parts.add(e.toString());
+
+    final blob = parts.join(' | ').toLowerCase();
+
+    // ✅ Keyword cho limit
+    final limitKeywords = <String>[
+      'daily_post_limit',
+      'daily posts limit',
+      'daily limit',
+      'limit exceeded',
+      'reached your daily',
+      'only 1 post per day',
+      '1 post per day',
+      'post per day',
+      'hết lượt đăng',
+      'giới hạn bài đăng',
+      'vượt quá giới hạn',
+      'p0001',
+      '23505',
+      'duplicate key',
+      'unique constraint',
+    ];
+
+    // ✅ Keyword cho RLS (rất hay gặp khi limit bằng policy)
+    final rlsKeywords = <String>[
+      'row-level security',
+      'row level security',
+      'violates row-level security',
+      'violates row level security',
+      'new row violates row-level security policy',
+      'permission denied',
+      '42501',
+    ];
+
+    final isLimitText = limitKeywords.any((k) => blob.contains(k));
+    final isRlsBlock = rlsKeywords.any((k) => blob.contains(k));
+
+    // Trong flow create post, RLS block gần như chính là "đã hết lượt"
+    return isLimitText || isRlsBlock;
+  }
+
+  // ====== UI DIALOGS ======
 
   void _showErrorDialog(String message) {
     if (!mounted) return;
@@ -317,6 +289,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
         barrierDismissible: false,
         builder: (_) => WillPopScope(
           onWillPop: () async {
+            // chặn back, thay vào đó đóng dialog rồi pop page
             if (mounted) {
               Navigator.of(context, rootNavigator: true).pop();
               Future.delayed(Duration.zero, () {
@@ -330,76 +303,23 @@ class _CreatePostPageState extends State<CreatePostPage> {
               children: [
                 Icon(Icons.timer_off_rounded, color: ColorName.navBackground),
                 const Gap(10),
-                const Text(
-                  'Daily Limit ',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                const Expanded(
+                  child: Text(
+                    'Posting limit reached.',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                 ),
               ],
             ),
-            content: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    'You have reached your daily posting limit.',
-                    style: TextStyle(fontSize: 16, color: Colors.grey[800]),
-                  ),
-                  const Gap(10),
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.orange[50],
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(Icons.info_outline,
-                                color: Colors.orange[800], size: 18),
-                            const SizedBox(width: 8),
-                            Text(
-                              'LIMIT DETAILS',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.orange[800],
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          '• 1 post per day per user\n'
-                          '• Resets at midnight (00:00)\n'
-                          '• No carryover to next day',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: Colors.orange[800],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 15),
-                  Text(
-                    'Please come back tomorrow to share more!',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontStyle: FontStyle.italic,
-                      color: Colors.grey[600],
-                    ),
-                  ),
-                ],
-              ),
+            content: const Text(
+              'Posting limit for today has been reached..',
+              style: TextStyle(fontSize: 16),
             ),
             actions: [
               TextButton(
                 onPressed: () {
                   Navigator.of(context, rootNavigator: true).pop();
-                  Future.delayed(const Duration(milliseconds: 300), () {
+                  Future.delayed(const Duration(milliseconds: 250), () {
                     if (mounted) {
                       context.router.pop();
                     }
@@ -409,13 +329,133 @@ class _CreatePostPageState extends State<CreatePostPage> {
                   backgroundColor: ColorName.navBackground,
                   foregroundColor: ColorName.black,
                 ),
-                child: const Text('Ok, I understand'),
+                child: const Text('OK'),
               ),
             ],
           ),
         ),
       );
     });
+  }
+
+  // ====== CREATE POST ======
+
+  Future<void> _createPost() async {
+    final content = _postController.text.trim();
+    // ignore: avoid_print
+    print(
+        '[Create] _createPost content="$content", visibility=${_visibility.backendValue}');
+
+    if (content.isEmpty && _selectedImage == null) {
+      _showErrorDialog('Please write something or add a photo before posting.');
+      return;
+    }
+
+    if (_characterCount > _maxCharacters) {
+      _showErrorDialog('Post exceeds the character limit of $_maxCharacters.');
+      return;
+    }
+
+    setState(() => _isSubmitting = true);
+
+    try {
+      String? imageUrl;
+
+      // nếu có ảnh thì upload trước
+      if (_selectedImage != null) {
+        imageUrl = await _uploadPostImage(_selectedImage!);
+      }
+
+      // gọi usecase trực tiếp qua getIt
+      final createUseCase = getIt<CreatePostUseCase>();
+
+      // createUseCase trả về PostEntity
+      final newPost = await createUseCase(
+        content,
+        imageUrl: imageUrl,
+        visibility: _visibility.backendValue, // 'public' | 'private'
+      );
+
+      // ignore: avoid_print
+      print('>>> [Create] New post id=${newPost.id}');
+
+      if (!mounted) return;
+
+      // 🔥 ĐẨY POST MỚI VÀO PostCubit DÙ MỞ TỪ ĐÂU ĐI NỮA
+      try {
+        final postCubit = context.read<PostCubit>();
+        if (!postCubit.isClosed) {
+          postCubit.addPostOnTop(newPost);
+        }
+      } catch (e) {
+        // nếu không tìm được PostCubit thì thôi, vẫn không crash
+        // ignore: avoid_print
+        print('>>> [Create] Không tìm thấy PostCubit trong context: $e');
+      }
+
+      // clear form
+      _postController.clear();
+      setState(() {
+        _selectedImage = null;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Post created successfully!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+
+      // ✅ chỉ cần pop() là đủ
+      context.router.pop();
+    } catch (e, st) {
+      // ===== log mạnh để debug đúng loại lỗi =====
+      // ignore: avoid_print
+      print('>>> [Create] ERROR TYPE: ${e.runtimeType}');
+      // ignore: avoid_print
+      print('>>> [Create] ERROR TO STRING: "${e.toString()}"');
+      final debugBlob = () {
+        final parts = <String>[];
+        if (e is PostgrestException) {
+          parts.addAll([
+            e.message.toString(),
+            (e.details ?? '').toString(),
+            (e.hint ?? '').toString(),
+            (e.code ?? '').toString(),
+          ]);
+        }
+        parts.add(e.toString());
+        return parts.join(' | ');
+      }();
+
+      print('>>> [Create] DAILY_LIMIT_CHECK_BLOB: $debugBlob');
+
+      if (e is PostgrestException) {
+        // ignore: avoid_print
+        print('>>> [Create] PostgrestException.code: ${e.code}');
+        // ignore: avoid_print
+        print('>>> [Create] PostgrestException.message: ${e.message}');
+        // ignore: avoid_print
+        print('>>> [Create] PostgrestException.details: ${e.details}');
+        // ignore: avoid_print
+        print('>>> [Create] PostgrestException.hint: ${e.hint}');
+      }
+
+      // ignore: avoid_print
+      print('>>> [Create] ERROR STACK: $st');
+
+      if (!mounted) return;
+
+      if (_isDailyPostLimitError(e)) {
+        _showDailyLimitDialog();
+      } else {
+        _showErrorDialog('Failed to create post. Please try again.');
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+      }
+    }
   }
 
   @override
@@ -440,6 +480,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
         canPost: canPost,
         onPostPressed: _isSubmitting ? null : _createPost,
         onBackPressed: () {
+          // ignore: avoid_print
           print('>>> [CreatePostPage] Back callback');
           context.router.maybePop();
         },
